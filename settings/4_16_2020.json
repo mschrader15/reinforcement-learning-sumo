@@ -1,0 +1,24 @@
+{
+  "Name": "tester",
+  "Environment": {
+    "algorithm": "PPO",
+    "warmup_time": 3600,
+    "sims_per_step": 1,
+    "horizon": 7200,
+    "reward_function": "minimize_fuel"
+  },
+  "Simulation": {
+    "file_root": "os.path.join(*os.path.split(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))[:-2])",
+    "net_file": "sumo-xml/simplified_reworked.net.xml",
+    "route_file": "sumo-xml/route-sampler/rl_route_sampler.route.xml",
+    "additional_files": [
+      "sumo-xml/traffic-lights/constant_green.add.xml",
+      "sumo-xml/traffic-lights/rl_tls.add.xml",
+      "sumo-xml/veh-descript/vTypeDistributions.add.xml"
+    ],
+    "tl_ids": ["63082002", "63082003", "63082004"],
+    "tl_settings_file": "sumo-xml/settings.json",
+    "sim_step": 0.1,
+    "start_time": "2020-02-24 06:00:00.000"
+  }
+}
