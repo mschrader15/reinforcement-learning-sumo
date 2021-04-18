@@ -1,0 +1,4 @@
+ray
+gym
+pendulum
+numpy

@@ -5,7 +5,9 @@
     "warmup_time": 3600,
     "sims_per_step": 1,
     "horizon": 7200,
-    "reward_function": "minimize_fuel"
+    "reward_function": "minimize_fuel",
+    "environment_location": "my_gym.environment",
+    "environment_name": "TLEnv"
   },
   "Simulation": {
     "file_root": "os.path.join(*os.path.split(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))[:-2])",
