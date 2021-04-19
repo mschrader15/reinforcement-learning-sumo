@@ -81,7 +81,7 @@ class _Base:
         """
         self.count_list.clear()
         for child in self:
-            self.count_list.extend(child.update_counts(**kwargs))
+            self.count_list.append(child.update_counts(**kwargs))
         return self.count_list
 
     # def get_counts(self, **kwargs):
@@ -290,15 +290,17 @@ class TLObservations(_Base):
         """
         return net_obj.getCoord()
 
-    def update_counts(self, **kwargs):
+    def update_counts(self, **kwargs) -> [[], ]:
         """
         This function calls update_counts on the children and passes the center coordinates
 
         @param kwargs: a forgiving list of inputs
-        @return: None
+        @return: a list of lists
         """
+        self.count_list.clear()
         for child in self:
-            child.update_counts(center=self._center, **kwargs)
+            self.count_list.extend(child.update_counts(center=self._center, **kwargs))
+        return self.count_list
 
 
 class GlobalObservations(_Base):

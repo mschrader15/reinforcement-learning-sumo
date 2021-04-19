@@ -211,15 +211,21 @@ class LightHead(Observable, _Base):
         :param kwargs:
         :return:
         """
-        # if len(self._paired_priority) < 2:
-        paired_name = self._paired_priority['main']
-        paired_light_color, time = _value_error_handler(self._paired_phase_actions[paired_name], (_TL_HEAD.GREEN, 1e6))
-        # if time > self._timers[self.state]:
-        #     self._timers[self.state] = time
-        if (paired_light_color == _TL_HEAD.GREEN) and (self.state not in [_TL_HEAD.YIELD, _TL_HEAD.GREEN]):
-            self.state = _TL_HEAD.YIELD
-        elif paired_light_color in [_TL_HEAD.YELLOW, _TL_HEAD.RED]:
-            self.state = paired_light_color
+        main_name = self._paired_priority['main']
+        main_color, main_time = _value_error_handler(self._paired_phase_actions[main_name], (_TL_HEAD.GREEN, 1e6))
+        if len(self._paired_priority) < 2:
+            if (main_color == _TL_HEAD.GREEN) and (self.state not in [_TL_HEAD.YIELD, _TL_HEAD.GREEN]):
+                self.state = _TL_HEAD.YIELD
+            elif main_color == _TL_HEAD.RED:
+                self.state = main_color
+            elif (main_color == _TL_HEAD.YELLOW) and self.state == _TL_HEAD.RED:
+                # if 1 is red but 6 is yellow, do not put 1 to yellow. Stay red
+                pass
+        else:
+            secondary_name = self._paired_priority['secondary']
+            secondary_color, secondary_name = _value_error_handler(self._paired_phase_actions[secondary_name], (_TL_HEAD.GREEN, 1e6))
+            if (secondary_color == _TL_HEAD.GREEN) and (main_color == _TL_HEAD.GREEN):
+                self.state = _TL_HEAD.YIELD
 
 
 class TrafficLightManager(_Base):
@@ -275,9 +281,9 @@ class TrafficLightManager(_Base):
                 linked_phases.append(int(phase))
         for yield_phase in linked_phases:
             phase_info = tl_details['phases'][str(yield_phase)]
-            # for paired_info in phase_info['yield_for'].items():
-            paired_light = light_heads[int(phase_info['yield_for']['main'])]
-            light_heads[yield_phase].link_yield_observer(priority='main', paired_phase=paired_light)
+            for paired_info in phase_info['yield_for'].items():
+                paired_light = light_heads[int(paired_info[1])]
+                light_heads[yield_phase].link_yield_observer(priority=paired_info[0], paired_phase=paired_light)
         return light_heads
 
     def tasks_are_empty(self, ):
