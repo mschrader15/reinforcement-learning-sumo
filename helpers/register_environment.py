@@ -2,23 +2,30 @@ import gym
 from gym.envs.registration import register
 
 
-def make_create_env(env_params, sim_params, version=0):
+def make_create_env(env_params, sim_params, version=0) -> (str, object):
+    """
+
+    @param env_params:
+    @param sim_params:
+    @param version:
+    @return:
+    """
 
     # deal with multiple environments being created under the same name
     all_envs = gym.envs.registry.all()
     env_ids = [env_spec.id for env_spec in all_envs]
-    while "{}-v{}".format(env_params['environment_name'], version) in env_ids:
+    while "{}-v{}".format(env_params.environment_name, version) in env_ids:
         version += 1
-    env_name = "{}-v{}".format(env_params['environment_name'], version)
+    env_name = "{}-v{}".format(env_params.environment_name, version)
 
     def create_env(*_):
 
         # env_name = "{}-v{}".format(base_env_name, version)
 
-        entry_point = f"{env_params['environment_location']}:{env_params['environment_name']}"
+        entry_point = f"{env_params.environment_location}:{env_params.environment_name}"
 
         register(
-            id=env_params['environment_name'],
+            id=env_name,
             entry_point=entry_point,
             kwargs={
                 "env_params": env_params,
@@ -26,6 +33,6 @@ def make_create_env(env_params, sim_params, version=0):
             }
         )
 
-        return gym.envs.make(env_params['environment_name'])
+        return gym.envs.make(env_name)
 
-    return create_env, env_name
+    return env_name, create_env

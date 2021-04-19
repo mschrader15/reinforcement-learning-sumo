@@ -380,7 +380,7 @@ class GlobalActor:
 
     @property
     def size(self, ) -> int:
-        return len(self)
+        return len(self.tls)
 
     @property
     def max_value(self) -> int:

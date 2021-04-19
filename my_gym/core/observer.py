@@ -1,12 +1,22 @@
 import sumolib
-from traci.constants import LAST_STEP_VEHICLE_ID_LIST
+from traci.constants import LAST_STEP_VEHICLE_ID_LIST, VAR_VEHICLE, VAR_LANES
 from copy import deepcopy
-from tools.sumo_tools import read_net
-
 
 DISTANCE_THRESHOLD = 100  # in meters
 
-# LAST_STEP_VEHICLE_IDS = tc.LAST_STEP_VEHICLE_ID_LIST
+
+def read_net(path: str) -> sumolib.net:
+    """
+    Read in the net file with the sumolib utility
+
+    Args:
+        path (str): path
+
+    Returns:
+        sumolib.net: sumolib net object
+    """
+    return sumolib.net.readNet(path)
+
 
 def xy_to_m(x0, y0, x1, y1):
     """
@@ -67,10 +77,15 @@ class _Base:
         network when called from the GlobalObservations level
 
         @param kwargs: a forgiving list of inputs
-        @return: a dictionary with children and their get_counts result
+        @return:
         """
+        self.count_list.clear()
         for child in self:
-            child.update_counts(**kwargs)
+            self.count_list.extend(child.update_counts(**kwargs))
+        return self.count_list
+
+    # def get_counts(self, **kwargs):
+    #
 
 
 class Lane(_Base):
@@ -92,11 +107,11 @@ class Lane(_Base):
         # a "lane" can actually be composed of multiple lanes in the SUMO network
         self._lane_list = lane_list
         # the count of cars in each lane (list to emulate a pointer)
-        self.count = [0]
+        self.count = 0
         # the ids of the cars in the lane during the last time step
         self._last_ids = []
         # subscribe to all of the lanes
-        self._subscribe_2_lanes()
+        # self._subscribe_2_lanes()
 
     def get_lane_count(self, ):
         """
@@ -113,6 +128,7 @@ class Lane(_Base):
         @return:
         """
         for lane in self._lane_list:
+
             self.traci_c.lane.subscribe(lane, [LAST_STEP_VEHICLE_ID_LIST])
 
     def update_counts(self, center: tuple, lane_ids: dict, vehicle_positions: dict) -> None:
@@ -143,7 +159,8 @@ class Lane(_Base):
 
         # assign these new ids to the history
         self._last_ids = new_ids
-        self.count[0] = len(new_ids)
+        self.count = len(new_ids)
+        return self.count
 
     def get_counts(self, ) -> int:
         """
@@ -156,6 +173,12 @@ class Lane(_Base):
     def get_direction(self, ) -> str:
 
         raise NotImplementedError("This function hasn't been implemented")
+
+    def register_traci(self, traci_c):
+        # register traci
+        self.traci_c = traci_c
+        #
+        self._subscribe_2_lanes()
 
 
 class Approach(_Base):
@@ -174,7 +197,7 @@ class Approach(_Base):
         self.direction = self.name
         # composing a dict of lanes. keys are the SUMO name
         self._last_vehicle_num = 0
-        self.count_dict = {child.name: child.count for child in self}
+        # self.count_dict = {child.name: child.count for child in self}
 
     def compose_lanes(self, edge_obj: sumolib.net.edge, camera_position: tuple) -> tuple:
         """
@@ -313,32 +336,39 @@ class GlobalObservations(_Base):
         # return {tls: TLObservations(net_obj=net_obj, tl_id=tls, ) for tls in self._tl_ids}
         return [TLObservations(net_obj=net_obj, tl_id=tls, ) for tls in self._tl_ids]
 
-    def get_counts(self, subscription_results: dict) -> list:
+    def get_counts(self, sim_dict) -> list:
         """
         update the counts for all lanes by passing the subscription updates
 
-        @return: self.count_dict
+        @return: self.count_list
         """
 
         # get a list of ids in each lane
-        lane_ids = subscription_results[LAST_STEP_VEHICLE_ID_LIST]
+        # lane_ids = self.traci_c.lane.getAllSubscriptionResults()
 
         # get the position of all vehicles in the network
-        vehicle_positions = self.traci_c.vehicle.getAllSubscriptionResults()
+        # vehicle_positions = self.traci_c.vehicle.getAllSubscriptionResults()
 
         # pass the lane_ids and vehicle_positions to the distance calculation
+        counts = []
         for child in self:
-            child.update_counts(lane_ids=lane_ids, vehicle_positions=vehicle_positions)
+            counts.extend(child.update_counts(lane_ids=sim_dict[VAR_LANES], vehicle_positions=sim_dict[VAR_VEHICLE]))
 
         # return the pre-constructed count dictionary
-        return self.count_list
+        return counts
 
-    # @staticmethod
-    # def subscribe_2_all_vehicles():
-    #     """
-    #     Subscribe to all new vehicles that have entered the network
-    #
-    #     @return: None
-    #     """
-    #     for veh_id in _Base.traci_c.simulation.getDepartedIDList():
-    #         _Base.traci_c.vehicle.subscribe(veh_id, [_Base.traci_c.constants.VAR_POSITION])
+    def register_traci(self, traci_c: object) -> [object, ]:
+        """
+        pass traci to the children and return the functions that the core traci module should execute.
+
+        @param traci_c:
+        @return:
+        """
+        self.traci_c = traci_c
+        for child in self:
+            child.register_traci(traci_c)
+
+        return [[traci_c.lane.getAllSubscriptionResults, (), VAR_LANES],
+                [traci_c.vehicle.getAllSubscriptionResults, (), VAR_VEHICLE]]
+
+

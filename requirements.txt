@@ -2,3 +2,5 @@ ray
 gym
 pendulum
 numpy
+sumolib
+traci

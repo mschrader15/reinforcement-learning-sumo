@@ -19,6 +19,9 @@ def minimize_fuel(subscription_values):
     @param subscription_values:
     @return:
     """
-
-    return -1 * sum(subscription_values[tc.VAR_VEHICLE][tc.VAR_FUELCONSUMPTION].values())
+    vehicle_list = list(subscription_values[tc.VAR_VEHICLE].values())
+    fc = 0
+    for vehicle_data in vehicle_list:
+        fc += vehicle_data[tc.VAR_FUELCONSUMPTION]
+    return -1 * fc
 

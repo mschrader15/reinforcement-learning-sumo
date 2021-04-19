@@ -22,6 +22,10 @@ class EnvParams(object):
         # import the parameters
         params = load_json(parameter_file)['Environment']
 
+        self.environment_location: str = safe_getter(params, 'environment_location')
+
+        self.environment_name: str = safe_getter(params, 'environment_name')
+
         self.algorithm: str = safe_getter(params, 'algorithm') or 'PPO'
 
         self.warm_up_time: int = safe_getter(params, 'warmup_time') or 3600
@@ -31,6 +35,12 @@ class EnvParams(object):
         self.horizon: int = safe_getter(params, 'horizon') or 3600
 
         self.reward_function: str = safe_getter(params, 'reward_function') or 'minimize_fuel'
+
+        self.clip_actions: str = safe_getter(params, 'clip_actions') or True
+
+    def __getitem__(self, item):
+
+        return self.__dict__[item]
 
 
 class SimParams(object):
@@ -55,13 +65,24 @@ class SimParams(object):
 
         self.additional_files: [str] = [os.path.join(root, file) for file in params['additional_files']]
 
-        self.tl_ids: [str] = os.path.join(root, params['tl_ids'])
+        self.tl_ids: [str] = params['tl_ids']
 
         self.tl_settings_file: str = os.path.join(root, params['tl_settings'])
 
+        self.tl_file: str = os.path.join(root, params['tl_file'])
+
         self.sim_step: float = params['sim_step']
+
+        self.warmup_time: float = env_params.warm_up_time
 
         self.sim_length: int = env_params.warm_up_time + (env_params.sims_per_step * env_params.horizon) + 5  # adding 5 seconds to be safe on reset
 
-        self.start_time: pendulum.DateTime = pendulum.parse(params['start_datetime'])
+        self.start_time: pendulum.DateTime = pendulum.parse(params['start_time'])
+
+        self.end_time: pendulum.DateTime = self.start_time.add(seconds=self.sim_length)
+
+
+    def __getitem__(self, item):
+
+        return self.__dict__[item]
 

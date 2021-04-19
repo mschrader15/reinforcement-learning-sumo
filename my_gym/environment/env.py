@@ -49,9 +49,11 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
         self.k.pass_traci_kernel(traci_c)
 
         # pass traci to the observer
-        self.observer.register_traci(traci_c)
+        traci_fns = self.observer.register_traci(traci_c)
+        # pass the observer traci function call back to the kernel
+        self.k.add_traci_call(traci_fns)
 
-        # register the ac
+        # register the actor
         self.actor.register_traci(traci_c)
 
         # create the reward function
@@ -107,7 +109,7 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
         # update the lights
         self.actor.update_lights(action_list=actions, sim_time=self.k.sim_time)
 
-    def get_state(self, ):
+    def get_state(self, subscription_data):
         """
         Return the state of the simulation as perceived by the RL agent.
 
@@ -117,7 +119,7 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
         """
 
         # prompt the observer class to find all counts
-        count_list = self.observer.get_counts(self.k.subscription_data)
+        count_list = self.observer.get_counts(subscription_data)
 
         # get the current traffic light states
         tl_states = self.actor.get_current_state()
@@ -172,6 +174,11 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
 
             # the kernel has a new traci connection now. need to re-register it
             self.observer.register_traci(traci_c)
+            # pass traci to the observer
+            traci_fns = self.observer.register_traci(traci_c)
+            # pass the observer traci function call back to the kernel
+            self.k.add_traci_call(traci_fns)
+
             self.actor.register_traci(traci_c)
 
         # else reset the simulation
@@ -202,17 +209,19 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
             self.apply_rl_actions(rl_actions=action)
 
             # step the simulation
-            self.k.simulation_step()
+            subscription_data = self.k.simulation_step()
 
-        observation = self.get_state()
-        reward = self.calculate_reward()
+        observation = self.get_state(subscription_data)
+        reward = self.calculate_reward(subscription_data)
+
         done = self.step_counter > self.horizon
+
         info = {}
 
         return observation, reward, done, info
 
-    def calculate_reward(self, ) -> float:
-        return self._reward_fn(self.k.subscription_data)
+    def calculate_reward(self, subscription_data) -> float:
+        return self._reward_fn(subscription_data)
 
     def _reset_action_obs(self, ):
         self.observer.re_initialize()

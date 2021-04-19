@@ -1,11 +1,9 @@
 import os
-import sys
 import signal
 import traci
 import traci.constants as tc
 import logging
 from random import randint
-import root
 import time
 from copy import deepcopy
 from sumolib import checkBinary
@@ -18,8 +16,11 @@ def sumo_cmd_line(params):
            '--seed', str(randint(0, 10000))
            ]
     if params.gui:
-        cmd.extend('--start')
+        cmd.extend(['--start'])
     return cmd
+
+
+VEHICLE_SUBSCRIPTIONS = [tc.VAR_POSITION, tc.VAR_FUELCONSUMPTION]
 
 
 class Kernel(object):
@@ -34,8 +35,9 @@ class Kernel(object):
         self.parent_fns = []
         self.sim_params = deepcopy(sim_params)
         self.sim_step_size = self.sim_params.sim_step
-        self.subscription_data = {}
+        # self.subscription_data = {}
         self.sim_time = 0
+        self.traci_calls = []
 
     def pass_traci_kernel(self, traci_c):
         """
@@ -48,7 +50,7 @@ class Kernel(object):
     def start_simulation(self, ):
 
         # find SUMO
-        sumo_binary = checkBinary('sumo-gui') if self.sim_params.render is True else checkBinary('sumo')
+        sumo_binary = checkBinary('sumo-gui') if self.sim_params.gui else checkBinary('sumo')
 
         # create the command line call
         sumo_call = [sumo_binary] + sumo_cmd_line(self.sim_params)
@@ -64,24 +66,38 @@ class Kernel(object):
 
         # connect to traci
         traci_c = traci.connect(port=self.sim_params.port, numRetries=100)
-        traci_c.setOrder(0)
+
+        # TODO: is this needed?? It throws an error
+        # traci_c.setOrder(0)
+
         traci_c.simulationStep()
 
         # set the traffic lights to the default behaviour and run for warm up period
-        for tl_id in self.sim_params.traffic_lights:
+        for tl_id in self.sim_params.tl_ids:
             traci_c.trafficlight.setProgram(tl_id, f'{tl_id}-1')
 
         # run for an hour to warm up the simulation
-        traci_c.simulationStep(3600)
+        for _ in range(int(self.sim_params.warmup_time * 1 / self.sim_step_size)):
+            traci_c.simulationStep()
+
+        # subscribe to all the vehicles in the network at this state
+        for veh_id in traci_c.vehicle.getIDList():
+            traci_c.vehicle.subscribe(veh_id, VEHICLE_SUBSCRIPTIONS)
 
         # set the traffic lights to the all green program
-        for tl_id in self.sim_params.traffic_lights:
+        for tl_id in self.sim_params.tl_ids:
             traci_c.trafficlight.setProgram(tl_id, f'{tl_id}-2')
 
         # saving the beginning state of the simulation
         traci_c.simulation.saveState('start_state.xml')
 
         return traci_c
+
+    @staticmethod
+    def _subscribe_to_vehicles(traci_c):
+        # subscribe to all new vehicle positions and fuel consumption
+        for veh_id in traci_c.simulation.getDepartedIDList():
+            traci_c.vehicle.subscribe(veh_id, VEHICLE_SUBSCRIPTIONS)
 
     def reset_simulation(self, ):
         self.sim_time = 0
@@ -91,6 +107,11 @@ class Kernel(object):
         # self.start_simulation()
         logging.info('resetting the simulation')
         self.traci_c.simulation.loadState('start_state.xml')
+
+        # # subscribe to all vehicles in the simulation at this point
+        # # subscribe to all new vehicle positions and fuel consumption
+        # for veh_id in self.traci_c.simulation.getAllI():
+        #     self.traci_c.subscribe(veh_id, tc.VAR_VEHICLE, [tc.VAR_POSITION, tc.VAR_FUELCONSUMPTION])
         self.simulation_step()
 
     def kill_simulation(self, ):
@@ -110,15 +131,24 @@ class Kernel(object):
     def close_simulation(self, ):
         logging.info('closing the simulation')
         self.traci_c.close()
+        self.traci_calls.clear()
 
     def simulation_step(self, ):
-
-        # subscribe to all new vehicle positions and fuel consumption
-        for veh_id in self.traci_c.simulation.getDepartedIDList():
-            self.traci_c.subscribe(veh_id, tc.VAR_VEHICLE, [tc.VAR_POSITION, tc.VAR_FUELCONSUMPTION])
-
-        self.sim_time += self.sim_step_size
+        # step the simulation
         self.traci_c.simulationStep()
 
+        self._subscribe_to_vehicles(self.traci_c)
+
+        self.sim_time += self.sim_step_size
+
+        return self.get_traci_data()
+
         # return get the simulation subscriptions
-        self.subscription_data = self.traci_c.simulation.getAllSubscriptionResults()
+        # self.subscription_data = self.traci_c.simulation.getAllSubscriptionResults()
+
+    def get_traci_data(self, ):
+        return {key: fn(*args) for fn, args, key in self.traci_calls}
+
+    def add_traci_call(self, traci_module):
+        self.traci_calls.extend(traci_module)
+

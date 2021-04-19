@@ -10,18 +10,19 @@
     "environment_name": "TLEnv"
   },
   "Simulation": {
-    "file_root": "os.path.join(*os.path.split(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))[:-2])",
+    "file_root": "../",
     "net_file": "sumo-xml/simplified_reworked.net.xml",
     "route_file": "sumo-xml/route-sampler/rl_route_sampler.route.xml",
     "additional_files": [
       "sumo-xml/traffic-lights/constant_green.add.xml",
-      "sumo-xml/traffic-lights/rl_tls.add.xml",
+      "sumo-xml/traffic-lights/tls.rl.add.xml",
       "sumo-xml/veh-descript/vTypeDistributions.add.xml"
     ],
     "tl_ids": ["63082002", "63082003", "63082004"],
-    "tl_settings_file": "sumo-xml/settings.json",
+    "tl_settings": "sumo-xml/settings.json",
     "tl_file": "sumo-xml/traffic-lights/tls.rl.add.xml",
     "sim_step": 0.1,
-    "start_time": "2020-02-24 06:00:00.000"
+    "start_time": "2020-02-24 06:00:00.000",
+    "gui": 1
   }
 }
