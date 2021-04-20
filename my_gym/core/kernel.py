@@ -13,7 +13,8 @@ import subprocess
 def sumo_cmd_line(params):
     cmd = ['-n', params.net_file, '-e', str(params.sim_length), '--step-length', str(params.sim_step),
            '-r', params.route_file, '-a', ", ".join(params.additional_files), '--remote-port', str(params.port),
-           '--seed', str(randint(0, 10000))
+           '--seed', str(randint(0, 10000),),
+           "--time-to-teleport", str(int(params.time_to_teleport))
            ]
     if params.gui:
         cmd.extend(['--start'])
@@ -35,9 +36,11 @@ class Kernel(object):
         self.parent_fns = []
         self.sim_params = deepcopy(sim_params)
         self.sim_step_size = self.sim_params.sim_step
+        self.state_file = f"start_state_{sim_params.port}.xml"
         # self.subscription_data = {}
         self.sim_time = 0
         self.traci_calls = []
+        self.sim_data = {}
 
     def pass_traci_kernel(self, traci_c):
         """
@@ -89,7 +92,11 @@ class Kernel(object):
             traci_c.trafficlight.setProgram(tl_id, f'{tl_id}-2')
 
         # saving the beginning state of the simulation
-        traci_c.simulation.saveState('start_state.xml')
+        traci_c.simulation.saveState(self.state_file)
+
+        traci_c.simulation.subscribe([tc.VAR_COLLIDING_VEHICLES_NUMBER])
+
+        self.add_traci_call([[traci_c.lane.getAllSubscriptionResults, (), tc.VAR_COLLIDING_VEHICLES_NUMBER], ])
 
         return traci_c
 
@@ -102,17 +109,27 @@ class Kernel(object):
     def reset_simulation(self, ):
         self.sim_time = 0
         # self.traci_c.close()
-        self.traci_c.simulation.clearPending()
-        # self.traci_c.close()
-        # self.start_simulation()
-        logging.info('resetting the simulation')
-        self.traci_c.simulation.loadState('start_state.xml')
 
-        # # subscribe to all vehicles in the simulation at this point
-        # # subscribe to all new vehicle positions and fuel consumption
-        # for veh_id in self.traci_c.simulation.getAllI():
-        #     self.traci_c.subscribe(veh_id, tc.VAR_VEHICLE, [tc.VAR_POSITION, tc.VAR_FUELCONSUMPTION])
+        # self.traci_c.load(sumo_cmd_line(self.sim_params))
+        self.traci_c.simulation.clearPending()
+
+        # unsubscribe from all the vehicles at the end state
+        for veh_id in self.traci_c.vehicle.getIDList():
+            self.traci_c.vehicle.unsubscribe(veh_id)
+
+        logging.info('resetting the simulation')
+        self.traci_c.simulation.loadState(self.state_file)
+
+        # subscribe to all vehicles in the simulation at this point
+        # subscribe to all new vehicle positions and fuel consumption
+        for veh_id in self.traci_c.simulation.getAllI():
+            self.traci_c.subscribe(veh_id, tc.VAR_VEHICLE, [tc.VAR_POSITION, tc.VAR_FUELCONSUMPTION])
         self.simulation_step()
+
+        # subscribe to all of the vehicles again
+        # unsubscribe from all the vehicles at the end state
+        for veh_id in self.traci_c.vehicle.getIDList():
+            self.traci_c.vehicle.subscribe(veh_id, VEHICLE_SUBSCRIPTIONS)
 
     def kill_simulation(self, ):
         try:
@@ -121,8 +138,8 @@ class Kernel(object):
         except Exception as e:
             print("Error during teardown: {}".format(e))
 
-    def register_traci_function(self, fn: object):
-        self.parent_fns.append(fn)
+    # def register_traci_function(self, fn: object):
+    #     self.parent_fns.append(fn)
 
     def _execute_traci_fns(self):
         for fn in self.parent_fns:
@@ -130,7 +147,11 @@ class Kernel(object):
 
     def close_simulation(self, ):
         logging.info('closing the simulation')
-        self.traci_c.close()
+        # kill the simulation if using the gui.
+        if self.sim_params.gui:
+            self.kill_simulation()
+        else:
+            self.traci_c.close()
         self.traci_calls.clear()
 
     def simulation_step(self, ):
@@ -141,14 +162,17 @@ class Kernel(object):
 
         self.sim_time += self.sim_step_size
 
-        return self.get_traci_data()
+        self.sim_data = self.get_traci_data()
 
-        # return get the simulation subscriptions
-        # self.subscription_data = self.traci_c.simulation.getAllSubscriptionResults()
+        return self.sim_data
 
     def get_traci_data(self, ):
         return {key: fn(*args) for fn, args, key in self.traci_calls}
 
     def add_traci_call(self, traci_module):
         self.traci_calls.extend(traci_module)
+
+    def check_collision(self):
+        """See parent class."""
+        return False  # self.sim_data[tc.VAR_COLLIDING_VEHICLES_NUMBER] != 0
 

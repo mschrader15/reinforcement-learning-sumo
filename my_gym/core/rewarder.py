@@ -1,16 +1,5 @@
 import traci.constants as tc
 
-#
-# class Rewarder(object):
-#
-#     def __init__(self, method):
-#
-#         self.execute_er = getattr(self, method)
-#
-#     def calculate(self, subscription_values):
-#
-#         self.execute_er(subscription_values)
-
 
 def minimize_fuel(subscription_values):
     """
@@ -25,3 +14,19 @@ def minimize_fuel(subscription_values):
         fc += vehicle_data[tc.VAR_FUELCONSUMPTION]
     return -1 * fc
 
+
+def fcic_pi_parent():
+
+    """
+    From: https://journals.sagepub.com/doi/full/10.1177/03611981211004181
+
+    @return:
+    """
+    x = 0
+
+    def fcic_pi(subscription_values, ):
+        nonlocal x
+        print(x)
+        x += 1
+
+    return fcic_pi

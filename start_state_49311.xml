@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- generated on Mon 19 Apr 2021 10:31:07 AM CDT by Eclipse SUMO GUI Version 1.8.0
+<!-- generated on Mon 19 Apr 2021 03:21:55 PM CDT by Eclipse SUMO GUI Version 1.8.0
 <configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
 
     <input>
@@ -10,27 +10,31 @@
     </input>
 
     <time>
-        <end value="10805"/>
-        <step-length value="0.1"/>
+        <end value="4605"/>
+        <step-length value="0.5"/>
     </time>
 
+    <processing>
+        <time-to-teleport value="-1"/>
+    </processing>
+
     <traci_server>
-        <remote-port value="50601"/>
+        <remote-port value="49311"/>
     </traci_server>
 
     <random_number>
-        <seed value="3697"/>
+        <seed value="1774"/>
     </random_number>
 
     <gui_only>
         <start value="true"/>
-        <tracker-interval value="0.1"/>
+        <tracker-interval value="0.5"/>
     </gui_only>
 
 </configuration>
 -->
 
-<snapshot xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/state_file.xsd" version="1.8.0" time="3600.10" type="micro">
+<snapshot xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/state_file.xsd" version="1.8.0" time="3600.50" type="micro">
     <route id="!0_1" state="1" edges="-8867312#6 gneE20 gneE23 115872656#8 115872656#9 115872656#10 115872656#10.14 115872656#11 115872656#11.5 gneE11 115872656#13.8"/>
     <route id="!0_10" state="1" edges="115872656#4 115872656#5 115872656#6 gneE22 gneE22.27 gneE23 115872656#8 115872656#9 115872656#10 115872656#10.14 115872656#11 115872656#11.5 gneE11 gneE1 -8868160#0"/>
     <route id="!0_11" state="1" edges="115872656#4 115872656#5 115872656#6 gneE22 gneE22.27 gneE23 115872656#8 115872656#9 115872656#10 115872656#10.14 638636924#1 638636924#1.8"/>
@@ -334,7 +338,7 @@
     <flowState id="3600_20" index="0"/>
     <flowState id="3600_50" index="0"/>
     <flowState id="3600_3" index="0"/>
-    <delay number="34" begin="2017" end="1983" depart="2884.90" time="162069.10"/>
+    <delay number="36" begin="2057" end="2021" depart="1078.00" time="156916.00"/>
     <vType id="vehDist0" length="5.15" vClass="passenger" lcKeepRight="0.5" carFollowModel="IDM" tau="0.825"/>
     <vType id="vehDist1" length="5.01" vClass="passenger" lcKeepRight="0.5" carFollowModel="IDM" tau="0.786"/>
     <vType id="vehDist10" length="5.18" vClass="passenger" lcKeepRight="0.5" carFollowModel="IDM" tau="0.746"/>
@@ -436,119 +440,130 @@
     <vType id="vehDist98" length="4.55" vClass="passenger" lcKeepRight="0.5" carFollowModel="IDM" tau="0.820"/>
     <vType id="vehDist99" length="5.07" vClass="passenger" lcKeepRight="0.5" carFollowModel="IDM" tau="0.816"/>
     <vTypeDistribution id="vehDist" vTypes="vehDist0 vehDist1 vehDist2 vehDist3 vehDist4 vehDist5 vehDist6 vehDist7 vehDist8 vehDist9 vehDist10 vehDist11 vehDist12 vehDist13 vehDist14 vehDist15 vehDist16 vehDist17 vehDist18 vehDist19 vehDist20 vehDist21 vehDist22 vehDist23 vehDist24 vehDist25 vehDist26 vehDist27 vehDist28 vehDist29 vehDist30 vehDist31 vehDist32 vehDist33 vehDist34 vehDist35 vehDist36 vehDist37 vehDist38 vehDist39 vehDist40 vehDist41 vehDist42 vehDist43 vehDist44 vehDist45 vehDist46 vehDist47 vehDist48 vehDist49 vehDist50 vehDist51 vehDist52 vehDist53 vehDist54 vehDist55 vehDist56 vehDist57 vehDist58 vehDist59 vehDist60 vehDist61 vehDist62 vehDist63 vehDist64 vehDist65 vehDist66 vehDist67 vehDist68 vehDist69 vehDist70 vehDist71 vehDist72 vehDist73 vehDist74 vehDist75 vehDist76 vehDist77 vehDist78 vehDist79 vehDist80 vehDist81 vehDist82 vehDist83 vehDist84 vehDist85 vehDist86 vehDist87 vehDist88 vehDist89 vehDist90 vehDist91 vehDist92 vehDist93 vehDist94 vehDist95 vehDist96 vehDist97 vehDist98 vehDist99" probabilities="1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00"/>
-    <vehicle id="3000_1.0" type="vehDist93" depart="3422.40" departSpeed="max" route="!3000_1" distance="1026.56 0" speedFactor="1.01" state="562 3422400 10 5.02 0 107.24 3600000 0 0" pos="397.27 392.35 2.26" speed="22.56 22.56" posLat="0.00" waitingTime="100000 1 68200 160800"/>
-    <vehicle id="3000_10.7" type="vehDist18" depart="3510.80" departSpeed="max" route="!3000_10" distance="529.35 0" speedFactor="0.91" state="562 3510800 7 4.86 0 57.43 3600000 0 0" pos="8.33 3.56 2.02" speed="20.19 20.19" posLat="0.00" waitingTime="100000 1 20400 70500"/>
-    <vehicle id="3000_21.18" type="vehDist26" depart="3543.90" departSpeed="max" route="!3000_21" distance="453.98 0" speedFactor="1.06" state="562 3543900 4 5.06 0 18.18 3600000 0 0" pos="344.03 339.08 2.25" speed="22.50 22.50" posLat="0.00" waitingTime="100000 1 38300 45200"/>
-    <vehicle id="3000_24.100" type="vehDist93" depart="3525.30" departSpeed="max" route="!3000_24" distance="1089.07 0" speedFactor="1.03" state="562 3530800 12 5.02 0 20.53 3600000 0 0" pos="37.26 32.34 2.10" speed="21.03 21.04" posLat="0.00" waitingTime="100000 2 42500 44100 69100 69200"/>
-    <vehicle id="3000_24.101" type="vehDist14" depart="3531.30" departSpeed="max" route="!3000_24" distance="1054.2 0" speedFactor="1.01" state="562 3536200 11 5.04 0 16.33 3600000 0 0" pos="25.60 20.66 2.13" speed="21.27 21.28" posLat="0.00" waitingTime="100000 1 63700 63800"/>
-    <vehicle id="3000_24.102" type="vehDist68" depart="3534.00" departSpeed="max" route="!3000_24" distance="1010.44 0" speedFactor="0.93" state="562 3538900 10 5.02 0 12.62 3600000 0 0" pos="6.38 1.45 2.04" speed="20.37 20.36" posLat="0.00" waitingTime="100000 1 61000 61100"/>
-    <vehicle id="3000_24.103" type="vehDist5" depart="3536.00" departSpeed="max" route="!3000_24" distance="937.31 0" speedFactor="1.01" state="562 3541500 10 4.87 0 15.28 3600000 0 0" pos="38.98 34.21 2.01" speed="20.14 20.14" posLat="0.00" waitingTime="100000 1 58400 58500"/>
-    <vehicle id="3000_24.104" type="vehDist99" depart="3539.90" departSpeed="max" route="!3000_24" distance="937.31 0" speedFactor="1.10" state="562 3546900 10 5.17 0 14.96 3600000 0 0" pos="9.22 4.14 2.00" speed="20.05 20.05" posLat="0.00" waitingTime="100000 1 53000 53100"/>
-    <vehicle id="3000_24.105" type="vehDist11" depart="3542.40" departSpeed="max" route="!3000_24" distance="909.6 0" speedFactor="1.04" state="562 3549600 9 5.17 0 11.26 3600000 0 0" pos="5.71 0.64 1.99" speed="19.90 19.89" posLat="0.00" waitingTime="100000 1 50300 50400"/>
-    <vehicle id="3000_24.106" type="vehDist65" depart="3549.20" departSpeed="max" route="!3000_24" distance="853.07 0" speedFactor="1.03" state="562 3552300 9 5.08 0 9.28 3600000 0 0" pos="32.80 27.82 1.98" speed="19.79 19.78" posLat="0.00" waitingTime="100000 1 47600 47700"/>
-    <vehicle id="3000_24.107" type="vehDist60" depart="3592.40" departSpeed="max" route="!3000_24" distance="0 0" speedFactor="0.93" state="562 3592400 0 4.92 0 0.02 3600000 0 0" pos="163.12 158.30 2.08" speed="20.80 20.80" posLat="0.00" waitingTime="100000 0"/>
-    <vehicle id="3000_24.90" type="vehDist53" depart="3490.00" departSpeed="max" route="!3000_24" distance="1371.8 0" speedFactor="0.94" state="562 3490000 17 4.76 0 41.26 3600000 0 0" pos="78.14 73.47 2.00" speed="20.02 19.98" posLat="0.00" waitingTime="100000 1 19900 50400"/>
-    <vehicle id="3000_24.92" type="vehDist26" depart="3494.80" departSpeed="max" route="!3000_24" distance="1371.8 0" speedFactor="0.96" state="562 3494800 17 5.06 0 40.88 3600000 0 0" pos="15.39 10.44 1.86" speed="18.61 18.63" posLat="0.00" waitingTime="100000 2 18400 23500 49100 64400"/>
-    <vehicle id="3000_24.93" type="vehDist32" depart="3499.30" departSpeed="max" route="!3000_24" distance="1089.07 0" speedFactor="0.74" state="562 3499300 12 5.15 0 35.41 3600000 0 0" pos="3.01 32.83 1.66" speed="16.64 16.64" posLat="0.00" waitingTime="100000 1 45400 73800"/>
-    <vehicle id="3000_24.94" type="vehDist97" depart="3505.90" departSpeed="max" route="!3000_24" distance="1175.53 0" speedFactor="0.87" state="562 3505900 13 5.02 0 32.68 3600000 0 0" pos="21.89 16.97 1.91" speed="19.10 19.09" posLat="0.00" waitingTime="100000 1 45400 69900"/>
-    <vehicle id="3000_24.95" type="vehDist62" depart="3510.80" departSpeed="max" route="!3000_24" distance="1225.54 0" speedFactor="1.03" state="562 3510800 15 5.23 0 35.61 3600000 0 0" pos="16.18 11.05 2.14" speed="21.36 21.29" posLat="0.00" waitingTime="100000 1 44900 66000"/>
-    <vehicle id="3000_24.96" type="vehDist66" depart="3514.40" departSpeed="max" route="!3000_24" distance="1175.53 0" speedFactor="1.05" state="562 3514400 13 5.15 0 34.97 3600000 0 0" pos="23.15 18.10 2.06" speed="20.58 20.54" posLat="0.00" waitingTime="100000 1 44200 64300"/>
-    <vehicle id="3000_24.97" type="vehDist4" depart="3517.00" departSpeed="max" route="!3000_24" distance="1054.2 0" speedFactor="1.07" state="562 3520000 11 5.30 0 35.67 3600000 0 0" pos="10.34 5.15 1.66" speed="16.64 16.64" posLat="0.00" waitingTime="100000 2 44200 52600 79800 80000"/>
-    <vehicle id="3000_24.98" type="vehDist63" depart="3523.70" departSpeed="max" route="!3000_24" distance="1028.04 0" speedFactor="1.09" state="562 3525400 11 5.03 0 32.47 3600000 0 0" pos="4.90 17.57 1.84" speed="18.38 18.42" posLat="0.00" waitingTime="100000 2 42600 49500 74500 74600"/>
-    <vehicle id="3000_24.99" type="vehDist10" depart="3524.20" departSpeed="max" route="!3000_24" distance="1149.71 0" speedFactor="1.17" state="562 3528200 13 5.28 0 27.04 3600000 0 0" pos="21.30 16.11 2.02" speed="20.17 20.14" posLat="0.00" waitingTime="100000 2 43400 47300 71700 71800"/>
-    <vehicle id="3000_25.1" type="vehDist57" depart="3460.30" departSpeed="max" route="!3000_25" distance="1206.9 0" speedFactor="0.89" state="562 3460500 14 4.79 0 78.11 3600000 0 0" pos="0.52 27.19 0.60" speed="5.99 6.26" posLat="0.00" waitingTime="100000 2 5700 9900 10000 75800"/>
-    <vehicle id="3000_29.59" type="vehDist95" depart="3584.70" departSpeed="max" route="!3000_29" distance="321.27 0" speedFactor="0.96" state="562 3584700 0 5.29 0 0.01 3600000 0 0" pos="12.11 6.92 2.13" speed="21.30 21.29" posLat="0.00" waitingTime="100000 0"/>
-    <vehicle id="3000_31.8" type="vehDist23" depart="3505.80" departSpeed="max" route="!3000_31" distance="1196.95 0" speedFactor="0.93" state="562 3505800 15 4.86 0 36.14 3600000 0 0" pos="54.13 49.37 2.04" speed="20.40 20.38" posLat="0.00" waitingTime="100000 2 19100 23400 49100 62100"/>
-    <vehicle id="3000_44.5" type="vehDist71" depart="3573.40" departSpeed="max" route="!3000_44" distance="137.38 0" speedFactor="0.89" state="562 3573400 1 4.98 12300 15.22 3600000 0 0" pos="22.03 17.14 0.00" speed="0.00 0.00" posLat="0.00" waitingTime="100000 1 0 12300"/>
-    <vehicle id="3000_52.4" type="vehDist27" depart="3548.30" departSpeed="max" route="!3000_52" distance="503.1 0" speedFactor="1.05" state="562 3548300 8 4.82 0 25.97 3600000 0 0" pos="48.87 44.14 1.76" speed="17.61 17.59" posLat="0.00" waitingTime="100000 1 19100 29900"/>
-    <vehicle id="3000_52.5" type="vehDist49" depart="3580.00" departSpeed="max" route="!3000_52" distance="0 0" speedFactor="0.97" state="562 3580000 0 4.92 13500 16.44 3600000 0 0" pos="53.11 48.29 0.00" speed="0.00 0.00" posLat="0.00" waitingTime="100000 1 0 13500"/>
-    <vehicle id="3000_9.57" type="vehDist43" depart="3518.60" departSpeed="max" route="!3000_9" distance="433.81 0" speedFactor="0.87" state="562 3518600 7 5.08 0 48.91 3600000 0 0" pos="93.48 88.49 1.85" speed="18.52 18.97" posLat="0.00" waitingTime="100000 1 20400 60900"/>
-    <vehicle id="3000_9.58" type="vehDist86" depart="3527.70" departSpeed="max" route="!3000_9" distance="433.81 0" speedFactor="1.03" state="562 3527700 7 4.92 0 46.11 3600000 0 0" pos="63.62 58.80 1.92" speed="19.23 19.24" posLat="0.00" waitingTime="100000 1 19900 55300"/>
-    <vehicle id="3000_9.59" type="vehDist21" depart="3536.20" departSpeed="max" route="!3000_9" distance="433.81 0" speedFactor="1.08" state="562 3536200 7 4.95 0 38.84 3600000 0 0" pos="61.33 56.48 1.96" speed="19.61 19.62" posLat="0.00" waitingTime="100000 1 19900 46700"/>
-    <vehicle id="3000_9.60" type="vehDist27" depart="3543.30" departSpeed="max" route="!3000_9" distance="433.81 0" speedFactor="0.84" state="562 3543300 7 4.82 0 27.32 3600000 0 0" pos="8.27 3.55 1.80" speed="17.98 17.96" posLat="0.00" waitingTime="100000 1 19200 38400"/>
-    <vehicle id="3000_9.61" type="vehDist89" depart="3560.80" departSpeed="max" route="!3000_9" distance="433.81 0" speedFactor="1.10" state="562 3560800 7 4.81 0 15.87 3600000 0 0" pos="30.83 26.12 1.98" speed="19.85 19.83" posLat="0.00" waitingTime="100000 1 19200 23300"/>
-    <vehicle id="3000_9.62" type="vehDist78" depart="3572.60" departSpeed="max" route="!3000_9" distance="359.94 0" speedFactor="0.98" state="562 3572600 6 4.98 0 3.91 3600000 0 0" pos="46.55 41.67 1.75" speed="17.46 17.39" posLat="0.00" waitingTime="100000 0"/>
-    <vehicle id="3000_9.63" type="vehDist12" depart="3579.20" departSpeed="max" route="!3000_9" distance="284.89 0" speedFactor="1.00" state="562 3579200 5 4.78 0 1.40 3600000 0 0" pos="51.59 46.91 1.38" speed="13.83 13.83" posLat="0.00" waitingTime="100000 0"/>
-    <vehicle id="3000_9.64" type="vehDist47" depart="3586.30" departSpeed="max" route="!3000_9" distance="202.44 0" speedFactor="0.78" state="562 3586300 3 5.12 0 1.14 3600000 0 0" pos="0.88 23.53 1.08" speed="10.84 10.84" posLat="0.00" waitingTime="100000 0"/>
-    <lane id=":6018689144_1_2">
-        <vehicles value="3000_24.105"/>
-    </lane>
-    <lane id=":63082004_5_0">
-        <vehicles value="3000_24.94"/>
-    </lane>
-    <lane id=":63082004_5_1">
-        <vehicles value="3000_24.96"/>
-    </lane>
-    <lane id=":64208332_1_0">
-        <vehicles value="3000_10.7"/>
-    </lane>
-    <lane id=":64208359_0_2">
-        <vehicles value="3000_24.102"/>
-    </lane>
-    <lane id=":834845345#1-AddedOffRampNode_0_0">
-        <vehicles value="3000_29.59"/>
-    </lane>
-    <lane id=":gneJ21_0_0">
-        <vehicles value="3000_24.97"/>
+    <vehicle id="3000_17.0" type="vehDist48" depart="3579.50" departSpeed="max" route="!3000_17" distance="43.53 0" speedFactor="1.14" state="562 3579500 1 5.44 8500 11.25 3600000 0 0" pos="20.40 15.07 0.00" speed="0.00 0.00" posLat="0.00" waitingTime="100000 1 0 8500"/>
+    <vehicle id="3000_17.1" type="vehDist62" depart="3580.00" departSpeed="max" route="!3000_17" distance="43.53 0" speedFactor="0.91" state="562 3580000 1 5.23 5500 9.98 3600000 0 0" pos="12.57 7.43 0.00" speed="0.00 0.00" posLat="0.00" waitingTime="100000 1 0 5500"/>
+    <vehicle id="3000_24.100" type="vehDist56" depart="3590.00" departSpeed="max" route="!3000_24" distance="0 0" speedFactor="1.01" state="562 3590000 0 4.96 0 0.44 3600000 0 0" pos="220.19 215.33 10.80" speed="21.60 21.59" posLat="0.00" waitingTime="100000 0"/>
+    <vehicle id="3000_24.85" type="vehDist51" depart="3504.50" departSpeed="max" route="!3000_24" distance="1211.23 0" speedFactor="0.86" state="562 3504500 14 4.92 0 32.75 3600000 0 0" pos="1.75 3.74 9.63" speed="19.25 19.25" posLat="0.00" waitingTime="100000 1 46000 69500"/>
+    <vehicle id="3000_24.86" type="vehDist25" depart="3507.00" departSpeed="max" route="!3000_24" distance="1371.8 0" speedFactor="1.26" state="562 3507000 17 4.97 0 43.51 3600000 0 0" pos="31.28 26.41 10.52" speed="21.04 21.20" posLat="0.00" waitingTime="100000 1 46000 72500"/>
+    <vehicle id="3000_24.87" type="vehDist71" depart="3509.50" departSpeed="max" route="!3000_24" distance="1149.71 0" speedFactor="0.89" state="562 3509500 13 4.98 0 31.81 3600000 0 0" pos="22.90 18.02 9.58" speed="19.16 19.16" posLat="0.00" waitingTime="100000 1 45500 67000"/>
+    <vehicle id="3000_24.88" type="vehDist33" depart="3512.00" departSpeed="max" route="!3000_24" distance="1325.37 0" speedFactor="1.18" state="562 3512000 16 5.09 0 37.48 3600000 0 0" pos="12.95 7.95 12.15" speed="24.31 24.23" posLat="0.00" waitingTime="100000 1 45500 67000"/>
+    <vehicle id="3000_24.89" type="vehDist90" depart="3519.00" departSpeed="max" route="!3000_24" distance="1089.07 0" speedFactor="0.90" state="562 3519000 12 4.93 0 25.36 3600000 0 0" pos="31.72 26.89 9.54" speed="19.09 19.08" posLat="0.00" waitingTime="100000 1 45000 56500"/>
+    <vehicle id="3000_24.90" type="vehDist66" depart="3525.00" departSpeed="max" route="!3000_24" distance="1089.07 0" speedFactor="0.82" state="562 3525000 12 5.15 0 14.86 3600000 0 0" pos="22.10 17.05 9.20" speed="18.39 18.39" posLat="0.00" waitingTime="100000 1 45000 48000"/>
+    <vehicle id="3000_24.91" type="vehDist29" depart="3548.50" departSpeed="max" route="!3000_24" distance="1010.44 0" speedFactor="0.89" state="562 3548500 10 5.12 0 0.25 3600000 0 0" pos="12.02 7.00 9.83" speed="19.66 19.67" posLat="0.00" waitingTime="100000 0"/>
+    <vehicle id="3000_24.92" type="vehDist20" depart="3551.00" departSpeed="max" route="!3000_24" distance="1054.2 0" speedFactor="1.08" state="562 3551000 11 4.96 0 4.46 3600000 0 0" pos="30.62 25.76 9.38" speed="18.76 18.80" posLat="0.00" waitingTime="100000 0"/>
+    <vehicle id="3000_24.93" type="vehDist76" depart="3553.50" departSpeed="max" route="!3000_24" distance="937.31 0" speedFactor="1.04" state="562 3553500 10 4.92 0 4.20 3600000 0 0" pos="53.56 48.74 9.91" speed="19.82 19.84" posLat="0.00" waitingTime="100000 0"/>
+    <vehicle id="3000_24.94" type="vehDist89" depart="3556.00" departSpeed="max" route="!3000_24" distance="1028.04 0" speedFactor="1.09" state="562 3556000 11 4.81 0 1.47 3600000 0 0" pos="13.58 8.87 10.74" speed="21.47 21.61" posLat="0.00" waitingTime="100000 0"/>
+    <vehicle id="3000_24.95" type="vehDist17" depart="3556.50" departSpeed="max" route="!3000_24" distance="853.07 0" speedFactor="0.90" state="562 3556500 9 4.85 0 0.32 3600000 0 0" pos="16.40 11.65 9.99" speed="19.98 20.00" posLat="0.00" waitingTime="100000 0"/>
+    <vehicle id="3000_24.96" type="vehDist4" depart="3568.00" departSpeed="max" route="!3000_24" distance="597.62 0" speedFactor="0.87" state="562 3568000 5 5.30 0 0.18 3600000 0 0" pos="26.03 20.83 9.72" speed="19.43 19.43" posLat="0.00" waitingTime="100000 0"/>
+    <vehicle id="3000_24.97" type="vehDist93" depart="3571.00" departSpeed="max" route="!3000_24" distance="649.43 0" speedFactor="1.04" state="562 3571000 5 5.02 0 0.83 3600000 0 0" pos="7.82 2.90 11.58" speed="23.15 23.15" posLat="0.00" waitingTime="100000 0"/>
+    <vehicle id="3000_24.98" type="vehDist14" depart="3579.50" departSpeed="max" route="!3000_24" distance="383.91 0" speedFactor="0.87" state="562 3579500 2 5.04 0 0.87 3600000 0 0" pos="1.87 5.77 9.66" speed="19.32 19.30" posLat="0.00" waitingTime="100000 0"/>
+    <vehicle id="3000_24.99" type="vehDist90" depart="3588.50" departSpeed="max" route="!3000_24" distance="0 0" speedFactor="1.05" state="562 3588500 0 4.93 0 0.20 3600000 0 0" pos="269.82 264.99 11.43" speed="22.87 22.88" posLat="0.00" waitingTime="100000 0"/>
+    <vehicle id="3000_25.0" type="vehDist90" depart="3460.50" departSpeed="max" route="!3000_25" distance="1226.9 0" speedFactor="1.11" state="562 3462500 15 4.93 0 86.24 3600000 0 0" pos="8.37 3.54 5.85" speed="11.70 10.61" posLat="0.00" waitingTime="100000 1 9000 77500"/>
+    <vehicle id="3000_29.42" type="vehDist68" depart="3578.00" departSpeed="max" route="!3000_29" distance="384.9 0" speedFactor="0.88" state="562 3578000 2 5.02 0 0.53 3600000 0 0" pos="40.07 35.15 8.66" speed="17.31 17.31" posLat="0.00" waitingTime="100000 0"/>
+    <vehicle id="3000_31.13" type="vehDist55" depart="3508.00" departSpeed="max" route="!3000_31" distance="1196.95 0" speedFactor="0.87" state="562 3508000 15 4.70 0 29.79 3600000 0 0" pos="62.44 57.84 9.73" speed="19.46 19.46" posLat="0.00" waitingTime="100000 1 49000 57500"/>
+    <vehicle id="3000_33.5" type="vehDist45" depart="3581.00" departSpeed="max" route="!3000_33" distance="422.77 0" speedFactor="0.98" state="562 3581000 3 5.36 0 1.81 3600000 0 0" pos="0.54 20.21 10.53" speed="21.06 20.92" posLat="0.00" waitingTime="100000 0"/>
+    <vehicle id="3000_52.7" type="vehDist67" depart="3594.00" departSpeed="max" route="!3000_52" distance="0 0" speedFactor="0.92" state="562 3594000 0 5.27 0 2.32 3600000 0 0" pos="52.11 46.93 0.91" speed="1.81 2.82" posLat="0.00" waitingTime="100000 0"/>
+    <vehicle id="3000_9.65" type="vehDist92" depart="3505.00" departSpeed="max" route="!3000_9" distance="1057.04 0" speedFactor="0.94" state="562 3505000 13 4.93 0 20.60 3600000 0 0" pos="397.02 392.19 10.20" speed="20.40 20.24" posLat="0.00" waitingTime="100000 1 48500 51500"/>
+    <vehicle id="3000_9.67" type="vehDist85" depart="3509.00" departSpeed="max" route="!3000_9" distance="575.32 0" speedFactor="1.08" state="562 3509000 9 5.30 0 61.54 3600000 0 0" pos="28.74 23.53 11.99" speed="23.99 23.96" posLat="0.00" waitingTime="100000 1 21000 71000"/>
+    <vehicle id="3000_9.68" type="vehDist52" depart="3509.50" departSpeed="max" route="!3000_9" distance="575.32 0" speedFactor="1.00" state="562 3510000 9 5.15 0 59.21 3600000 0 0" pos="8.77 3.72 11.19" speed="22.38 22.36" posLat="0.00" waitingTime="100000 1 21000 63500"/>
+    <vehicle id="3000_9.69" type="vehDist34" depart="3520.50" departSpeed="max" route="!3000_9" distance="548.48 0" speedFactor="1.12" state="562 3520500 8 4.96 0 53.24 3600000 0 0" pos="1.81 16.07 11.74" speed="23.47 23.41" posLat="0.00" waitingTime="100000 1 20500 61500"/>
+    <vehicle id="3000_9.70" type="vehDist16" depart="3524.00" departSpeed="max" route="!3000_9" distance="433.81 0" speedFactor="0.96" state="562 3524000 7 4.98 0 46.57 3600000 0 0" pos="88.71 83.83 10.51" speed="21.03 20.97" posLat="0.00" waitingTime="100000 1 20500 54000"/>
+    <vehicle id="3000_9.71" type="vehDist11" depart="3530.50" departSpeed="max" route="!3000_9" distance="433.81 0" speedFactor="0.90" state="562 3530500 7 5.17 0 41.10 3600000 0 0" pos="34.43 29.36 9.71" speed="19.42 19.31" posLat="0.00" waitingTime="100000 1 20000 50500"/>
+    <vehicle id="3000_9.72" type="vehDist99" depart="3531.00" departSpeed="max" route="!3000_9" distance="433.81 0" speedFactor="1.05" state="562 3531000 7 5.17 0 43.35 3600000 0 0" pos="61.63 56.56 11.08" speed="22.15 22.01" posLat="0.00" waitingTime="100000 1 20000 47000"/>
+    <vehicle id="3000_9.73" type="vehDist15" depart="3531.50" departSpeed="max" route="!3000_9" distance="433.81 0" speedFactor="1.06" state="562 3533500 7 4.93 0 43.02 3600000 0 0" pos="14.84 10.01 10.46" speed="20.91 20.60" posLat="0.00" waitingTime="100000 1 19000 45000"/>
+    <vehicle id="3000_9.74" type="vehDist64" depart="3538.00" departSpeed="max" route="!3000_9" distance="359.94 0" speedFactor="0.89" state="562 3538000 6 5.10 0 35.60 3600000 0 0" pos="59.90 54.90 8.93" speed="17.86 17.52" posLat="0.00" waitingTime="100000 1 19000 39500"/>
+    <vehicle id="3000_9.75" type="vehDist70" depart="3562.00" departSpeed="max" route="!3000_9" distance="359.94 0" speedFactor="1.09" state="562 3562000 6 4.51 0 17.48 3600000 0 0" pos="32.65 28.24 8.35" speed="16.69 16.06" posLat="0.00" waitingTime="100000 1 18500 21500"/>
+    <vehicle id="3000_9.76" type="vehDist71" depart="3575.50" departSpeed="max" route="!3000_9" distance="359.94 0" speedFactor="1.03" state="562 3575500 6 4.98 0 2.82 3600000 0 0" pos="33.34 28.45 9.25" speed="18.51 17.69" posLat="0.00" waitingTime="100000 0"/>
+    <vehicle id="3000_9.77" type="vehDist56" depart="3586.00" departSpeed="max" route="!3000_9" distance="215.23 0" speedFactor="0.85" state="562 3586000 4 4.96 0 1.19 3600000 0 0" pos="2.61 10.53 5.93" speed="11.86 11.86" posLat="0.00" waitingTime="100000 0"/>
+    <vehicle id="3000_9.78" type="vehDist55" depart="3589.50" departSpeed="max" route="!3000_9" distance="174.77 0" speedFactor="0.90" state="562 3589500 3 4.70 0 1.48 3600000 0 0" pos="5.49 0.89 6.28" speed="12.55 12.55" posLat="0.00" waitingTime="100000 0"/>
+    <lane id=":64208359_0_0">
+        <vehicles value="3000_24.91"/>
     </lane>
     <lane id=":gneJ21_0_1">
-        <vehicles value="3000_24.101"/>
+        <vehicles value="3000_24.92"/>
     </lane>
-    <lane id=":gneJ57_0_0">
-        <vehicles value="3000_9.64"/>
+    <lane id=":gneJ24_1_0">
+        <vehicles value="3000_24.85"/>
+    </lane>
+    <lane id=":gneJ77_0_2">
+        <vehicles value="3000_24.97"/>
+    </lane>
+    <lane id="-8867312#4.11_0">
+        <vehicles value="3000_25.0"/>
+    </lane>
+    <lane id="115872656#10_1">
+        <vehicles value="3000_9.69"/>
+    </lane>
+    <lane id="115872656#10.14_0">
+        <vehicles value="3000_9.68"/>
+    </lane>
+    <lane id="115872656#10.14_1">
+        <vehicles value="3000_9.67"/>
     </lane>
     <lane id="115872656#13.8_1">
-        <vehicles value="3000_21.18 3000_1.0"/>
+        <vehicles value="3000_9.65"/>
     </lane>
     <lane id="115872656#8_0">
-        <vehicles value="3000_9.62"/>
+        <vehicles value="3000_9.75 3000_9.74"/>
+    </lane>
+    <lane id="115872656#8_1">
+        <vehicles value="3000_9.76"/>
     </lane>
     <lane id="115872656#9_1">
-        <vehicles value="3000_9.60 3000_9.58"/>
+        <vehicles value="3000_9.71 3000_9.70"/>
     </lane>
     <lane id="115872656#9_2">
-        <vehicles value="3000_9.61 3000_9.59 3000_9.57"/>
+        <vehicles value="3000_9.73 3000_9.72"/>
+    </lane>
+    <lane id="660891910#1.19_1">
+        <vehicles value="3000_17.1 3000_17.0"/>
     </lane>
     <lane id="834845345#1_0">
-        <vehicles value="3000_24.107"/>
+        <vehicles value="3000_24.100 3000_24.99"/>
     </lane>
-    <lane id="834845345#6.23_2">
-        <vehicles value="3000_24.106"/>
+    <lane id="834845345#12_1">
+        <vehicles value="3000_24.88"/>
     </lane>
-    <lane id="834845345#7_2">
-        <vehicles value="3000_24.104 3000_24.103"/>
-    </lane>
-    <lane id="834845345#8_0">
+    <lane id="834845345#2_0">
         <vehicles value="3000_24.98"/>
     </lane>
-    <lane id="834845345#8.108_1">
-        <vehicles value="3000_24.99"/>
+    <lane id="834845345#4_0">
+        <vehicles value="3000_24.96"/>
     </lane>
-    <lane id="834845345#8.20_0">
-        <vehicles value="3000_24.93"/>
+    <lane id="834845345#4_1">
+        <vehicles value="3000_33.5"/>
     </lane>
-    <lane id="834845345#8.20_1">
-        <vehicles value="3000_24.100"/>
-    </lane>
-    <lane id="834845345#9.4_1">
+    <lane id="834845345#6.23_0">
         <vehicles value="3000_24.95"/>
     </lane>
-    <lane id="gneE14_0">
-        <vehicles value="3000_24.92 3000_52.4 3000_24.90"/>
+    <lane id="834845345#7_0">
+        <vehicles value="3000_24.93"/>
+    </lane>
+    <lane id="834845345#8_1">
+        <vehicles value="3000_24.94"/>
+    </lane>
+    <lane id="834845345#8.108_0">
+        <vehicles value="3000_24.87"/>
+    </lane>
+    <lane id="834845345#8.20_0">
+        <vehicles value="3000_24.89"/>
+    </lane>
+    <lane id="834845345#8.20_1">
+        <vehicles value="3000_24.90"/>
+    </lane>
+    <lane id="8884863_0">
+        <vehicles value="3000_29.42"/>
     </lane>
     <lane id="gneE14_1">
-        <vehicles value="3000_31.8"/>
+        <vehicles value="3000_24.86 3000_31.13"/>
     </lane>
-    <lane id="gneE18_0">
-        <vehicles value="3000_44.5"/>
+    <lane id="gneE22_1">
+        <vehicles value="3000_9.78"/>
     </lane>
-    <lane id="gneE19_0">
-        <vehicles value="3000_25.1"/>
-    </lane>
-    <lane id="gneE23_0">
-        <vehicles value="3000_9.63"/>
+    <lane id="gneE22.27_0">
+        <vehicles value="3000_9.77"/>
     </lane>
     <lane id="gneE30_0">
-        <vehicles value="3000_52.5"/>
+        <vehicles value="3000_52.7"/>
     </lane>
 </snapshot>

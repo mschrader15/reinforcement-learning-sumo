@@ -81,6 +81,7 @@ class SimParams(object):
 
         self.end_time: pendulum.DateTime = self.start_time.add(seconds=self.sim_length)
 
+        self.time_to_teleport = -1  # this is the sumo setting for no teleport
 
     def __getitem__(self, item):
 

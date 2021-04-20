@@ -213,15 +213,17 @@ class LightHead(Observable, _Base):
         """
         main_name = self._paired_priority['main']
         main_color, main_time = _value_error_handler(self._paired_phase_actions[main_name], (_TL_HEAD.GREEN, 1e6))
-        if len(self._paired_priority) < 2:
-            if (main_color == _TL_HEAD.GREEN) and (self.state not in [_TL_HEAD.YIELD, _TL_HEAD.GREEN]):
-                self.state = _TL_HEAD.YIELD
-            elif main_color == _TL_HEAD.RED:
-                self.state = main_color
-            elif (main_color == _TL_HEAD.YELLOW) and self.state == _TL_HEAD.RED:
-                # if 1 is red but 6 is yellow, do not put 1 to yellow. Stay red
-                pass
-        else:
+        # if len(self._paired_priority) < 2:
+        if (main_color == _TL_HEAD.GREEN) and (self.state not in [_TL_HEAD.YIELD, _TL_HEAD.GREEN]):
+            self.state = _TL_HEAD.YIELD
+        elif main_color == _TL_HEAD.RED:
+            self.state = main_color
+        elif main_color == _TL_HEAD.YELLOW and self.state != _TL_HEAD.YELLOW:
+            self.state = _TL_HEAD.YELLOW
+        # elif (main_color == _TL_HEAD.YELLOW) and self.state == _TL_HEAD.RED:
+        #     # if 1 is red but 6 is yellow, do not put 1 to yellow. Stay red
+        #     pass
+        if len(self._paired_priority) > 1:
             secondary_name = self._paired_priority['secondary']
             secondary_color, secondary_name = _value_error_handler(self._paired_phase_actions[secondary_name], (_TL_HEAD.GREEN, 1e6))
             if (secondary_color == _TL_HEAD.GREEN) and (main_color == _TL_HEAD.GREEN):
@@ -232,7 +234,6 @@ class TrafficLightManager(_Base):
 
     def __init__(self, tl_id, tl_details):
         self.tl_id = tl_id
-        self.traci_c = None
         self.current_state = (2, 6)
         self.potential_movements = list(map(int, tl_details['phase_order']))
         self.action_space = self._create_states()
@@ -241,6 +242,8 @@ class TrafficLightManager(_Base):
         self._task_list = []
         self._last_light_string = ""
         super().__init__()
+        # traci needs to be after the _Base.__init__ because otherwise it will be frozen as a none
+        self.traci_c = None
 
     def re_initialize(self, ):
         self._re_initialize()
@@ -327,7 +330,7 @@ class TrafficLightManager(_Base):
         new_string = self._generate_string()
         if new_string not in self._last_light_string:
             self.traci_c.trafficlight.setRedYellowGreenState(self.tl_id, new_string)
-            print(self.tl_id, new_string)
+            # print(self.tl_id, new_string)
             self._last_light_string = new_string
 
     def get_current_state(self, ):

@@ -124,7 +124,7 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
         # get the current traffic light states
         tl_states = self.actor.get_current_state()
 
-        return np.array([tl_states, count_list])
+        return np.array([tl_states, count_list], dtype=object)
 
     def clip_actions(self, rl_actions=None):
         """Clip the actions passed from the RL agent.
@@ -139,6 +139,7 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
         array_like
             The rl_actions clipped according to the box or boxes
         """
+
         # ignore if no actions are issued
         if rl_actions is None:
             return
@@ -162,29 +163,30 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
             observation (object): the initial observation.
         """
         # reset the time counter
-        self.time_counter = 0
+        # self.time_counter = 0
 
         # restart completely if we should restart
-        if self.step_counter > 1e6:
-            self.step_counter = 0
-            self.k.close_simulation()
-            traci_c = self.k.start_simulation()
-            self.k.pass_traci_kernel(traci_c)
-            self._reset_action_obs()
+        # if self.step_counter > 1e6:
+        # TODO put this back to the way that it was. Need a better way to load the simulation
+        self.step_counter = 0
+        self.k.close_simulation()
+        traci_c = self.k.start_simulation()
+        self.k.pass_traci_kernel(traci_c)
+        self._reset_action_obs()
 
-            # the kernel has a new traci connection now. need to re-register it
-            self.observer.register_traci(traci_c)
-            # pass traci to the observer
-            traci_fns = self.observer.register_traci(traci_c)
-            # pass the observer traci function call back to the kernel
-            self.k.add_traci_call(traci_fns)
+        # the kernel has a new traci connection now. need to re-register it
+        self.observer.register_traci(traci_c)
+        # pass traci to the observer
+        traci_fns = self.observer.register_traci(traci_c)
+        # pass the observer traci function call back to the kernel
+        self.k.add_traci_call(traci_fns)
 
-            self.actor.register_traci(traci_c)
+        self.actor.register_traci(traci_c)
 
-        # else reset the simulation
-        else:
-            self.k.reset_simulation()
-            self._reset_action_obs()
+        # # else reset the simulation
+        # else:
+        # self.k.reset_simulation()
+        # self._reset_action_obs()
 
     def step(self, action):
         """Run one timestep of the environment's dynamics. When end of
@@ -205,18 +207,28 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
             # increment the step counter
             self.step_counter += 1
 
+            # self.time_counter += self.sim_params.sim_step
+
             # apply the rl agent actions
             self.apply_rl_actions(rl_actions=action)
 
             # step the simulation
             subscription_data = self.k.simulation_step()
 
+            # check for collisions and kill the simulation if so
+            crash = self.k.check_collision()
+            if crash:
+                print("There was a crash")
+                break
+
         observation = self.get_state(subscription_data)
         reward = self.calculate_reward(subscription_data)
 
-        done = self.step_counter > self.horizon
+        done = (self.k.sim_time > self.horizon) or crash
 
-        info = {}
+        info = {
+            'sim_time': self.k.sim_time,
+        }
 
         return observation, reward, done, info
 

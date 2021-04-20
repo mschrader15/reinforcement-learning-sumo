@@ -4,7 +4,7 @@
     "algorithm": "PPO",
     "warmup_time": 3600,
     "sims_per_step": 1,
-    "horizon": 7200,
+    "horizon": 1000,
     "reward_function": "minimize_fuel",
     "environment_location": "my_gym.environment",
     "environment_name": "TLEnv"
@@ -21,7 +21,7 @@
     "tl_ids": ["63082002", "63082003", "63082004"],
     "tl_settings": "sumo-xml/settings.json",
     "tl_file": "sumo-xml/traffic-lights/tls.rl.add.xml",
-    "sim_step": 0.1,
+    "sim_step": 0.5,
     "start_time": "2020-02-24 06:00:00.000",
     "gui": 1
   }

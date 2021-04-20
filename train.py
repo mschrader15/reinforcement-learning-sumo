@@ -47,12 +47,14 @@ def run_no_rl(sim_params, env_params):
     # with env(env_params=env_params, sim_params=sim_params) as e:
 
     # for _ in range(10):
-    for _ in range(1000):
+    for _ in range(3):
 
-        action = env.action_space.sample()
-        observation, reward, done, info = env.step(action)
-        if done:
-            print('done')
+        done = False
+        while not done:
+            action = env.action_space.sample()
+            observation, reward, done, info = env.step(action)
+
+        env.reset()
 
     env.close()
 

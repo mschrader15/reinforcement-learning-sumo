@@ -42,7 +42,6 @@ class _Base:
         self.name = name
         self._children: _Base = children
         self.count_list = [child.count_list for child in self]
-        self.traci_c = None
         self.init_state = None
 
     def freeze(self, ):
@@ -51,14 +50,17 @@ class _Base:
             child.freeze()
 
     def re_initialize(self):
+
         for name, value in self.init_state.items():
             self.__dict__[name] = value
+
+        self.freeze()
 
     def get_lane_count(self, ):
         return sum([child.get_lane_count() for child in self])
 
     def register_traci(self, traci_c):
-        self.traci_c = traci_c
+        # self.traci_c = traci_c
         for child in self:
             child.register_traci(traci_c)
 
@@ -121,7 +123,7 @@ class Lane(_Base):
         """
         return 1
 
-    def _subscribe_2_lanes(self, ):
+    def _subscribe_2_lanes(self, traci_c):
         """
         This function is called once to subscribe to the lanes
 
@@ -129,7 +131,7 @@ class Lane(_Base):
         """
         for lane in self._lane_list:
 
-            self.traci_c.lane.subscribe(lane, [LAST_STEP_VEHICLE_ID_LIST])
+            traci_c.lane.subscribe(lane, [LAST_STEP_VEHICLE_ID_LIST])
 
     def update_counts(self, center: tuple, lane_ids: dict, vehicle_positions: dict) -> None:
         """
@@ -176,9 +178,9 @@ class Lane(_Base):
 
     def register_traci(self, traci_c):
         # register traci
-        self.traci_c = traci_c
-        #
-        self._subscribe_2_lanes()
+        # self.traci_c = traci_c
+        # subscribe to the lane that I am in charge of
+        self._subscribe_2_lanes(traci_c)
 
 
 class Approach(_Base):
@@ -359,14 +361,14 @@ class GlobalObservations(_Base):
         # return the pre-constructed count dictionary
         return counts
 
-    def register_traci(self, traci_c: object) -> [object, ]:
+    def register_traci(self, traci_c: object) -> [[object, tuple, int], ]:
         """
         pass traci to the children and return the functions that the core traci module should execute.
 
         @param traci_c:
         @return:
         """
-        self.traci_c = traci_c
+        # self.traci_c = traci_c
         for child in self:
             child.register_traci(traci_c)
 
