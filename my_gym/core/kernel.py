@@ -12,7 +12,7 @@ import subprocess
 
 def sumo_cmd_line(params):
     cmd = ['-n', params.net_file, '-e', str(params.sim_length), '--step-length', str(params.sim_step),
-           '-r', params.route_file, '-a', ", ".join(params.additional_files), '--remote-port', str(params.port),
+           '-a', ", ".join(params.additional_files + [params.route_file]), '--remote-port', str(params.port),
            '--seed', str(randint(0, 10000),),
            "--time-to-teleport", str(int(params.time_to_teleport))
            ]
@@ -36,8 +36,7 @@ class Kernel(object):
         self.parent_fns = []
         self.sim_params = deepcopy(sim_params)
         self.sim_step_size = self.sim_params.sim_step
-        self.state_file = f"start_state_{sim_params.port}.xml"
-        # self.subscription_data = {}
+        self.state_file = os.path.join(sim_params.sim_state_dir, "start_state_{sim_params.port}.xml")
         self.sim_time = 0
         self.traci_calls = []
         self.sim_data = {}
@@ -122,8 +121,6 @@ class Kernel(object):
 
         # subscribe to all vehicles in the simulation at this point
         # subscribe to all new vehicle positions and fuel consumption
-        for veh_id in self.traci_c.simulation.getAllI():
-            self.traci_c.subscribe(veh_id, tc.VAR_VEHICLE, [tc.VAR_POSITION, tc.VAR_FUELCONSUMPTION])
         self.simulation_step()
 
         # subscribe to all of the vehicles again

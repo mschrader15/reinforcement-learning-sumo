@@ -235,6 +235,11 @@ class Approach(_Base):
                 # break the while loop and return where we are at.
                 # This happens from the error raised in _get_straight_connection
                 break
+        # slow_edges = []
+        # for lane in lanes:
+        #     if lane.getSpeed() < 20:
+        #         slow_edges.append(lane.getEdge().getID())
+        # print("Slow Edges", list(set(slow_edges)))
         # the normal return. the function found enough lanes to satisfy the distance requirement
         return [lane.getID() for lane in lanes]
 

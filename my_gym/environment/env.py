@@ -1,6 +1,8 @@
 import gym
 import sumolib
 import atexit
+
+import traci.exceptions
 from gym.spaces import Box, Tuple
 import numpy as np
 import traceback
@@ -48,16 +50,17 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
         # pass the traci connection back to the kernel
         self.k.pass_traci_kernel(traci_c)
 
-        # pass traci to the observer
-        traci_fns = self.observer.register_traci(traci_c)
         # pass the observer traci function call back to the kernel
-        self.k.add_traci_call(traci_fns)
+        self.k.add_traci_call(self.observer.register_traci(traci_c))
 
         # register the actor
         self.actor.register_traci(traci_c)
 
         # create the reward function
-        self._reward_fn = getattr(rewarder, self.env_params.reward_function)
+        self.rewarder = getattr(rewarder, self.env_params.reward_class)(sim_params, env_params)
+
+        # pass the rewarder traci function call back to the kernel
+        self.k.add_traci_call(self.rewarder.register_traci(traci_c))
 
         # terminate sumo on exit
         atexit.register(self.terminate)
@@ -166,27 +169,39 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
         # self.time_counter = 0
 
         # restart completely if we should restart
-        # if self.step_counter > 1e6:
+        if self.step_counter > 1e6:
         # TODO put this back to the way that it was. Need a better way to load the simulation
+            self._hard_reset()
+
+        # # else reset the simulation
+        else:
+            try:
+                self.k.reset_simulation()
+                self._reset_action_obs_rewarder()
+            except traci.exceptions.FatalTraCIError:
+                self.reset()
+
+    def _hard_reset(self):
+        """
+        This function is called when SUMO needs to be tore down and rebuilt
+
+        @return: None
+        """
+
         self.step_counter = 0
         self.k.close_simulation()
         traci_c = self.k.start_simulation()
         self.k.pass_traci_kernel(traci_c)
-        self._reset_action_obs()
+        self._reset_action_obs_rewarder()
 
-        # the kernel has a new traci connection now. need to re-register it
-        self.observer.register_traci(traci_c)
-        # pass traci to the observer
-        traci_fns = self.observer.register_traci(traci_c)
-        # pass the observer traci function call back to the kernel
-        self.k.add_traci_call(traci_fns)
+        # pass traci to the observer and the corresponding functions back to the
+        self.k.add_traci_call(self.observer.register_traci(traci_c))
 
+        # pass traci to the actor
         self.actor.register_traci(traci_c)
 
-        # # else reset the simulation
-        # else:
-        # self.k.reset_simulation()
-        # self._reset_action_obs()
+        # pass traci to the rewarder and then register the calls
+        self.k.add_traci_call(self.rewarder.register_traci(traci_c))
 
     def step(self, action):
         """Run one timestep of the environment's dynamics. When end of
@@ -233,14 +248,14 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
         return observation, reward, done, info
 
     def calculate_reward(self, subscription_data) -> float:
-        return self._reward_fn(subscription_data)
+        return self.rewarder.get_reward(subscription_data)
 
-    def _reset_action_obs(self, ):
+    def _reset_action_obs_rewarder(self, ):
         self.observer.re_initialize()
         self.actor.re_initialize()
+        self.rewarder.re_initialize()
 
     def terminate(self, ):
-
         try:
             self.k.close_simulation()
 

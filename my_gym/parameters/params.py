@@ -34,7 +34,7 @@ class EnvParams(object):
 
         self.horizon: int = safe_getter(params, 'horizon') or 3600
 
-        self.reward_function: str = safe_getter(params, 'reward_function') or 'minimize_fuel'
+        self.reward_class: str = safe_getter(params, 'reward_class') or 'FCIC'
 
         self.clip_actions: str = safe_getter(params, 'clip_actions') or True
 
@@ -54,6 +54,8 @@ class SimParams(object):
             root = exec(params['file_root'])
         except Exception as e:
             root = params['file_root']
+
+        self.sim_state_dir: str = os.path.join(root, 'reinforcement-learning-sumo', 'tmp', 'sim_state')
 
         self.gui = params['gui']
 
@@ -75,13 +77,16 @@ class SimParams(object):
 
         self.warmup_time: float = env_params.warm_up_time
 
-        self.sim_length: int = env_params.warm_up_time + (env_params.sims_per_step * env_params.horizon) + 5  # adding 5 seconds to be safe on reset
+        # sum the warmup time, sims per step * horizon and an extra 1000
+        self.sim_length: int = env_params.warm_up_time + (env_params.sims_per_step * env_params.horizon) + 1000
 
         self.start_time: pendulum.DateTime = pendulum.parse(params['start_time'])
 
         self.end_time: pendulum.DateTime = self.start_time.add(seconds=self.sim_length)
 
         self.time_to_teleport = -1  # this is the sumo setting for no teleport
+
+        self.central_junction = safe_getter(params, 'central_junction') or '63082003'
 
     def __getitem__(self, item):
 

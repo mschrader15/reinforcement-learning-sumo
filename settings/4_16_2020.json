@@ -5,7 +5,7 @@
     "warmup_time": 3600,
     "sims_per_step": 1,
     "horizon": 1000,
-    "reward_function": "minimize_fuel",
+    "reward_class": "FCIC",
     "environment_location": "my_gym.environment",
     "environment_name": "TLEnv"
   },
