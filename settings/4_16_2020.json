@@ -1,7 +1,7 @@
 {
   "Name": "tester",
   "Environment": {
-    "algorithm": "PPO",
+    "algorithm": "no-rl",
     "warmup_time": 3600,
     "sims_per_step": 1,
     "horizon": 1000,
@@ -10,7 +10,7 @@
     "environment_name": "TLEnv"
   },
   "Simulation": {
-    "file_root": "../",
+    "file_root": "./",
     "net_file": "sumo-xml/simplified_reworked.net.xml",
     "route_file": "sumo-xml/route-sampler/rl_route_sampler.route.xml",
     "additional_files": [
@@ -23,6 +23,6 @@
     "tl_file": "sumo-xml/traffic-lights/tls.rl.add.xml",
     "sim_step": 0.5,
     "start_time": "2020-02-24 06:00:00.000",
-    "gui": 1
+    "gui": 0
   }
 }

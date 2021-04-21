@@ -3,7 +3,7 @@ import sumolib
 import atexit
 
 import traci.exceptions
-from gym.spaces import Box, Tuple
+from gym.spaces import Box, Tuple, Discrete
 import numpy as np
 import traceback
 from copy import deepcopy
@@ -76,10 +76,26 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
 
     @property
     def observation_space(self):
-        traffic_lights = Box(
+        traffic_light_states = Box(
             low=0,
             high=6383,  # this is per the enumeration format in the observer class
             shape=self.action_space.shape,
+            dtype=np.float32
+        )
+
+        traffic_light_times = Box(
+            low=0,
+            high=self.sim_params.sim_length,  # the value is actually the time delta since the start of the last green state but theoretical max is sim length 
+            shape=self.action_space.shape,
+            dtype=np.float32
+        )
+
+
+        # TODO: maybe change this to a discrete
+        traffic_light_transition_active = Box(
+            low=0,
+            high=1,  
+            shape=self.action_space.shape,  
             dtype=np.float32
         )
 
@@ -91,7 +107,7 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
             dtype=np.float32,
         )
 
-        return Tuple((traffic_lights, vehicle_num))
+        return Tuple((traffic_light_states, traffic_light_times, traffic_light_transition_active, vehicle_num))
 
     def apply_rl_actions(self, rl_actions):
         """Specify the actions to be performed by the rl agent(s).
@@ -124,10 +140,10 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
         # prompt the observer class to find all counts
         count_list = self.observer.get_counts(subscription_data)
 
-        # get the current traffic light states
+        # get the current traffic light states, a tuple of lists is returned
         tl_states = self.actor.get_current_state()
 
-        return np.array([tl_states, count_list], dtype=object)
+        return np.array([*tl_states, count_list], dtype=object)
 
     def clip_actions(self, rl_actions=None):
         """Clip the actions passed from the RL agent.

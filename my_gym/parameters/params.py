@@ -1,6 +1,8 @@
 import os
 import json
 import pendulum
+import distutils
+from helpers import utils
 
 
 def load_json(file):
@@ -57,7 +59,10 @@ class SimParams(object):
 
         self.sim_state_dir: str = os.path.join(root, 'reinforcement-learning-sumo', 'tmp', 'sim_state')
 
-        self.gui = params['gui']
+        # make the directory
+        utils.make_directory(self.sim_state_dir)
+
+        self.gui = bool(distutils.util.strtobool(str(params['gui'])))
 
         self.port: int = 0
 

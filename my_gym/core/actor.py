@@ -241,6 +241,8 @@ class TrafficLightManager(_Base):
         self.light_heads = self._compose_light_heads(tl_details)
         self._task_list = []
         self._last_light_string = ""
+        self._last_green_time = 0
+        self._transition_active = False
         super().__init__()
         # traci needs to be after the _Base.__init__ because otherwise it will be frozen as a none
         self.traci_c = None
@@ -297,18 +299,35 @@ class TrafficLightManager(_Base):
         desired_state = self._int_to_action(action)
         if (desired_state != self.current_state) and (desired_state in self.action_space):
             if self.tasks_are_empty():
+                # set the transition to being active
+                self._transition_active = True
+
                 yellow_to_red_states = [state for state in self.current_state if state not in desired_state]
+
                 state_progression = [[(self.light_heads[head].transition, light_state) for head in yellow_to_red_states]
                                      for light_state in [_TL_HEAD.YELLOW, _TL_HEAD.RED]] + \
                                     [[(self.light_heads[head].transition, _TL_HEAD.GREEN) for head in desired_state]]
+                
+                # tell myself that I have changed
                 state_progression[-1] += [(self._update_state, desired_state)]
+
+                # update the timer
+                state_progression[-1] += [(self._update_timer, ()))]
+                
                 self._task_list.extend(state_progression)
+                
                 success = True
         light_heads_success = self._step()
         return success * light_heads_success
 
     def _update_state(self, state):
         self.current_state = state
+        self._transition_active = False
+        return True
+
+    def _update_timer(self, ):
+        self._last_light_string = _Timer.get_time()
+        # signifies a sucessful function completion
         return True
 
     def _step(self, ):
@@ -350,6 +369,12 @@ class TrafficLightManager(_Base):
             return states[0] * 100 + states[1]
         return states[0]
 
+    def get_last_green_time(self, ):
+        return _Timer.time - self._last_green_time
+
+    def get_transition_active(self, ):
+        return 1. * self._transition_active
+    
 
 class GlobalActor:
 
@@ -414,5 +439,13 @@ class GlobalActor:
 
         @return: list of int
         """
-        return [tl.get_current_state() for tl in self]
+        states = []
+        last_green_times = []
+        transition_active = []
 
+        for tl in self:
+            states.append(tl.get_current_state())
+            last_green_times.append(tl.get_last_green_time())
+            transition_active.append(tl.get_transition_active())
+
+        return states, last_green_times, transition_active
