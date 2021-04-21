@@ -307,15 +307,15 @@ class TrafficLightManager(_Base):
                 state_progression = [[(self.light_heads[head].transition, light_state) for head in yellow_to_red_states]
                                      for light_state in [_TL_HEAD.YELLOW, _TL_HEAD.RED]] + \
                                     [[(self.light_heads[head].transition, _TL_HEAD.GREEN) for head in desired_state]]
-                
+
                 # tell myself that I have changed
                 state_progression[-1] += [(self._update_state, desired_state)]
 
                 # update the timer
-                state_progression[-1] += [(self._update_timer, ()))]
-                
+                state_progression[-1] += [(self._update_timer, ())]
+
                 self._task_list.extend(state_progression)
-                
+
                 success = True
         light_heads_success = self._step()
         return success * light_heads_success
@@ -325,8 +325,8 @@ class TrafficLightManager(_Base):
         self._transition_active = False
         return True
 
-    def _update_timer(self, ):
-        self._last_light_string = _Timer.get_time()
+    def _update_timer(self, *args, **kwargs):
+        self._last_green_time = _Timer.get_time()
         # signifies a sucessful function completion
         return True
 
@@ -374,7 +374,7 @@ class TrafficLightManager(_Base):
 
     def get_transition_active(self, ):
         return 1. * self._transition_active
-    
+
 
 class GlobalActor:
 
