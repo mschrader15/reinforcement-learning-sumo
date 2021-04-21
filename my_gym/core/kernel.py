@@ -36,7 +36,7 @@ class Kernel(object):
         self.parent_fns = []
         self.sim_params = deepcopy(sim_params)
         self.sim_step_size = self.sim_params.sim_step
-        self.state_file = os.path.join(sim_params.sim_state_dir, "start_state_{sim_params.port}.xml")
+        self.state_file = os.path.join(sim_params.sim_state_dir, f"start_state_{sim_params.port}.xml")
         self.sim_time = 0
         self.traci_calls = []
         self.sim_data = {}

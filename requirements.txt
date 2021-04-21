@@ -4,3 +4,6 @@ pendulum
 numpy
 sumolib
 traci
+dm-tree
+opencv-python
+tabulate
