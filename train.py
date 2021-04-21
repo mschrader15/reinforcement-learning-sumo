@@ -21,7 +21,10 @@ def get_parameters(path_to_settings):
 
 
 def preprocessing(sim_params, *args, **kwargs):
-
+    """
+    Execute preprocessing tasks
+    
+    """
     execute_preprocessing_tasks([['tools.preprocessing.generate_input_files', (sim_params, )]])
 
 
@@ -29,13 +32,12 @@ def commandline_parser(args):
 
     parser = argparse.ArgumentParser(
         # formatter_class=argparse.RawDescriptionHelpFormatter,
-        # description="Parse argument used when running a Flow simulation.",
-        # epilog="python train.py EXP_CONFIG"
+        description="Parse argument used when running a Flow simulation.",
+        epilog="python train.py EXP_CONFIG"
     )
 
     parser.add_argument(
-        '--config_path', type=str, default='settings/4_16_2020.json',
-        help='path to the configuration file'
+        '--config_path', type=str, default='settings/4_16_2020.json', help='path to the configuration file'
     )
 
     return parser.parse_known_args(args)[0]
