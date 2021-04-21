@@ -12,10 +12,3 @@ def execute_preprocessing_tasks(fn_list: [[str, ()]]) -> None:
         for fn_next in fns[1:]:
             fn = getattr(fn, fn_next)
         fn(*args)
-
-#
-# class PreProcessor:
-#
-#     def __init__(self, module, function):
-#
-#         module = __import__(module)

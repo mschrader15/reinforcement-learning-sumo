@@ -7,3 +7,5 @@ traci
 dm-tree
 opencv-python
 tabulate
+lz4
+tensorboardX

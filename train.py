@@ -25,6 +25,9 @@ def preprocessing(sim_params, *args, **kwargs):
     Execute preprocessing tasks
     
     """
+    # add the root location to the path
+    sys.path.insert(0, sim_params.root)
+
     execute_preprocessing_tasks([['tools.preprocessing.generate_input_files', (sim_params, )]])
 
 
@@ -37,7 +40,7 @@ def commandline_parser(args):
     )
 
     parser.add_argument(
-        '--config_path', type=str, default='settings/4_16_2020.json', help='path to the configuration file'
+        '--config_path', type=str, default='./settings/4_16_2020.json', help='path to the configuration file'
     )
 
     return parser.parse_known_args(args)[0]
@@ -56,8 +59,7 @@ def main(cmd_line_args):
     # preprocessing
     # preprocessing(sim_params)
 
-    # run no RL
-    TRAINING_FUNCTIONS[env_params.algorithm.lower()]
+    TRAINING_FUNCTIONS[env_params.algorithm.lower()](sim_params, env_params)
 
 if __name__ == "__main__":
 

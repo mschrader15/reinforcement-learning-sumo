@@ -1,7 +1,7 @@
 import os
 import json
 import pendulum
-import distutils
+from distutils import util
 from helpers import utils
 
 
@@ -22,7 +22,11 @@ class EnvParams(object):
     def __init__(self, parameter_file):
 
         # import the parameters
-        params = load_json(parameter_file)['Environment']
+        params = load_json(parameter_file)
+
+        self.name = params['Name']
+
+        params = params['Environment']
 
         self.environment_location: str = safe_getter(params, 'environment_location')
 
@@ -39,6 +43,10 @@ class EnvParams(object):
         self.reward_class: str = safe_getter(params, 'reward_class') or 'FCIC'
 
         self.clip_actions: str = safe_getter(params, 'clip_actions') or True
+
+        self.num_rollouts: int = safe_getter(params, 'num_rollouts') or 50
+
+        self.cpu_num: int = safe_getter(params, 'cpu_num') or 1
 
     def __getitem__(self, item):
 
@@ -62,7 +70,9 @@ class SimParams(object):
         # make the directory
         utils.make_directory(self.sim_state_dir)
 
-        self.gui = bool(distutils.util.strtobool(str(params['gui'])))
+        self.root = root
+
+        self.gui = bool(util.strtobool(str(params['gui'])))
 
         self.port: int = 0
 
