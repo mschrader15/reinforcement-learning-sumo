@@ -108,6 +108,8 @@ class Lane(_Base):
         super(Lane, self).__init__(name=lane_list[0], children=[])
         # a "lane" can actually be composed of multiple lanes in the SUMO network
         self._lane_list = lane_list
+
+        print(self._lane_list)
         # the count of cars in each lane (list to emulate a pointer)
         self.count = 0
         # the ids of the cars in the lane during the last time step
@@ -280,10 +282,12 @@ class TLObservations(_Base):
         @param net_obj: net object
         @return: a list of Approaches
         """
-        return_list = []  # {}
+        return_list = []
+        edge_list = []
         for lane0, _, _ in net_obj.getConnections():
             edge = lane0.getEdge()
-            if edge.getToNode().getID() in self._tl_id:
+            if (edge not in edge_list) and (edge.getToNode().getID() in self._tl_id):
+                edge_list.append(edge)
                 return_list.append(Approach(approach_obj=edge, camera_position=self._center))
         return return_list
 

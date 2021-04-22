@@ -3,7 +3,7 @@ import sumolib
 import atexit
 
 import traci.exceptions
-from gym.spaces import Box, Tuple, Discrete
+from gym.spaces import Box, Tuple, Discrete, MultiDiscrete
 import numpy as np
 import traceback
 from copy import deepcopy
@@ -76,6 +76,8 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
 
     @property
     def observation_space(self):
+
+        # MultiDiscrete()
         traffic_light_states = Box(
             low=0,
             high=6383,  # this is per the enumeration format in the observer class
@@ -85,17 +87,17 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
 
         traffic_light_times = Box(
             low=0,
-            high=self.sim_params.sim_length,  # the value is actually the time delta since the start of the last green state but theoretical max is sim length 
+            high=self.sim_params.sim_length,
+            # the value is actually the time delta since the start of the last green state but theoretical max is sim length
             shape=self.action_space.shape,
             dtype=np.float32
         )
 
-
         # TODO: maybe change this to a discrete
         traffic_light_transition_active = Box(
             low=0,
-            high=1,  
-            shape=self.action_space.shape,  
+            high=1,
+            shape=self.action_space.shape,
             dtype=np.float32
         )
 
@@ -143,7 +145,7 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
         # get the current traffic light states, a tuple of lists is returned
         tl_states = self.actor.get_current_state()
 
-        return np.array([*tl_states, count_list], dtype=object)
+        return *tl_states, count_list  # dtype=object)
 
     def clip_actions(self, rl_actions=None):
         """Clip the actions passed from the RL agent.
@@ -186,7 +188,7 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
 
         # restart completely if we should restart
         if self.step_counter > 1e6:
-        # TODO put this back to the way that it was. Need a better way to load the simulation
+            # TODO put this back to the way that it was. Need a better way to load the simulation
             self._hard_reset()
 
         # # else reset the simulation
