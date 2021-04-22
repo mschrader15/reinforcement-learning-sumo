@@ -63,7 +63,7 @@ class SimParams(object):
         try:
             # one could pass the file root as an executable bit of python code
             root = exec(params['file_root'])
-        except Exception as e:
+        except Exception:
             root = params['file_root']
         
         self.sim_state_dir: str = os.path.join(root, 'reinforcement-learning-sumo', 'tmp', 'sim_state')

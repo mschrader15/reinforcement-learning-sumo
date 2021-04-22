@@ -4,7 +4,7 @@
     "algorithm": "no-rl",
     "warmup_time": 3600,
     "sims_per_step": 1,
-    "horizon": 1800,
+    "horizon": 500,
     "reward_class": "FCIC",
     "environment_location": "my_gym.environment",
     "environment_name": "TLEnv",
@@ -25,6 +25,7 @@
     "tl_file": "sumo-xml/traffic-lights/tls.rl.add.xml",
     "sim_step": 0.5,
     "start_time": "2020-02-24 06:00:00.000",
-    "gui": 0
+    "gui": 1,
+    "central_junction": "63082003"
   }
 }

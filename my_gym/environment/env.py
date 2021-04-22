@@ -67,23 +67,30 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
 
     @property
     def action_space(self):
-        return Box(
-            low=0,
-            high=self.actor.max_value,
-            shape=(self.actor.size,),
-            dtype=np.float32,
-        )
+        return MultiDiscrete([*self.actor.discrete_space_shape])
+        # return Box(
+        #     low=0,
+        #     high=self.actor.max_value,
+        #     shape=(self.actor.size,),
+        #     dtype=np.float32,
+        # )
 
     @property
     def observation_space(self):
 
-        # MultiDiscrete()
-        traffic_light_states = Box(
-            low=0,
-            high=6383,  # this is per the enumeration format in the observer class
-            shape=self.action_space.shape,
-            dtype=np.float32
-        )
+        traffic_light_shapes = self.actor.size['']
+
+        traffic_light_states = MultiDiscrete([*self.actor.discrete_space_shape])
+
+        traffic_light_colors = MultiDiscrete(self.actor.size['color'])
+
+        # # MultiDiscrete()
+        # traffic_light_states = Box(
+        #     low=0,
+        #     high=6383,  # this is per the enumeration format in the observer class
+        #     shape=self.action_space.shape,
+        #     dtype=np.float32
+        # )
 
         traffic_light_times = Box(
             low=0,
@@ -93,13 +100,13 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
             dtype=np.float32
         )
 
-        # TODO: maybe change this to a discrete
-        traffic_light_transition_active = Box(
-            low=0,
-            high=1,
-            shape=self.action_space.shape,
-            dtype=np.float32
-        )
+        # # TODO: maybe change this to a discrete
+        # traffic_light_transition_active = Box(
+        #     low=0,
+        #     high=1,
+        #     shape=self.action_space.shape,
+        #     dtype=np.float32
+        # )
 
         vehicle_num = Box(
             low=0,
@@ -109,7 +116,7 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
             dtype=np.float32,
         )
 
-        return Tuple((traffic_light_states, traffic_light_times, traffic_light_transition_active, vehicle_num))
+        return Tuple((traffic_light_states, traffic_light_times, traffic_light_colors, vehicle_num))
 
     def apply_rl_actions(self, rl_actions):
         """Specify the actions to be performed by the rl agent(s).
@@ -122,10 +129,11 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
         if rl_actions is None:
             return
 
-        rl_actions = self.clip_actions(rl_actions) if self.env_params.clip_actions else rl_actions
+        actions = self.clip_actions(rl_actions) if self.env_params.clip_actions else rl_actions
 
         # convert the actions to integers
-        actions = list(map(floor, rl_actions))
+        # actions = list(map(floor, rl_actions))
+        
 
         # update the lights
         self.actor.update_lights(action_list=actions, sim_time=self.k.sim_time)
@@ -160,15 +168,15 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
         array_like
             The rl_actions clipped according to the box or boxes
         """
-
+        return rl_actions
         # ignore if no actions are issued
-        if rl_actions is None:
-            return
+        # if rl_actions is None:
+        #     return
 
-        return np.clip(rl_actions,
-                       a_min=self.action_space.low,
-                       a_max=self.action_space.high
-                       )
+        # return np.clip(rl_actions,
+        #                a_min=self.action_space.low,
+        #                a_max=self.action_space.high
+        #                )
 
     def reset(self, ):
         """Resets the environment to an initial state and returns an initial

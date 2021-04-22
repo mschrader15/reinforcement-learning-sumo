@@ -28,6 +28,7 @@ class _TL_HEAD(enum.Enum):
     YELLOW = 1
     GREEN = 2
     YIELD = 3
+    INACTIVE = 4
 
 
 class _Timer:
@@ -236,7 +237,7 @@ class TrafficLightManager(_Base):
         self.tl_id = tl_id
         self.current_state = (2, 6)
         self.potential_movements = list(map(int, tl_details['phase_order']))
-        self.action_space = self._create_states()
+        self.action_space, self.action_space_index_dict = self._create_states()
         self.action_space_length = len(self.action_space)
         self.light_heads = self._compose_light_heads(tl_details)
         self._task_list = []
@@ -252,8 +253,47 @@ class TrafficLightManager(_Base):
         for _, light_head in self.light_heads.items():
             light_head._re_initialize()
 
+    def _set_initial_states(self, light_string: str):
+        """
+        This function sets the initial states to what they are in the simulation when the reinforcement learning algorithm takes over. 
+        It is called when traci is passed to this class
+
+        Args:
+            light_string (str): the string returned from traci.trafficlight.getRedYellowGreenState()
+        """
+        start_index = 0
+        actual_state = []
+        for light_head in self.light_heads:
+            end_index = start_index + len(light_head.light_strings[_TL_HEAD.RED])
+            substring = light_string[start_index:end_index]
+            if 'G' in substring:
+                light_head.transition(_TL_HEAD.GREEN)
+                actual_state.append(light_head.phase_name)
+            elif 'y' in substring:
+                light_head.transition(_TL_HEAD.YELLOW)
+            elif 'g' in substring:
+                light_head.transition(_TL_HEAD.YIELD)
+            else:
+                light_head.transition(_TL_HEAD.RED)
+            # move the start_index along
+            start_index = end_index
+        if actual_state in self.action_space:
+            self.current_state = actual_state
+        else:
+            print('uh oh. Alert Max')
+
+
     def set_traci(self, traci_c):
+        """
+        This function is called by the parent class to pass Traci. Called on Environment resets
+
+        It passes traci to the class, and also sets the light heads to the state that they are in the simulation
+
+        Args:
+            traci_c ([type]): A traci connection object
+        """
         self.traci_c = traci_c
+        self._set_initial_states(self.traci_c.trafficlight.getRedYellowGreenState(self.tl_id))
 
     def _int_to_action(self, action: int) -> list:
         return self.action_space[action]
@@ -274,7 +314,7 @@ class TrafficLightManager(_Base):
                     possible_states.append([j, i])
                 elif len(secondary) < 2:
                     possible_states.append([j])
-        return possible_states
+        return possible_states, {state: i for i, state in enumerate(possible_states)}
 
     def _compose_light_heads(self, tl_details):
         linked_phases = []
@@ -362,18 +402,22 @@ class TrafficLightManager(_Base):
 
         @return: int <= 6383
         """
-        states = []
-        for phase in self.current_state:
-            states.append(phase * 10 + self.light_heads[phase].state.value)
-        if len(states) > 1:
-            return states[0] * 100 + states[1]
-        return states[0]
+        # states = []
+        # for phase in self.current_state:
+        #     states.append(phase * 10 + self.light_heads[phase].state.value)
+        # if len(states) > 1:
+        #     return states[0] * 100 + states[1]
+        # return states[0]
+        return self.action_space_index_dict[self.current_state]
 
     def get_last_green_time(self, ):
         return _Timer.time - self._last_green_time
 
-    def get_transition_active(self, ):
-        return 1. * self._transition_active
+    def get_light_head_colors(self, ):
+        colors = [self.light_heads[phase].state.value for phase in self.current_state]
+        if len(colors) < 2:
+            colors.append(_TL_HEAD.INACTIVE.value)
+        return colors
 
 
 class GlobalActor:
@@ -381,7 +425,7 @@ class GlobalActor:
     def __init__(self, tl_settings_file, ):
         self.tls = self.create_tl_managers(read_settings(tl_settings_file))
 
-    def __iter__(self):
+    def __iter__(self) -> TrafficLightManager:
         for item in self.tls:
             yield item
 
@@ -414,11 +458,13 @@ class GlobalActor:
 
     @property
     def size(self, ) -> int:
-        return len(self.tls)
+        return {'state': [tl_manager.action_space_length - 1 for tl_manager in self], 
+                'color': [_TL_HEAD.INACTIVE.value for _ in range(len(self.tls) * 2)], 
+                'last_time': len(self.tls)}
 
     @property
-    def max_value(self) -> int:
-        return max([tl_manager.action_space_length - 1 for tl_manager in self])
+    def discrete_space_shape(self) -> int:
+        return [tl_manager.action_space_length - 1 for tl_manager in self]
 
     @staticmethod
     def create_tl_managers(settings: dict) -> [TrafficLightManager, ]:
@@ -426,11 +472,10 @@ class GlobalActor:
 
     def update_lights(self, action_list: list, sim_time: float) -> None:
         _Timer.time = sim_time
-
         for action, tl_manager in zip(action_list, self):
-            if action < tl_manager.action_space_length:
-                tl_manager.update_state(action)
-                tl_manager.update_sumo()
+            # if action < tl_manager.action_space_length:
+            tl_manager.update_state(action)
+            tl_manager.update_sumo()
         # return {tl_id: self.tls[tl_id].update_state(action) for tl_id, action in action_dict.items()}
 
     def get_current_state(self, ) -> [int, ]:
@@ -441,11 +486,11 @@ class GlobalActor:
         """
         states = []
         last_green_times = []
-        transition_active = []
+        light_head_colors = []
 
         for tl in self:
             states.append(tl.get_current_state())
             last_green_times.append(tl.get_last_green_time())
-            transition_active.append(tl.get_transition_active())
+            light_head_colors.append(tl.get_light_head_colors())
 
-        return states, last_green_times, transition_active
+        return states, last_green_times, light_head_colors
