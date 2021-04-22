@@ -1,32 +1,29 @@
 import os
-import json
 import pendulum
 from distutils import util
-from helpers import utils
+from ..helpers import utils
+from copy import deepcopy
 
 
-def load_json(file):
-    with open(file, 'rb') as f:
-        return json.load(f)
-
-
-def safe_getter(_dict, param):
+def safe_getter(_dict: dict, param: str):
     try:
-        return _dict[param]
+        popped = _dict.pop(param)
+        return popped
     except KeyError:
         return None
 
 
 class EnvParams(object):
 
-    def __init__(self, parameter_file):
+    def __init__(self, settings_dict: dict):
 
         # import the parameters
-        params = load_json(parameter_file)
+        self.json_input = settings_dict     
 
-        self.name = params['Name']
+        self.name = self.json_input['Name']
 
-        params = params['Environment']
+        # seperate the dictionary that is being deconstructed from the real input 
+        params = deepcopy(self.json_input['Environment'])
 
         self.environment_location: str = safe_getter(params, 'environment_location')
 
@@ -48,23 +45,27 @@ class EnvParams(object):
 
         self.cpu_num: int = safe_getter(params, 'cpu_num') or 1
 
-    def __getitem__(self, item):
+        # pass the remaining items in the json input as parameters too
+        for key, value in params.items():
+            self.__dict__[key] = value
 
-        return self.__dict__[item]
+    def __getitem__(self, item):
+        return getattr(self, item, None)
 
 
 class SimParams(object):
 
-    def __init__(self, env_params: EnvParams, parameter_file: str):
+    def __init__(self, env_params: EnvParams, settings_dict: dict):
 
         # import the parameters
-        params = load_json(parameter_file)['Simulation']
+        params = deepcopy(settings_dict['Simulation'])
 
         try:
+            # one could pass the file root as an executable bit of python code
             root = exec(params['file_root'])
         except Exception as e:
             root = params['file_root']
-
+        
         self.sim_state_dir: str = os.path.join(root, 'reinforcement-learning-sumo', 'tmp', 'sim_state')
 
         # make the directory
@@ -72,38 +73,35 @@ class SimParams(object):
 
         self.root = root
 
-        self.gui = bool(util.strtobool(str(params['gui'])))
+        self.gui = bool(util.strtobool(str(safe_getter(params, 'gui'))))
 
         self.port: int = 0
 
-        self.net_file: str = os.path.join(root, params['net_file'])
+        self.net_file: str = os.path.join(root, safe_getter(params, 'net_file'))
 
-        self.route_file: str = os.path.join(root, params['route_file'])
+        self.route_file: str = os.path.join(root, safe_getter(params, 'route_file'))
 
-        self.additional_files: [str] = [os.path.join(root, file) for file in params['additional_files']]
+        self.additional_files: [str] = [os.path.join(root, file) for file in safe_getter(params, 'additional_files')]
 
-        self.tl_ids: [str] = params['tl_ids']
+        self.tl_ids: [str] = safe_getter(params, 'tl_ids')
 
-        self.tl_settings_file: str = os.path.join(root, params['tl_settings'])
+        self.tl_settings_file: str = os.path.join(root, safe_getter(params, 'tl_settings'))
 
-        self.tl_file: str = os.path.join(root, params['tl_file'])
+        self.tl_file: str = os.path.join(root, safe_getter(params, 'tl_file'))
 
-        self.sim_step: float = params['sim_step']
+        self.sim_step: float = safe_getter(params, 'sim_step')
 
         self.warmup_time: float = env_params.warm_up_time
 
         # sum the warmup time, sims per step * horizon and an extra 1000
         self.sim_length: int = env_params.warm_up_time + (env_params.sims_per_step * env_params.horizon) + 1000
 
-        self.start_time: pendulum.DateTime = pendulum.parse(params['start_time'])
+        # self.time_to_teleport = -1  # this is the sumo setting for no teleport
 
-        self.end_time: pendulum.DateTime = self.start_time.add(seconds=self.sim_length)
-
-        self.time_to_teleport = -1  # this is the sumo setting for no teleport
-
-        self.central_junction = safe_getter(params, 'central_junction') or '63082003'
+        # self.central_junction = safe_getter(params, 'central_junction') or '63082003'
+        # add in the rest of the stuff in the configuration file
+        for key, value in params.items():
+            self.__dict__[key] = value
 
     def __getitem__(self, item):
-
-        return self.__dict__[item]
-
+        return getattr(self, item, None)

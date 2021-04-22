@@ -26,10 +26,24 @@ except ImportError:
     from ray.rllib.agents.registry import get_agent_class
 from ray.tune.registry import register_env
 
-from my_gym.helpers import make_create_env
-from my_gym.helpers import get_rllib_config
-from my_gym.helpers import get_rllib_pkl
-from my_gym.helpers import xml2csv
+try:
+    from .helpers import make_create_env
+    from .helpers import get_rllib_config
+    from .helpers import get_rllib_pkl
+    from .helpers import xml2csv
+    from .helpers import get_parameters
+except (ImportError, ModuleNotFoundError):
+    import sys
+    # print(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    # this is pretty hacky
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
+    from my_gym.helpers import make_create_env
+    from my_gym.helpers import get_rllib_config
+    from my_gym.helpers import get_rllib_pkl
+    from my_gym.helpers import xml2csv
+    from my_gym.helpers import get_parameters
+
 
 EXAMPLE_USAGE = """
 example usage:
@@ -51,7 +65,7 @@ def visualizer_rllib(args):
     result_dir = args.result_dir if args.result_dir[-1] != '/' \
         else args.result_dir[:-1]
 
-    config = get_rllib_config(result_dir)
+    config = get_rllib_pkl(result_dir)
 
     # check if we have a multiagent environment but in a
     # backwards compatible way
@@ -62,68 +76,74 @@ def visualizer_rllib(args):
     else:
         multiagent = False
 
-    # Run on only one cpu for rendering purposes
-    config['num_workers'] = 0
+    # flow_params = get_agent_class(config)
 
-    flow_params = get_flow_params(config)
+    # this is the input file that was passed to train
+    # master_input = config['env_config']['settings_input']
+
+    try:
+
+        env_params, sim_params = get_parameters(config['env_config']['settings_input'])
+    except KeyError:
+        env_params, sim_params = get_parameters(input("Config file cannot be found. Enter the path: "))
 
     # hack for old pkl files
     # TODO(ev) remove eventually
-    sim_params = flow_params['sim']
-    setattr(sim_params, 'num_clients', 1)
+    # sim_params = flow_params['sim']
+    # setattr(sim_params, 'num_clients', 1)
 
     # for hacks for old pkl files TODO: remove eventually
-    if not hasattr(sim_params, 'use_ballistic'):
-        sim_params.use_ballistic = False
+    # if not hasattr(sim_params, 'use_ballistic'):
+    #     sim_params.use_ballistic = False
 
     # Determine agent and checkpoint
-    config_run = config['env_config']['run'] if 'run' in config['env_config'] \
-        else None
-    if args.run and config_run:
-        if args.run != config_run:
-            print('visualizer_rllib.py: error: run argument '
-                  + '\'{}\' passed in '.format(args.run)
-                  + 'differs from the one stored in params.json '
-                  + '\'{}\''.format(config_run))
-            sys.exit(1)
-    if args.run:
-        agent_cls = get_agent_class(args.run)
-    elif config_run:
-        agent_cls = get_agent_class(config_run)
-    else:
-        print('visualizer_rllib.py: error: could not find flow parameter '
-              '\'run\' in params.json, '
-              'add argument --run to provide the algorithm or model used '
-              'to train the results\n e.g. '
-              'python ./visualizer_rllib.py /tmp/ray/result_dir 1 --run PPO')
-        sys.exit(1)
+    # config_run = config['env_config']['run'] if 'run' in config['env_config'] else None
+    # if args.run and config_run:
+    #     if args.run != config_run:
+    #         print('visualizer_rllib.py: error: run argument '
+    #               + '\'{}\' passed in '.format(args.run)
+    #               + 'differs from the one stored in params.json '
+    #               + '\'{}\''.format(config_run))
+    #         sys.exit(1)
+    # if args.run:
+    #     agent_cls = get_agent_class(args.run)
+    # elif config_run:
+    #     agent_cls = get_agent_class(config_run)
+    # else:
+    #     print('visualizer_rllib.py: error: could not find flow parameter '
+    #           '\'run\' in params.json, '
+    #           'add argument --run to provide the algorithm or model used '
+    #           'to train the results\n e.g. '
+    #           'python ./visualizer_rllib.py /tmp/ray/result_dir 1 --run PPO')
+    #     sys.exit(1)
+    agent_cls = get_agent_class(env_params.algorithm)
 
-    sim_params.restart_instance = True
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    emission_path = '{0}/test_time_rollout/'.format(dir_path)
-    sim_params.emission_path = emission_path if args.gen_emission else None
-
-    # pick your rendering mode
-    if args.render_mode == 'sumo_web3d':
-        sim_params.num_clients = 2
-        sim_params.render = False
-    elif args.render_mode == 'drgb':
-        sim_params.render = 'drgb'
-        sim_params.pxpm = 4
-    elif args.render_mode == 'sumo_gui':
-        sim_params.render = False  # will be set to True below
-    elif args.render_mode == 'no_render':
-        sim_params.render = False
-    if args.save_render:
-        if args.render_mode != 'sumo_gui':
-            sim_params.render = 'drgb'
-            sim_params.pxpm = 4
-        sim_params.save_render = True
+    # sim_params.restart_instance = True
+    # dir_path = os.path.dirname(os.path.realpath(__file__))
+    setattr(sim_params, 'emissions_path', args.emissions_output) 
+    # # pick your rendering mode
+    # if args.render_mode == 'sumo_web3d':
+    #     sim_params.num_clients = 2
+    #     sim_params.render = False
+    # elif args.render_mode == 'drgb':
+    #     sim_params.render = 'drgb'
+    #     sim_params.pxpm = 4
+    # elif args.render_mode == 'sumo_gui':
+    #     sim_params.render = False  # will be set to True below
+    # elif args.render_mode == 'no_render':
+    #     sim_params.render = False
+    # if args.save_render:
+    #     if args.render_mode != 'sumo_gui':
+    #         sim_params.render = 'drgb'
+    #         sim_params.pxpm = 4
+    #     sim_params.save_render = True
 
     # Create and register a gym+rllib env
-    create_env, env_name = make_create_env(params=flow_params, version=0)
-    register_env(env_name, create_env)
+    # set the gui to true
+    sim_params.gui = True
 
+    gym_name, create_env = make_create_env(env_params=env_params, sim_params=sim_params)
+    register_env(gym_name, create_env)
     # check if the environment is a single or multiagent environment, and
     # get the right address accordingly
     # single_agent_envs = [env for env in dir(flow.envs)
@@ -136,18 +156,17 @@ def visualizer_rllib(args):
 
     # Start the environment with the gui turned on and a path for the
     # emission file
-    env_params = flow_params['env']
-    env_params.restart_instance = False
-    if args.evaluate:
-        env_params.evaluate = True
 
     # lower the horizon if testing
     if args.horizon:
         config['horizon'] = args.horizon
         env_params.horizon = args.horizon
 
+    # just use 1 cpu for replay
+    config['num_workers'] = 1 if env_params.algorithm.lower() in 'es' else 0 
+
     # create the agent that will be used to compute the actions
-    agent = agent_cls(env=env_name, config=config)
+    agent = agent_cls(env=gym_name, config=config)
     checkpoint = result_dir + '/checkpoint_' + args.checkpoint_num
     checkpoint = checkpoint + '/checkpoint-' + args.checkpoint_num
     agent.restore(checkpoint)
@@ -156,10 +175,10 @@ def visualizer_rllib(args):
             os.environ.get("TEST_FLAG") != 'True':
         env = agent.local_evaluator.env
     else:
-        env = gym.make(env_name)
+        env = gym.make(gym_name)
 
     # if args.render_mode == 'sumo_gui':
-    env.sim_params.render = True  # set to True after initializing agent and env
+    # env.sim_params.render = True  # set to True after initializing agent and env
 
     if multiagent:
         rets = {}
@@ -303,24 +322,24 @@ def visualizer_rllib(args):
     env.unwrapped.terminate()
 
     # if prompted, convert the emission file into a csv file
-    if args.gen_emission:
-        time.sleep(0.1)
+    if args.emissions_output:
 
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        emission_filename = '{0}-emission.xml'.format(env.network.name)
+        # let sumo finish building the output file
+        time.sleep(0.5)
 
-        emission_path = \
-            '{0}/test_time_rollout/{1}'.format(dir_path, emission_filename)
+        # dir_path = os.path.dirname(os.path.realpath(__file__))
+        # emission_filename = '{0}-emission.xml'.format(env.network.name)
+
+        # emission_path = \
+        #     '{0}/test_time_rollout/{1}'.format(dir_path, emission_filename)
 
         # convert the emission file into a csv file
-        emission_to_csv(emission_path)
+        emission_path_csv = args.emissions_output[:-4] + ".csv"
+        xml2csv(args.emmissions_output, 'emissions', emission_path_csv)
+        os.remove(args.emissions_output)
 
         # print the location of the emission csv file
-        emission_path_csv = emission_path[:-4] + ".csv"
-        print("\nGenerated emission file at " + emission_path_csv)
-
-        # delete the .xml version of the emission file
-        os.remove(emission_path)
+        print("\nGenerated emission file at " + emission_path_csv)        
 
 
 def create_parser():
@@ -332,8 +351,8 @@ def create_parser():
         epilog=EXAMPLE_USAGE)
 
     # required input parameters
-    parser.add_argument(
-        'result_dir', type=str, help='Directory containing results')
+    parser.add_argument('result_dir', type=str, help='Directory containing results')
+
     parser.add_argument('checkpoint_num', type=str, help='Checkpoint number.')
 
     # optional input parameters
@@ -351,8 +370,9 @@ def create_parser():
         default=1,
         help='The number of rollouts to visualize.')
     parser.add_argument(
-        '--gen_emission',
-        action='store_true',
+        '--emissions_output',
+        type=str,
+        default=None,  # this is obvi inconsistant with the type but :shrug:
         help='Specifies whether to generate an emission file from the '
              'simulation')
     parser.add_argument(

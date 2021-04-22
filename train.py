@@ -2,22 +2,10 @@ import importlib
 import argparse
 import sys
 from copy import deepcopy
-from my_gym.parameters import EnvParams
-from my_gym.parameters import SimParams
 from my_gym.helpers import make_create_env
 from my_gym.helpers import execute_preprocessing_tasks
-from my_gym.trainers import TRAINING_FUNCTIONS
-
-
-def get_parameters(path_to_settings):
-
-    """Get the environment parameters"""
-    env_params = EnvParams(parameter_file=path_to_settings)
-
-    """Get the simulation parameters"""
-    sim_params = SimParams(env_params=env_params, parameter_file=path_to_settings)
-
-    return env_params, sim_params
+from my_gym.helpers import get_parameters
+from trainers import TRAINING_FUNCTIONS
 
 
 def preprocessing(sim_params, *args, **kwargs):

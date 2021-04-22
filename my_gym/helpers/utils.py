@@ -29,9 +29,7 @@ def get_rllib_config(path):
     if not os.path.exists(config_path):
         config_path = os.path.join(path, "../params.json")
     if not os.path.exists(config_path):
-        raise ValueError(
-            "Could not find params.json in either the checkpoint dir or "
-            "its parent directory.")
+        raise ValueError(f"Could not find params.json in either the checkpoint dir or its parent directory. {path}")
     with open(config_path) as f:
         config = json.load(f)
     return config

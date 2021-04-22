@@ -11,13 +11,18 @@ import subprocess
 
 
 def sumo_cmd_line(params):
+
     cmd = ['-n', params.net_file, '-e', str(params.sim_length), '--step-length', str(params.sim_step),
            '-a', ", ".join(params.additional_files + [params.route_file]), '--remote-port', str(params.port),
            '--seed', str(randint(0, 10000),),
-           "--time-to-teleport", str(int(params.time_to_teleport))
+           "--time-to-teleport", "-1",
+           "--collision.action", "remove",
            ]
     if params.gui:
         cmd.extend(['--start'])
+
+    if params['emissions']:
+        cmd.extend(['--emission-output', params['emissions']])
     return cmd
 
 
@@ -50,6 +55,7 @@ class Kernel(object):
         self.traci_c = traci_c
 
     def start_simulation(self, ):
+        # pylint: disable=maybe-no-member
 
         # find SUMO
         sumo_binary = checkBinary('sumo-gui') if self.sim_params.gui else checkBinary('sumo')
@@ -68,10 +74,8 @@ class Kernel(object):
 
         # connect to traci
         traci_c = traci.connect(port=self.sim_params.port, numRetries=100)
-
         # TODO: is this needed?? It throws an error
-        # traci_c.setOrder(0)
-
+        traci_c.setOrder(0)
         traci_c.simulationStep()
 
         # set the traffic lights to the default behaviour and run for warm up period

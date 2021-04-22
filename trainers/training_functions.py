@@ -1,6 +1,6 @@
 import os
 from copy import deepcopy
-from helpers import make_create_env
+from my_gym.helpers import make_create_env
 
 
 def run_no_rl(sim_params, env_params):
@@ -59,6 +59,10 @@ def run_rllib_es(sim_params, env_params):
     config["model"]["fcnet_hiddens"] = [100, 50, 25]
     config['clip_actions'] = False  # FIXME(ev) temporary ray bug
     config["observation_filter"] = "NoFilter"
+
+    # add the environment parameters to the config settings so that they will be saved
+    # Helps simplify replay
+    config['env_config']['settings_input'] = env_params.json_input
 
     # register the environment
     register_env(gym_name, create_env)
