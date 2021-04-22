@@ -1,3 +1,6 @@
+# project specific ignores
+tmp/
+
 # pycharm specific
 .idea/
 

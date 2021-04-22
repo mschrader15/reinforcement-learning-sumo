@@ -145,7 +145,7 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
         # get the current traffic light states, a tuple of lists is returned
         tl_states = self.actor.get_current_state()
 
-        return *tl_states, count_list  # dtype=object)
+        return (*tl_states, count_list)  # dtype=object)
 
     def clip_actions(self, rl_actions=None):
         """Clip the actions passed from the RL agent.

@@ -109,7 +109,6 @@ class Lane(_Base):
         # a "lane" can actually be composed of multiple lanes in the SUMO network
         self._lane_list = lane_list
 
-        print(self._lane_list)
         # the count of cars in each lane (list to emulate a pointer)
         self.count = 0
         # the ids of the cars in the lane during the last time step
