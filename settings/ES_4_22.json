@@ -1,0 +1,30 @@
+{
+  "Name": "ES-short",
+  "Environment": {
+    "algorithm": "ES",
+    "warmup_time": 3600,
+    "sims_per_step": 1,
+    "horizon": 300,
+    "reward_class": "FCIC",
+    "environment_location": "my_gym.environment",
+    "environment_name": "TLEnv",
+    "num_rollouts": 60,
+    "cpu_num": 60
+  },
+  "Simulation": {
+    "file_root": "/home/max/remote/airport-harper-sumo",
+    "net_file": "sumo-xml/simplified_reworked.net.xml",
+    "route_file": "sumo-xml/route-sampler/rl_route_sampler.route.xml",
+    "additional_files": [
+      "sumo-xml/traffic-lights/constant_green.add.xml",
+      "sumo-xml/traffic-lights/tls.rl.add.xml",
+      "sumo-xml/veh-descript/vTypeDistributions.add.xml"
+    ],
+    "tl_ids": ["63082002", "63082003", "63082004"],
+    "tl_settings": "sumo-xml/settings.json",
+    "tl_file": "sumo-xml/traffic-lights/tls.rl.add.xml",
+    "sim_step": 0.5,
+    "start_time": "2020-02-24 06:00:00.000",
+    "gui": 0
+  }
+}

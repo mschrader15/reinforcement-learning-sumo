@@ -58,7 +58,7 @@ class FCIC(Rewarder):
         relevant_data = subscription_dict[self.junction_id]
         delay = self._get_delay(relevant_data)
         k_s = self._get_sorted_stopped(relevant_data)
-        return -1 * (delay + k_s)
+        return -1 * (delay + k_s / 3600)
 
     def get_stops(self):
         pass

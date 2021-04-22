@@ -4,8 +4,8 @@ import sys
 from copy import deepcopy
 from my_gym.parameters import EnvParams
 from my_gym.parameters import SimParams
-from helpers import make_create_env
-from helpers import execute_preprocessing_tasks
+from my_gym.helpers import make_create_env
+from my_gym.helpers import execute_preprocessing_tasks
 from my_gym.trainers import TRAINING_FUNCTIONS
 
 
