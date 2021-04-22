@@ -212,10 +212,10 @@ def visualizer_rllib(args):
         env.restart_simulation(sim_params=sim_params, render=sim_params.render)
 
     # Simulate and collect metrics
-    final_outflows = []
-    final_inflows = []
-    mean_speed = []
-    std_speed = []
+    # final_outflows = []
+    # final_inflows = []
+    # mean_speed = []
+    # std_speed = []
     for i in range(args.num_rollouts):
         # vel = []
         state = env.reset()

@@ -213,7 +213,7 @@ class LightHead(Observable, _Base):
         :return:
         """
         main_name = self._paired_priority['main']
-        main_color, main_time = _value_error_handler(self._paired_phase_actions[main_name], (_TL_HEAD.GREEN, 1e6))
+        main_color, _ = _value_error_handler(self._paired_phase_actions[main_name], (_TL_HEAD.GREEN, 1e6))
         # if len(self._paired_priority) < 2:
         if (main_color == _TL_HEAD.GREEN) and (self.state not in [_TL_HEAD.YIELD, _TL_HEAD.GREEN]):
             self.state = _TL_HEAD.YIELD
@@ -226,7 +226,7 @@ class LightHead(Observable, _Base):
         #     pass
         if len(self._paired_priority) > 1:
             secondary_name = self._paired_priority['secondary']
-            secondary_color, secondary_name = _value_error_handler(self._paired_phase_actions[secondary_name], (_TL_HEAD.GREEN, 1e6))
+            secondary_color, _ = _value_error_handler(self._paired_phase_actions[secondary_name], (_TL_HEAD.GREEN, 1e6))
             if (secondary_color == _TL_HEAD.GREEN) and (main_color == _TL_HEAD.GREEN):
                 self.state = _TL_HEAD.YIELD
 
@@ -235,7 +235,7 @@ class TrafficLightManager(_Base):
 
     def __init__(self, tl_id, tl_details):
         self.tl_id = tl_id
-        self.current_state = (2, 6)
+        self.current_state: list = [2, 6]
         self.potential_movements = list(map(int, tl_details['phase_order']))
         self.action_space, self.action_space_index_dict = self._create_states()
         self.action_space_length = len(self.action_space)

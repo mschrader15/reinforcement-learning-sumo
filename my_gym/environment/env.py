@@ -78,7 +78,7 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
     @property
     def observation_space(self):
 
-        traffic_light_shapes = self.actor.size['']
+        # traffic_light_shapes = self.actor.size['']
 
         traffic_light_states = MultiDiscrete([*self.actor.discrete_space_shape])
 
