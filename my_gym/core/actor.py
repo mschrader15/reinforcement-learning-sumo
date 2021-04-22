@@ -314,7 +314,7 @@ class TrafficLightManager(_Base):
                     possible_states.append([j, i])
                 elif len(secondary) < 2:
                     possible_states.append([j])
-        return possible_states, {state: i for i, state in enumerate(possible_states)}
+        return possible_states, {tuple(state): i for i, state in enumerate(possible_states)}
 
     def _compose_light_heads(self, tl_details):
         linked_phases = []
@@ -408,7 +408,7 @@ class TrafficLightManager(_Base):
         # if len(states) > 1:
         #     return states[0] * 100 + states[1]
         # return states[0]
-        return self.action_space_index_dict[self.current_state]
+        return self.action_space_index_dict[tuple(self.current_state)]
 
     def get_last_green_time(self, ):
         return _Timer.time - self._last_green_time
