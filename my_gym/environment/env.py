@@ -199,6 +199,8 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
             except traci.exceptions.FatalTraCIError:
                 self.reset()
 
+        return self.get_state()
+
     def _hard_reset(self):
         """
         This function is called when SUMO needs to be tore down and rebuilt
