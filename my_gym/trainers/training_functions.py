@@ -49,7 +49,7 @@ def run_rllib_es(sim_params, env_params):
     agent_cls = get_agent_class(alg_run)
     config = deepcopy(agent_cls._default_config)
 
-    config["num_workers"] = min(env_params.cpu_num, env_params.num_rollouts)
+    config["num_workers"] = 1 #min(env_params.cpu_num, env_params.num_rollouts)
     config["episodes_per_batch"] = env_params.num_rollouts
     config["eval_prob"] = 0.05
     # optimal parameters
