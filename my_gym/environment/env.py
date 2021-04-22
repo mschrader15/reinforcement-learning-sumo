@@ -116,7 +116,7 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
             dtype=np.float32,
         )
 
-        return Tuple((traffic_light_states, traffic_light_times, traffic_light_colors, vehicle_num))
+        return Tuple((traffic_light_states,  traffic_light_times, traffic_light_colors, vehicle_num))
 
     def apply_rl_actions(self, rl_actions):
         """Specify the actions to be performed by the rl agent(s).
@@ -153,7 +153,7 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
         # get the current traffic light states, a tuple of lists is returned
         tl_states = self.actor.get_current_state()
 
-        return (*tl_states, count_list)  # dtype=object)
+        return (*tl_states, count_list)
 
     def clip_actions(self, rl_actions=None):
         """Clip the actions passed from the RL agent.

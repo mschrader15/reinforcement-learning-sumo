@@ -1,7 +1,6 @@
 import os
 import pendulum
 from distutils import util
-from ..helpers import utils
 from copy import deepcopy
 
 
@@ -11,6 +10,11 @@ def safe_getter(_dict: dict, param: str):
         return popped
     except KeyError:
         return None
+
+
+def make_directory(path):
+
+    os.makedirs(path, exist_ok=True)
 
 
 class EnvParams(object):
@@ -69,7 +73,7 @@ class SimParams(object):
         self.sim_state_dir: str = os.path.join(root, 'reinforcement-learning-sumo', 'tmp', 'sim_state')
 
         # make the directory
-        utils.make_directory(self.sim_state_dir)
+        make_directory(self.sim_state_dir)
 
         self.root = root
 

@@ -1,15 +1,27 @@
+import os
 import json
-from my_gym.parameters import SimParams
-from my_gym.parameters import EnvParams
+try:
+
+    from my_gym.parameters import SimParams
+    from my_gym.parameters import EnvParams
+
+except ImportError:
+    import sys
+        # this is pretty hacky
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
+    # print(sys.path)
+    from my_gym.parameters import SimParams
+    from my_gym.parameters import EnvParams
 
 
 def get_parameters(input_object: str or dict) -> (EnvParams, SimParams):
-    
+
     if isinstance(input_object, dict):
         settings_dict = input_object
     else:
         with open(input_object, 'rb') as f:
-             settings_dict = json.load(f)
+            settings_dict = json.load(f)
 
     """Get the environment parameters"""
     env_params = EnvParams(settings_dict=settings_dict)

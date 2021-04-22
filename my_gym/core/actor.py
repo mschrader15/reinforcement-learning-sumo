@@ -263,12 +263,13 @@ class TrafficLightManager(_Base):
         """
         start_index = 0
         actual_state = []
-        for light_head in self.light_heads:
+        for phase in self.potential_movements:
+            light_head = self.light_heads[phase]
             end_index = start_index + len(light_head.light_strings[_TL_HEAD.RED])
             substring = light_string[start_index:end_index]
             if 'G' in substring:
                 light_head.transition(_TL_HEAD.GREEN)
-                actual_state.append(light_head.phase_name)
+                actual_state.append(int(light_head.phase_name))
             elif 'y' in substring:
                 light_head.transition(_TL_HEAD.YELLOW)
             elif 'g' in substring:
@@ -458,13 +459,13 @@ class GlobalActor:
 
     @property
     def size(self, ) -> int:
-        return {'state': [tl_manager.action_space_length - 1 for tl_manager in self], 
-                'color': [_TL_HEAD.INACTIVE.value for _ in range(len(self.tls) * 2)], 
+        return {'state': [tl_manager.action_space_length for tl_manager in self], 
+                'color': [_TL_HEAD.INACTIVE.value + 1 for _ in range(len(self.tls) * 2)], 
                 'last_time': len(self.tls)}
 
     @property
     def discrete_space_shape(self) -> int:
-        return [tl_manager.action_space_length - 1 for tl_manager in self]
+        return [tl_manager.action_space_length for tl_manager in self]
 
     @staticmethod
     def create_tl_managers(settings: dict) -> [TrafficLightManager, ]:
@@ -491,6 +492,6 @@ class GlobalActor:
         for tl in self:
             states.append(tl.get_current_state())
             last_green_times.append(tl.get_last_green_time())
-            light_head_colors.append(tl.get_light_head_colors())
+            light_head_colors.extend(tl.get_light_head_colors())
 
         return states, last_green_times, light_head_colors

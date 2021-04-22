@@ -42,6 +42,9 @@ def run_rllib_es(sim_params, env_params):
     # start ray
     ray.init()
 
+    # force no gui, crashes computer if so many instances spawn
+    sim_params.gui = False
+
     # initialize the gym
     gym_name, create_env = make_create_env(env_params, sim_params)
 
