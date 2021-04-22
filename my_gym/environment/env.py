@@ -198,8 +198,8 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
                 self._reset_action_obs_rewarder()
             except traci.exceptions.FatalTraCIError:
                 self.reset()
-
-        return self.get_state()
+        subscription_data = self.k.simulation_step()
+        return self.get_state(subscription_data)
 
     def _hard_reset(self):
         """
@@ -224,7 +224,8 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
         self.k.add_traci_call(self.rewarder.register_traci(traci_c))
 
     def step(self, action):
-        """Run one timestep of the environment's dynamics. When end of
+        """
+        Run one timestep of the environment's dynamics. When end of
         episode is reached, you are responsible for calling `reset()`
         to reset this environment's state.
         Accepts an action and returns a tuple (observation, reward, done, info).
