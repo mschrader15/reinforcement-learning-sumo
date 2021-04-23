@@ -18,7 +18,7 @@ class BinaryDistribution(Distribution):
 
 
 setup(
-    name='flow',
+    name='my_gym',
     version="1.0.0",
     distclass=BinaryDistribution,
     # cmdclass={"build_ext": build_ext},

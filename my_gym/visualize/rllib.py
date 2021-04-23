@@ -26,23 +26,12 @@ except ImportError:
     from ray.rllib.agents.registry import get_agent_class
 from ray.tune.registry import register_env
 
-try:
-    from .helpers import make_create_env
-    from .helpers import get_rllib_config
-    from .helpers import get_rllib_pkl
-    from .helpers import xml2csv
-    from .helpers import get_parameters
-except (ImportError, ModuleNotFoundError):
-    import sys
-    # print(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-    # this is pretty hacky
-    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+from my_gym.helpers import make_create_env
+from my_gym.helpers import get_rllib_config
+from my_gym.helpers import get_rllib_pkl
+from my_gym.helpers import xml2csv
+from my_gym.helpers import get_parameters
 
-    from my_gym.helpers import make_create_env
-    from my_gym.helpers import get_rllib_config
-    from my_gym.helpers import get_rllib_pkl
-    from my_gym.helpers import xml2csv
-    from my_gym.helpers import get_parameters
 
 
 EXAMPLE_USAGE = """
@@ -208,8 +197,8 @@ def visualizer_rllib(args):
         use_lstm = False
 
     # if restart_instance, don't restart here because env.reset will restart later
-    if not sim_params.restart_instance:
-        env.restart_simulation(sim_params=sim_params, render=sim_params.render)
+    # if not sim_params.restart_instance:
+    #     env.restart_simulation(sim_params=sim_params, render=sim_params.render)
 
     # Simulate and collect metrics
     # final_outflows = []
@@ -281,7 +270,7 @@ def visualizer_rllib(args):
 
     print('==== Summary of results ====')
     print("Return:")
-    print(mean_speed)
+    # print(mean_speed)
     if multiagent:
         for agent_id, rew in rets.items():
             print('For agent', agent_id)

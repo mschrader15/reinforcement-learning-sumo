@@ -9,7 +9,7 @@
     "environment_location": "my_gym.environment",
     "environment_name": "TLEnv",
     "num_rollouts": 60,
-    "cpu_num": 1
+    "cpu_num": 64
   },
   "Simulation": {
     "file_root": "/home/max/remote/airport-harper-sumo",

@@ -91,8 +91,9 @@ class Kernel(object):
             traci_c.vehicle.subscribe(veh_id, VEHICLE_SUBSCRIPTIONS)
 
         # set the traffic lights to the all green program
-        for tl_id in self.sim_params.tl_ids:
-            traci_c.trafficlight.setProgram(tl_id, f'{tl_id}-2')
+        if not self.sim_params.no_actor:
+            for tl_id in self.sim_params.tl_ids:
+                traci_c.trafficlight.setProgram(tl_id, f'{tl_id}-2')
 
         # saving the beginning state of the simulation
         traci_c.simulation.saveState(self.state_file)

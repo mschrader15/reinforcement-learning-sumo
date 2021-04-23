@@ -136,7 +136,8 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
         
 
         # update the lights
-        self.actor.update_lights(action_list=actions, sim_time=self.k.sim_time)
+        if not self.sim_params.no_actor:
+            self.actor.update_lights(action_list=actions, sim_time=self.k.sim_time)
 
     def get_state(self, subscription_data):
         """

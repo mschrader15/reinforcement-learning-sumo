@@ -52,6 +52,8 @@ def run_rllib_es(sim_params, env_params):
     agent_cls = get_agent_class(alg_run)
     config = deepcopy(agent_cls._default_config)
 
+
+    # TODO: add in the horizon length (If it is given in time, then it needs to be divided by the step size)
     config["num_workers"] = min(env_params.cpu_num, env_params.num_rollouts)
     config["episodes_per_batch"] = env_params.num_rollouts
     config["eval_prob"] = 0.05

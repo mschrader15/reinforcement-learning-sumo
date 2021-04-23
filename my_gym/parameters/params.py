@@ -100,9 +100,11 @@ class SimParams(object):
         # sum the warmup time, sims per step * horizon and an extra 1000
         self.sim_length: int = env_params.warm_up_time + (env_params.sims_per_step * env_params.horizon) + 1000
 
-        # self.time_to_teleport = -1  # this is the sumo setting for no teleport
+        # determine if the actor is desired or not
+        # using this for offline analysis of the reward
+        self.no_actor = safe_getter(params, "no_actor") or False
 
-        # self.central_junction = safe_getter(params, 'central_junction') or '63082003'
+
         # add in the rest of the stuff in the configuration file
         for key, value in params.items():
             self.__dict__[key] = value
