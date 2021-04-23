@@ -2,8 +2,7 @@ import csv
 from lxml import etree
 
 
-FIELD_NAMES = {'emissions': ['timestep_time',
-                             'vehicle_CO',
+FIELD_NAMES = {'emissions': ['vehicle_CO',
                              'vehicle_CO2',
                              'vehicle_HC',
                              'vehicle_NOx',
@@ -43,11 +42,12 @@ FIELD_NAMES = {'emissions': ['timestep_time',
 
 def _parse_and_write_emissions(elem, csv_writer, fields, metadata):
     if (elem.tag == 'timestep') and (len(elem.attrib) > 0):
-        meta_data = [elem.attrib['time']]
-        return meta_data
+        metadata = [elem.attrib['time']]
+        return metadata
     elif (elem.tag == 'vehicle') and (len(elem.attrib) >= 19):
         csv_writer.writerow(metadata + [elem.attrib[col_name] for col_name in fields])
         return metadata
+    return metadata
 
 
 def _parse_and_write_detector(elem, csv_writer, fields, metadata):
@@ -74,15 +74,19 @@ class _XML2CSV:
     @staticmethod
     def fast_iter(context, func, **kwargs):
         meta_data = [0]
-        for event, elem in context:
-            meta_data = func(elem, metadata=meta_data, **kwargs)
-            elem.clear()
-            while elem.getprevious() is not None:
-                try:
-                    del elem.getparent()[0]
-                except TypeError:
-                    break
-        del context
+        try:
+            for _, elem in context:
+                meta_data = func(elem, metadata=meta_data, **kwargs)
+                elem.clear()
+                while elem.getprevious() is not None:
+                    try:
+                        del elem.getparent()[0]
+                    except TypeError:
+                        break
+            del context
+        except Exception as e:
+            print(e)
+            pass
 
     def main(self, ):
         header_fields = self._fields

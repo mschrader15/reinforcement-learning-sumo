@@ -18,16 +18,16 @@ class BinaryDistribution(Distribution):
 
 
 setup(
-    name='my_gym',
-    version="1.0.0",
+    name='rl_sumo',
+    version="1.0.1",
     distclass=BinaryDistribution,
     # cmdclass={"build_ext": build_ext},
     packages=find_packages(),
     description=("Univ. of Alabama ME691 Reinforcement Learning Project"),
     # long_description=open("README.md").read(),
-    url="https://github.com/flow-project/flow",
-    # keywords=("autonomous vehicles intelligent-traffic-control"
-    #           "reinforcement-learning deep-learning python"),
+    url="https://github.com/mschrader15/reinforcement-learning-sumo",
+    keywords=("autonomous vehicles intelligent-traffic-control"
+              "reinforcement-learning deep-learning python"),
     install_requires=_read_requirements_file(),
     zip_safe=False,
 )

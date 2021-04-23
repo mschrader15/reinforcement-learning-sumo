@@ -17,7 +17,6 @@ def minimize_fuel(subscription_values):
 
 
 class Rewarder:
-
     def __init__(self, ):
         pass
 
@@ -33,7 +32,6 @@ class Rewarder:
 
 
 class FCIC(Rewarder):
-
     """
     From: https://journals.sagepub.com/doi/full/10.1177/03611981211004181
 
@@ -43,15 +41,16 @@ class FCIC(Rewarder):
         super(FCIC, self).__init__()
         self.junction_id = deepcopy(sim_params.central_junction)
         self.sim_step = deepcopy(sim_params.sim_step)
-        self.k_array = [[['gneE0.12', 'gneE17', '-638636924#1.9', '660891910#1.19', '660891910#1', 'gneE18',
-                          'gneE13', 'gneE20', '-8867312#6', 'gneE22', 'gneE22.27'], 100],
-                        [[], 190]
-                        ]
+        self.k_array = [[[
+            'gneE0.12', 'gneE17', '-638636924#1.9', '660891910#1.19', '660891910#1', 'gneE18', 'gneE13', 'gneE20',
+            '-8867312#6', 'gneE22', 'gneE22.27'
+        ], 100], [[], 190]]
 
     def register_traci(self, traci_c):
-
+        
         traci_c.junction.subscribeContext(self.junction_id, tc.CMD_GET_VEHICLE_VARIABLE, 1000000,
                                           [tc.VAR_SPEED, tc.VAR_ALLOWED_SPEED, tc.VAR_ROAD_ID])
+
         return [[traci_c.junction.getContextSubscriptionResults, (self.junction_id, ), self.junction_id]]
 
     def get_reward(self, subscription_dict):
@@ -90,6 +89,7 @@ class FCIC(Rewarder):
                         k_s[1] += self.k_array[1][1]
             return sum([k * self.sim_step for k in k_s])
         return sum(k_s)
+
 
 # def fcic_pi(subscription_values, ):
 #         nonlocal x

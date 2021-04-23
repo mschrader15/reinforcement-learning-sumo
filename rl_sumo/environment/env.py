@@ -1,36 +1,39 @@
 import gym
 import sumolib
 import atexit
-
+from random import randint
 import traci.exceptions
 from gym.spaces import Box, Tuple, Discrete, MultiDiscrete
+from gym.utils import seeding
 import numpy as np
 import traceback
 from copy import deepcopy
 from math import floor
-from my_gym.core import Kernel
-from my_gym.core import GlobalObservations
-from my_gym.core import GlobalActor
-from my_gym.core import rewarder
+from rl_sumo.core import Kernel
+from rl_sumo.core import GlobalObservations
+from rl_sumo.core import GlobalActor
+from rl_sumo.core import rewarder
 from abc import ABCMeta, abstractmethod
 
 
 class TLEnv(gym.Env, metaclass=ABCMeta):
-
-    def __init__(self,
-                 env_params,
-                 sim_params, ):
+    def __init__(
+        self,
+        env_params,
+        sim_params,
+    ):
 
         # counters
         self.step_counter = 0
         self.time_counter = 0
+        self.master_reset_count = 0
 
         # read in the parameters
         self.env_params = deepcopy(env_params)
         self.sim_params = deepcopy(sim_params)
 
         # calculate the "true" simulation horizon
-        self.horizon = self.env_params.sims_per_step * self.env_params.horizon
+        self.horizon = self.env_params.horizon
 
         # find an open port
         self.sim_params.port = sumolib.miscutils.getFreeSocketPort()
@@ -39,28 +42,32 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
         self.k = Kernel(self.sim_params)
 
         # create the observer
-        self.observer = GlobalObservations(net_file=sim_params.net_file, tl_ids=sim_params.tl_ids, name="Global")
+        self.observer = GlobalObservations(net_file=sim_params.net_file,
+                                           tl_ids=sim_params.tl_ids,
+                                           name="Global")
 
         # create the action space
         self.actor = GlobalActor(tl_settings_file=sim_params.tl_settings_file)
 
         # run the simulation to create the traci connection. I think this makes everything pickle-able!
-        traci_c = self.k.start_simulation()
+        # traci_c = self.k.start_simulation()
 
         # pass the traci connection back to the kernel
-        self.k.pass_traci_kernel(traci_c)
+        # self.k.pass_traci_kernel(traci_c)
 
         # pass the observer traci function call back to the kernel
-        self.k.add_traci_call(self.observer.register_traci(traci_c))
+        # self.k.add_traci_call(self.observer.register_traci(traci_c))
 
         # register the actor
-        self.actor.register_traci(traci_c)
+        # self.actor.register_traci(traci_c)
 
         # create the reward function
-        self.rewarder = getattr(rewarder, self.env_params.reward_class)(sim_params, env_params)
+        self.rewarder = getattr(rewarder,
+                                self.env_params.reward_class)(sim_params,
+                                                              env_params)
 
         # pass the rewarder traci function call back to the kernel
-        self.k.add_traci_call(self.rewarder.register_traci(traci_c))
+        # self.k.add_traci_call(self.rewarder.register_traci(traci_c))
 
         # terminate sumo on exit
         atexit.register(self.terminate)
@@ -80,7 +87,8 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
 
         # traffic_light_shapes = self.actor.size['']
 
-        traffic_light_states = MultiDiscrete([*self.actor.discrete_space_shape])
+        traffic_light_states = MultiDiscrete(
+            [*self.actor.discrete_space_shape])
 
         traffic_light_colors = MultiDiscrete(self.actor.size['color'])
 
@@ -97,8 +105,7 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
             high=self.sim_params.sim_length,
             # the value is actually the time delta since the start of the last green state but theoretical max is sim length
             shape=self.action_space.shape,
-            dtype=np.float32
-        )
+            dtype=np.float32)
 
         # traffic_light_transition_active = Box(
         #     low=0,
@@ -111,11 +118,12 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
             low=0,
             # unrealistic, but setting the maximum number of cars in any lane = to the distance that the camera can see in meters
             high=self.observer.distance_threshold,
-            shape=(self.observer.get_lane_count(),),
+            shape=(self.observer.get_lane_count(), ),
             dtype=np.float32,
         )
 
-        return Tuple((traffic_light_states,  traffic_light_times, traffic_light_colors, vehicle_num))
+        return Tuple((traffic_light_states, traffic_light_times,
+                      traffic_light_colors, vehicle_num))
 
     def apply_rl_actions(self, rl_actions):
         """Specify the actions to be performed by the rl agent(s).
@@ -128,15 +136,16 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
         if rl_actions is None:
             return
 
-        actions = self.clip_actions(rl_actions) if self.env_params.clip_actions else rl_actions
+        actions = self.clip_actions(
+            rl_actions) if self.env_params.clip_actions else rl_actions
 
         # convert the actions to integers
         # actions = list(map(floor, rl_actions))
-        
 
         # update the lights
         if not self.sim_params.no_actor:
-            self.actor.update_lights(action_list=actions, sim_time=self.k.sim_time)
+            self.actor.update_lights(action_list=actions,
+                                     sim_time=self.k.sim_time)
 
     def get_state(self, subscription_data):
         """
@@ -195,7 +204,7 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
         # self.time_counter = 0
 
         # restart completely if we should restart
-        if self.step_counter > 1e6:
+        if (self.step_counter > 1e6) or (self.master_reset_count < 1):
             self._hard_reset()
 
         # # else reset the simulation
@@ -206,6 +215,11 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
             except traci.exceptions.FatalTraCIError:
                 self.reset()
         subscription_data = self.k.simulation_step()
+        
+        # reset the counters
+        self.master_reset_count += 1
+        self.step_counter = 0
+        
         return self.get_state(subscription_data)
 
     def _hard_reset(self):
@@ -229,6 +243,13 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
 
         # pass traci to the rewarder and then register the calls
         self.k.add_traci_call(self.rewarder.register_traci(traci_c))
+
+    def seed(self, seed=None):
+        self.np_random, seed = seeding.np_random(seed)
+        self.k.set_seed(seed)
+        return [
+            seed,
+        ]
 
     def step(self, action):
         """
@@ -258,16 +279,19 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
             # step the simulation
             subscription_data = self.k.simulation_step()
 
-            # check for collisions and kill the simulation if so
+            # check for collisions and kill the simulation if so.
+            # TODO: Actually implement this
             crash = self.k.check_collision()
+
             if crash:
                 print("There was a crash")
                 break
-
+        
         observation = self.get_state(subscription_data)
+        
         reward = self.calculate_reward(subscription_data)
 
-        done = (self.k.sim_time > self.horizon) or crash
+        done = (self.step_counter >= self.horizon) or crash
 
         info = {
             'sim_time': self.k.sim_time,
@@ -290,3 +314,10 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
         except FileNotFoundError:
             # Skip automatic termination. Connection is probably already closed
             print(traceback.format_exc())
+
+    def close(self):
+        """
+        Terminate the simulation
+
+        """
+        self.terminate()

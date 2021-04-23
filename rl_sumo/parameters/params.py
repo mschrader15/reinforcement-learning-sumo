@@ -1,7 +1,7 @@
 import os
-import pendulum
 from distutils import util
 from copy import deepcopy
+from datetime import datetime
 
 
 def safe_getter(_dict: dict, param: str):
@@ -18,15 +18,14 @@ def make_directory(path):
 
 
 class EnvParams(object):
-
     def __init__(self, settings_dict: dict):
 
         # import the parameters
-        self.json_input = settings_dict     
+        self.json_input = settings_dict
 
         self.name = self.json_input['Name']
 
-        # seperate the dictionary that is being deconstructed from the real input 
+        # seperate the dictionary that is being deconstructed from the real input
         params = deepcopy(self.json_input['Environment'])
 
         self.environment_location: str = safe_getter(params, 'environment_location')
@@ -39,7 +38,10 @@ class EnvParams(object):
 
         self.sims_per_step: int = safe_getter(params, 'sims_per_step') or 1
 
-        self.horizon: int = safe_getter(params, 'horizon') or 3600
+        # the horizon is entered as a time. It is divided by the simulation step to get
+        # the number of steps required by the RL learner
+        self.horizon: int = int((safe_getter(params, 'horizon') or 3600) / \
+            self.json_input['Simulation']['sim_step'])
 
         self.reward_class: str = safe_getter(params, 'reward_class') or 'FCIC'
 
@@ -58,7 +60,6 @@ class EnvParams(object):
 
 
 class SimParams(object):
-
     def __init__(self, env_params: EnvParams, settings_dict: dict):
 
         # import the parameters
@@ -69,7 +70,7 @@ class SimParams(object):
             root = exec(params['file_root'])
         except Exception:
             root = params['file_root']
-        
+
         self.sim_state_dir: str = os.path.join(root, 'reinforcement-learning-sumo', 'tmp', 'sim_state')
 
         # make the directory
@@ -104,6 +105,13 @@ class SimParams(object):
         # using this for offline analysis of the reward
         self.no_actor = safe_getter(params, "no_actor") or False
 
+        emissions = safe_getter(params, 'emissions')
+
+        if emissions:
+            emissions_path = os.path.join(*os.path.split(emissions)[:-1], env_params.name,
+                                          datetime.now().strftime('%Y_%m_%d_%H_%M_%S'))
+            make_directory(emissions_path)
+            setattr(self, 'emissions', os.path.join(emissions_path, os.path.split(emissions)[-1]))
 
         # add in the rest of the stuff in the configuration file
         for key, value in params.items():

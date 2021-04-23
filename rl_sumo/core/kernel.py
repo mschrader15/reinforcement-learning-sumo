@@ -3,21 +3,32 @@ import signal
 import traci
 import traci.constants as tc
 import logging
-from random import randint
 import time
 from copy import deepcopy
 from sumolib import checkBinary
 import subprocess
 
 
-def sumo_cmd_line(params):
+def sumo_cmd_line(params, kernel):
 
-    cmd = ['-n', params.net_file, '-e', str(params.sim_length), '--step-length', str(params.sim_step),
-           '-a', ", ".join(params.additional_files + [params.route_file]), '--remote-port', str(params.port),
-           '--seed', str(randint(0, 10000),),
-           "--time-to-teleport", "-1",
-           "--collision.action", "remove",
-           ]
+    cmd = [
+        '-n',
+        params.net_file,
+        '-e',
+        str(params.sim_length),
+        '--step-length',
+        str(params.sim_step),
+        '-a',
+        ", ".join(params.additional_files + [params.route_file]),
+        '--remote-port',
+        str(params.port),
+        '--seed',
+        str(kernel.seed),
+        "--time-to-teleport",
+        "-1",
+        "--collision.action",
+        "remove",
+    ]
     if params.gui:
         cmd.extend(['--start'])
 
@@ -33,7 +44,6 @@ class Kernel(object):
     """
     This class is the core for interfacing with the simulation
     """
-
     def __init__(self, sim_params):
 
         self.traci_c = None
@@ -41,10 +51,15 @@ class Kernel(object):
         self.parent_fns = []
         self.sim_params = deepcopy(sim_params)
         self.sim_step_size = self.sim_params.sim_step
-        self.state_file = os.path.join(sim_params.sim_state_dir, f"start_state_{sim_params.port}.xml")
+        self.state_file = os.path.join(sim_params.sim_state_dir,
+                                       f"start_state_{sim_params.port}.xml")
         self.sim_time = 0
+        self.seed = 5
         self.traci_calls = []
         self.sim_data = {}
+
+    def set_seed(self, seed):
+        self.seed = seed
 
     def pass_traci_kernel(self, traci_c):
         """
@@ -58,16 +73,14 @@ class Kernel(object):
         # pylint: disable=maybe-no-member
 
         # find SUMO
-        sumo_binary = checkBinary('sumo-gui') if self.sim_params.gui else checkBinary('sumo')
+        sumo_binary = checkBinary(
+            'sumo-gui') if self.sim_params.gui else checkBinary('sumo')
 
         # create the command line call
-        sumo_call = [sumo_binary] + sumo_cmd_line(self.sim_params)
+        sumo_call = [sumo_binary] + sumo_cmd_line(self.sim_params, self)
 
         # start the process
-        self.sumo_proc = subprocess.Popen(
-            sumo_call,
-            stdout=subprocess.DEVNULL
-        )
+        self.sumo_proc = subprocess.Popen(sumo_call, stdout=subprocess.DEVNULL)
 
         # sleep before trying to connect with TRACI
         time.sleep(1)
@@ -82,7 +95,8 @@ class Kernel(object):
             traci_c.trafficlight.setProgram(tl_id, f'{tl_id}-1')
 
         # run for an hour to warm up the simulation
-        for _ in range(int(self.sim_params.warmup_time * 1 / self.sim_step_size)):
+        for _ in range(
+                int(self.sim_params.warmup_time * 1 / self.sim_step_size)):
             traci_c.simulationStep()
 
         # subscribe to all the vehicles in the network at this state
@@ -99,7 +113,12 @@ class Kernel(object):
 
         traci_c.simulation.subscribe([tc.VAR_COLLIDING_VEHICLES_NUMBER])
 
-        self.add_traci_call([[traci_c.lane.getAllSubscriptionResults, (), tc.VAR_COLLIDING_VEHICLES_NUMBER], ])
+        self.add_traci_call([
+            [
+                traci_c.lane.getAllSubscriptionResults, (),
+                tc.VAR_COLLIDING_VEHICLES_NUMBER
+            ],
+        ])
 
         return traci_c
 
@@ -134,8 +153,8 @@ class Kernel(object):
 
     def kill_simulation(self, ):
         try:
+            self.sumo_proc.kill()
             os.killpg(self.sumo_proc.pid, signal.SIGTERM)
-            os.remove('')
         except Exception as e:
             print("Error during teardown: {}".format(e))
 
@@ -150,6 +169,7 @@ class Kernel(object):
         logging.info('closing the simulation')
         # kill the simulation if using the gui.
         if self.sim_params.gui:
+            # self.traci_c.close()
             self.kill_simulation()
         else:
             self.traci_c.close()
@@ -176,4 +196,3 @@ class Kernel(object):
     def check_collision(self):
         """See parent class."""
         return False  # self.sim_data[tc.VAR_COLLIDING_VEHICLES_NUMBER] != 0
-

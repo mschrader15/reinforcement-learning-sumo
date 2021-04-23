@@ -1,9 +1,13 @@
 import os
 from copy import deepcopy
-from my_gym.helpers import make_create_env
+from rl_sumo.helpers import make_create_env
 
 
 def run_no_rl(sim_params, env_params):
+    import csv
+    from my_gym.helpers import xml2csv
+    import time 
+
     # pylint: disable=unused-variable
     gym_name, create_env = make_create_env(env_params, sim_params)
 
@@ -12,18 +16,39 @@ def run_no_rl(sim_params, env_params):
     # with env(env_params=env_params, sim_params=sim_params) as e:
 
     # for _ in range(10):
-    for _ in range(3):
+    for i in range(1):
+
+        env.reset()
+
+        rewards = []
 
         done = False
-
         while not done:
 
             action = env.action_space.sample()
             observation, reward, done, info = env.step(action)
+            if sim_params['gather_reward']:
+                rewards.append([env.k.sim_time, reward])
 
-        env.reset()
+        if sim_params['emissions']:
+            reward_file = os.path.join(*os.path.split(sim_params['emissions'])[:-1], f'rewards_run_{i}.csv')
+            with open(reward_file, 'w') as f:
+                writer = csv.writer(f, dialect='excel')
+                writer.writerows(rewards)
 
     env.close()
+
+    if sim_params['emissions']:
+
+        # let sumo finish building the output file
+        time.sleep(0.5)
+
+        emission_path_csv = sim_params['emissions'][:-4] + ".csv"
+        xml2csv(sim_params['emissions'], 'emissions', emission_path_csv)
+        os.remove(sim_params['emissions'])
+
+        # print the location of the emission csv file
+        print("\nGenerated emission file at " + emission_path_csv)
 
 
 def run_rllib_es(sim_params, env_params):
@@ -52,8 +77,7 @@ def run_rllib_es(sim_params, env_params):
     agent_cls = get_agent_class(alg_run)
     config = deepcopy(agent_cls._default_config)
 
-
-    # TODO: add in the horizon length (If it is given in time, then it needs to be divided by the step size)
+    config['horizon'] = env_params.horizon
     config["num_workers"] = min(env_params.cpu_num, env_params.num_rollouts)
     config["episodes_per_batch"] = env_params.num_rollouts
     config["eval_prob"] = 0.05
@@ -62,7 +86,7 @@ def run_rllib_es(sim_params, env_params):
     config["stepsize"] = 0.02
 
     config["model"]["fcnet_hiddens"] = [100, 50, 25]
-    config['clip_actions'] = False  # FIXME(ev) temporary ray bug
+    config['clip_actions'] = False
     config["observation_filter"] = "NoFilter"
 
     # add the environment parameters to the config settings so that they will be saved
@@ -81,16 +105,14 @@ def run_rllib_es(sim_params, env_params):
         },
         "checkpoint_freq": 25,
         "max_failures": 999,
-        "stop": {"training_iteration": 500},
+        "stop": {
+            "training_iteration": 500
+        },
         "num_samples": 1,
     }
 
     #
-    trials = run_experiments({
-        env_params.name: exp_tag
-    })
+    trials = run_experiments({env_params.name: exp_tag})
 
 
-
-TRAINING_FUNCTIONS = {'no-rl': run_no_rl,
-                      'es': run_rllib_es}
+TRAINING_FUNCTIONS = {'no-rl': run_no_rl, 'es': run_rllib_es}

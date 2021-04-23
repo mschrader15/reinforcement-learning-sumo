@@ -18,7 +18,7 @@ import numpy as np
 import os
 import sys
 import time
-
+import csv
 import ray
 try:
     from ray.rllib.agents.agent import get_agent_class
@@ -26,13 +26,11 @@ except ImportError:
     from ray.rllib.agents.registry import get_agent_class
 from ray.tune.registry import register_env
 
-from my_gym.helpers import make_create_env
-from my_gym.helpers import get_rllib_config
-from my_gym.helpers import get_rllib_pkl
-from my_gym.helpers import xml2csv
-from my_gym.helpers import get_parameters
-
-
+from rl_sumo.helpers import make_create_env
+from rl_sumo.helpers import get_rllib_config
+from rl_sumo.helpers import get_rllib_pkl
+from rl_sumo.helpers import xml2csv
+from rl_sumo.helpers import get_parameters
 
 EXAMPLE_USAGE = """
 example usage:
@@ -77,7 +75,6 @@ def visualizer_rllib(args):
         env_params, sim_params = get_parameters(input("Config file cannot be found. Enter the path: "))
 
     # hack for old pkl files
-    # TODO(ev) remove eventually
     # sim_params = flow_params['sim']
     # setattr(sim_params, 'num_clients', 1)
 
@@ -109,25 +106,8 @@ def visualizer_rllib(args):
 
     # sim_params.restart_instance = True
     # dir_path = os.path.dirname(os.path.realpath(__file__))
-    setattr(sim_params, 'emissions_path', args.emissions_output) 
-    # # pick your rendering mode
-    # if args.render_mode == 'sumo_web3d':
-    #     sim_params.num_clients = 2
-    #     sim_params.render = False
-    # elif args.render_mode == 'drgb':
-    #     sim_params.render = 'drgb'
-    #     sim_params.pxpm = 4
-    # elif args.render_mode == 'sumo_gui':
-    #     sim_params.render = False  # will be set to True below
-    # elif args.render_mode == 'no_render':
-    #     sim_params.render = False
-    # if args.save_render:
-    #     if args.render_mode != 'sumo_gui':
-    #         sim_params.render = 'drgb'
-    #         sim_params.pxpm = 4
-    #     sim_params.save_render = True
+    setattr(sim_params, 'emissions_path', args.emissions_output)
 
-    # Create and register a gym+rllib env
     # set the gui to true
     sim_params.gui = True
 
@@ -152,7 +132,7 @@ def visualizer_rllib(args):
         env_params.horizon = args.horizon
 
     # just use 1 cpu for replay
-    config['num_workers'] = 1 if env_params.algorithm.lower() in 'es' else 0 
+    config['num_workers'] = 1 if env_params.algorithm.lower() in 'es' else 0
 
     # create the agent that will be used to compute the actions
     agent = agent_cls(env=gym_name, config=config)
@@ -186,8 +166,7 @@ def visualizer_rllib(args):
             policy_map_fn = config['multiagent']['policy_mapping_fn']
             size = config['model']['lstm_cell_size']
             for key in config['multiagent']['policies'].keys():
-                state_init[key] = [np.zeros(size, np.float32),
-                                   np.zeros(size, np.float32)]
+                state_init[key] = [np.zeros(size, np.float32), np.zeros(size, np.float32)]
         else:
             state_init = [
                 np.zeros(config['model']['lstm_cell_size'], np.float32),
@@ -207,6 +186,9 @@ def visualizer_rllib(args):
     # std_speed = []
     for i in range(args.num_rollouts):
         # vel = []
+
+        rewards = ["sim_time", "reward"]
+
         state = env.reset()
         if multiagent:
             ret = {key: [0] for key in rets.keys()}
@@ -229,11 +211,11 @@ def visualizer_rllib(args):
                             state[agent_id], state=state_init[agent_id],
                             policy_id=policy_map_fn(agent_id))
                     else:
-                        action[agent_id] = agent.compute_action(
-                            state[agent_id], policy_id=policy_map_fn(agent_id))
+                        action[agent_id] = agent.compute_action(state[agent_id], policy_id=policy_map_fn(agent_id))
             else:
                 action = agent.compute_action(state)
                 state, reward, done, _ = env.step(action)
+                rewards.append([env.k.sim_time, reward])
             if multiagent:
                 for actor, rew in reward.items():
                     ret[policy_map_fn(actor)][0] += rew
@@ -249,24 +231,12 @@ def visualizer_rllib(args):
                 rets[key].append(ret[key])
         else:
             rets.append(ret)
-
-        # outflow = vehicles.get_outflow_rate(500)
-        # final_outflows.append(outflow)
-        # inflow = vehicles.get_inflow_rate(500)
-        # final_inflows.append(inflow)
-        # if np.all(np.array(final_inflows) > 1e-5):
-        #     throughput_efficiency = [x / y for x, y in
-        #                              zip(final_outflows, final_inflows)]
-        # else:
-        #     throughput_efficiency = [0] * len(final_inflows)
-        # mean_speed.append(np.mean(vel))
-        # std_speed.append(np.std(vel))
-        # if multiagent:
-        #     for agent_id, rew in rets.items():
-        #         print('Round {}, Return: {} for agent {}'.format(
-        #             i, ret, agent_id))
-        # else:
-        #     print('Round {}, Return: {}'.format(i, ret))
+    
+    if args.emissions:
+        reward_file = os.path.join(*os.path.split(args.emissions_output)[:-1], f'rewards_run_{i}.csv')
+        with open(reward_file, 'w') as f:
+            writer = csv.writer(f, dialect='excel')
+            writer.writerows(rewards)
 
     print('==== Summary of results ====')
     print("Return:")
@@ -275,37 +245,10 @@ def visualizer_rllib(args):
         for agent_id, rew in rets.items():
             print('For agent', agent_id)
             print(rew)
-            print('Average, std return: {}, {} for agent {}'.format(
-                np.mean(rew), np.std(rew), agent_id))
+            print('Average, std return: {}, {} for agent {}'.format(np.mean(rew), np.std(rew), agent_id))
     else:
         print(rets)
-        print('Average, std: {}, {}'.format(
-            np.mean(rets), np.std(rets)))
-
-    # print("\nSpeed, mean (m/s):")
-    # print(mean_speed)
-    # print('Average, std: {}, {}'.format(np.mean(mean_speed), np.std(
-    #     mean_speed)))
-    # print("\nSpeed, std (m/s):")
-    # print(std_speed)
-    # print('Average, std: {}, {}'.format(np.mean(std_speed), np.std(
-    #     std_speed)))
-
-    # # Compute arrival rate of vehicles in the last 500 sec of the run
-    # print("\nOutflows (veh/hr):")
-    # print(final_outflows)
-    # print('Average, std: {}, {}'.format(np.mean(final_outflows),
-    #                                     np.std(final_outflows)))
-    # # Compute departure rate of vehicles in the last 500 sec of the run
-    # print("Inflows (veh/hr):")
-    # print(final_inflows)
-    # print('Average, std: {}, {}'.format(np.mean(final_inflows),
-    #                                     np.std(final_inflows)))
-    # # Compute throughput efficiency in the last 500 sec of the
-    # print("Throughput efficiency (veh/hr):")
-    # print(throughput_efficiency)
-    # print('Average, std: {}, {}'.format(np.mean(throughput_efficiency),
-    #                                     np.std(throughput_efficiency)))  
+        print('Average, std: {}, {}'.format(np.mean(rets), np.std(rets)))
 
     # terminate the environment
     env.unwrapped.terminate()
@@ -328,16 +271,15 @@ def visualizer_rllib(args):
         os.remove(args.emissions_output)
 
         # print the location of the emission csv file
-        print("\nGenerated emission file at " + emission_path_csv)        
+        print("\nGenerated emission file at " + emission_path_csv)
 
 
 def create_parser():
     """Create the parser to capture CLI arguments."""
-    parser = argparse.ArgumentParser(
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        description='[Flow] Evaluates a reinforcement learning agent '
-                    'given a checkpoint.',
-        epilog=EXAMPLE_USAGE)
+    parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
+                                     description='[Flow] Evaluates a reinforcement learning agent '
+                                     'given a checkpoint.',
+                                     epilog=EXAMPLE_USAGE)
 
     # required input parameters
     parser.add_argument('result_dir', type=str, help='Directory containing results')
@@ -345,45 +287,34 @@ def create_parser():
     parser.add_argument('checkpoint_num', type=str, help='Checkpoint number.')
 
     # optional input parameters
-    parser.add_argument(
-        '--run',
-        type=str,
-        help='The algorithm or model to train. This may refer to '
-             'the name of a built-on algorithm (e.g. RLLib\'s DQN '
-             'or PPO), or a user-defined trainable function or '
-             'class registered in the tune registry. '
-             'Required for results trained with flow-0.2.0 and before.')
-    parser.add_argument(
-        '--num_rollouts',
-        type=int,
-        default=1,
-        help='The number of rollouts to visualize.')
+    parser.add_argument('--run',
+                        type=str,
+                        help='The algorithm or model to train. This may refer to '
+                        'the name of a built-on algorithm (e.g. RLLib\'s DQN '
+                        'or PPO), or a user-defined trainable function or '
+                        'class registered in the tune registry. '
+                        'Required for results trained with flow-0.2.0 and before.')
+    parser.add_argument('--num_rollouts', type=int, default=1, help='The number of rollouts to visualize.')
     parser.add_argument(
         '--emissions_output',
         type=str,
         default=None,  # this is obvi inconsistant with the type but :shrug:
         help='Specifies whether to generate an emission file from the '
-             'simulation')
-    parser.add_argument(
-        '--evaluate',
-        action='store_true',
-        help='Specifies whether to use the \'evaluate\' reward '
-             'for the environment.')
-    parser.add_argument(
-        '--render_mode',
-        type=str,
-        default='sumo_gui',
-        help='Pick the render mode. Options include sumo_web3d, '
-             'rgbd and sumo_gui')
-    parser.add_argument(
-        '--save_render',
-        action='store_true',
-        help='Saves a rendered video to a file. NOTE: Overrides render_mode '
-             'with pyglet rendering.')
-    parser.add_argument(
-        '--horizon',
-        type=int,
-        help='Specifies the horizon.')
+        'simulation')
+    parser.add_argument('--evaluate',
+                        action='store_true',
+                        help='Specifies whether to use the \'evaluate\' reward '
+                        'for the environment.')
+    parser.add_argument('--render_mode',
+                        type=str,
+                        default='sumo_gui',
+                        help='Pick the render mode. Options include sumo_web3d, '
+                        'rgbd and sumo_gui')
+    parser.add_argument('--save_render',
+                        action='store_true',
+                        help='Saves a rendered video to a file. NOTE: Overrides render_mode '
+                        'with pyglet rendering.')
+    parser.add_argument('--horizon', type=int, help='Specifies the horizon.')
     return parser
 
 
