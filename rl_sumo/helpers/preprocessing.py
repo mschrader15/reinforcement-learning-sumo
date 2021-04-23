@@ -1,18 +1,7 @@
 import os
 import json
-try:
-
-    from my_gym.parameters import SimParams
-    from my_gym.parameters import EnvParams
-
-except ImportError:
-    import sys
-        # this is pretty hacky
-    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-
-    # print(sys.path)
-    from my_gym.parameters import SimParams
-    from my_gym.parameters import EnvParams
+from rl_sumo.parameters import SimParams
+from rl_sumo.parameters import EnvParams
 
 
 def get_parameters(input_object: str or dict) -> (EnvParams, SimParams):

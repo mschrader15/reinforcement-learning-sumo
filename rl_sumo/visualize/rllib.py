@@ -74,11 +74,14 @@ def visualizer_rllib(args):
     except KeyError:
         env_params, sim_params = get_parameters(input("Config file cannot be found. Enter the path: "))
 
+    # HACK: for old environment names
+    if 'my_gym' in env_params.environment_location:
+        env_params.environment_location = 'rl_sumo.environment'
+
     # hack for old pkl files
     # sim_params = flow_params['sim']
     # setattr(sim_params, 'num_clients', 1)
 
-    # for hacks for old pkl files TODO: remove eventually
     # if not hasattr(sim_params, 'use_ballistic'):
     #     sim_params.use_ballistic = False
 
@@ -187,7 +190,7 @@ def visualizer_rllib(args):
     for i in range(args.num_rollouts):
         # vel = []
 
-        rewards = ["sim_time", "reward"]
+        rewards = [["sim_time", "reward"]]
 
         state = env.reset()
         if multiagent:
@@ -231,8 +234,8 @@ def visualizer_rllib(args):
                 rets[key].append(ret[key])
         else:
             rets.append(ret)
-    
-    if args.emissions:
+
+    if args.emissions_output:
         reward_file = os.path.join(*os.path.split(args.emissions_output)[:-1], f'rewards_run_{i}.csv')
         with open(reward_file, 'w') as f:
             writer = csv.writer(f, dialect='excel')

@@ -20,19 +20,35 @@ def make_create_env(env_params, sim_params, version=0) -> (str, object):
 
     def create_env(*_):
 
-        # env_name = "{}-v{}".format(base_env_name, version)
+        try:
+            entry_point = f"{env_params.environment_location}:{env_params.environment_name}"
 
-        entry_point = f"{env_params.environment_location}:{env_params.environment_name}"
+            register(
+                id=env_name,
+                entry_point=entry_point,
+                kwargs={
+                    "env_params": env_params,
+                    "sim_params": sim_params,
+                }
+            )
 
-        register(
-            id=env_name,
-            entry_point=entry_point,
-            kwargs={
-                "env_params": env_params,
-                "sim_params": sim_params,
-            }
-        )
+            _env = gym.envs.make(env_name)
 
-        return gym.envs.make(env_name)
+        except ModuleNotFoundError:
+
+            entry_point = f"rl_sumo.environment:{env_params.environment_name}"
+
+            register(
+                id=env_name,
+                entry_point=entry_point,
+                kwargs={
+                    "env_params": env_params,
+                    "sim_params": sim_params,
+                }
+            )
+
+            _env = gym.envs.make(env_name)
+        
+        return _env
 
     return env_name, create_env

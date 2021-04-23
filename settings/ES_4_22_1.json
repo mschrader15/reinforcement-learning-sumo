@@ -1,12 +1,12 @@
 {
-  "Name": "ES-short-2",
+  "Name": "PPO-4-23",
   "Environment": {
-    "algorithm": "ES",
+    "algorithm": "PPO",
     "warmup_time": 3600,
     "sims_per_step": 1,
     "horizon": 300,
     "reward_class": "FCIC",
-    "environment_location": "my_gym.environment",
+    "environment_location": "rl_sumo.environment",
     "environment_name": "TLEnv",
     "num_rollouts": 60,
     "cpu_num": 64

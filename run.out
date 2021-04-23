@@ -1,0 +1,754 @@
+nohup: ignoring input
+calling /home/max/SUMO/sumo/bin/duarouter -n /home/max/remote/airport-harper-sumo/sumo-xml/simplified_reworked.net.xml -r /home/max/remote/airport-harper-sumo/sumo-xml/random-routes/random.route.xml --ignore-errors --begin 0 --end 3600 --no-step-log --no-warnings -o /home/max/remote/airport-harper-sumo/sumo-xml/random-routes/validated.random.route.xml
+Success.
+calling /home/max/SUMO/sumo/bin/duarouter -n /home/max/remote/airport-harper-sumo/sumo-xml/simplified_reworked.net.xml -r /home/max/remote/airport-harper-sumo/sumo-xml/random-routes/random.route.xml --ignore-errors --begin 0 --end 3600 --no-step-log --no-warnings -o /home/max/remote/airport-harper-sumo/sumo-xml/random-routes/random.route.xml.tmp --write-trips
+Success.
+Optimization succeeded
+1200: Wrote 361 routes (45 distinct) achieving total count 860 (100.12%) at 29 locations. GEH<5 for 100.00%
+result route edge count: count 361, min 3.00 (198), max 18.00 (1), mean 11.97 Q1 6.00, median 14.00, Q3 18.00
+ histogram: [(3, 3), (4, 56), (5, 17), (6, 16), (7, 23), (8, 7), (9, 24), (10, 5), (11, 3), (12, 8), (13, 5), (14, 44), (15, 10), (16, 28), (18, 112)]
+result route detector count: count 361, min 1.00 (0), max 4.00 (14), mean 2.38 Q1 2.00, median 3.00, Q3 3.00
+ histogram: [(1, 61), (2, 108), (3, 185), (4, 7)]
+GEH: count 29, min 0.00 ([834845345#1 834845345#1-AddedOffRampEdge] 1032 1032), max 3.46 ([gneE18 gneE23] 6 0), mean 0.39 Q1 0.00, median 0.00, Q3 0.32
+Warning: underflow locations: count 5, min 1.00 (('gneE11', '115872656#13.8')), max 1.00 (('gneE11', '115872656#13.8')), mean 1.00 Q1 1.00, median 1.00, Q3 1.00 (total 5)
+Warning: overflow locations: count 5, min -2.00 (('834845345#8.20', 'gneE8')), max -1.00 (('834845345#4', '834845345#5.74')), mean -1.20 Q1 -1.00, median -1.00, Q3 -1.00 (total -6)
+Optimization succeeded
+3000: Wrote 377 routes (41 distinct) achieving total count 910 (98.70%) at 29 locations. GEH<5 for 100.00%
+result route edge count: count 377, min 3.00 (157), max 18.00 (11), mean 11.73 Q1 6.00, median 14.00, Q3 18.00
+ histogram: [(3, 4), (4, 55), (5, 29), (6, 29), (7, 12), (8, 6), (9, 16), (10, 4), (11, 4), (12, 9), (13, 3), (14, 70), (15, 13), (16, 13), (18, 110)]
+result route detector count: count 377, min 1.00 (6), max 4.00 (246), mean 2.41 Q1 2.00, median 3.00, Q3 3.00
+ histogram: [(1, 65), (2, 96), (3, 211), (4, 5)]
+GEH: count 29, min 0.00 ([gneE0.12 115872656#13.8] 24 24), max 3.46 ([gneE18 gneE23] 6 0), mean 0.44 Q1 0.00, median 0.00, Q3 0.52
+Warning: underflow locations: count 11, min 1.00 (('834845345#1', '834845345#1-AddedOffRampEdge')), max 2.00 (('115872656#9', '115872656#10')), mean 1.18 Q1 1.00, median 1.00, Q3 1.00 (total 13)
+Warning: overflow locations: count 1, min -1.00 (('gneE11', 'gneE1')), max -1.00 (('gneE11', 'gneE1')), mean -1.00 Q1 -1.00, median -1.00, Q3 -1.00 (total -1)
+Optimization succeeded
+2400: Wrote 401 routes (50 distinct) achieving total count 948 (99.27%) at 29 locations. GEH<5 for 100.00%
+result route edge count: count 401, min 3.00 (88), max 18.00 (5), mean 11.87 Q1 6.00, median 14.00, Q3 18.00
+ histogram: [(3, 6), (4, 58), (5, 25), (6, 22), (7, 11), (8, 8), (9, 30), (10, 6), (11, 8), (12, 11), (13, 4), (14, 51), (15, 12), (16, 33), (18, 116)]
+result route detector count: count 401, min 1.00 (0), max 4.00 (1), mean 2.36 Q1 2.00, median 3.00, Q3 3.00
+ histogram: [(1, 72), (2, 116), (3, 208), (4, 5)]
+GEH: count 29, min 0.00 ([gneE0.12 115872656#13.8] 36 36), max 3.46 ([834845345#8.108 gneE19] 6 0), mean 0.21 Q1 0.00, median 0.00, Q3 0.00
+Warning: underflow locations: count 6, min 1.00 (('834845345#1', '834845345#1-AddedOffRampEdge')), max 2.00 (('834845345#8', '834845345#8.20')), mean 1.17 Q1 1.00, median 1.00, Q3 1.00 (total 7)
+Optimization succeeded
+600: Wrote 272 routes (40 distinct) achieving total count 667 (99.40%) at 29 locations. GEH<5 for 100.00%
+result route edge count: count 272, min 3.00 (7), max 18.00 (2), mean 12.10 Q1 6.00, median 14.00, Q3 18.00
+ histogram: [(3, 2), (4, 41), (5, 20), (6, 10), (7, 12), (8, 12), (9, 4), (10, 4), (11, 2), (12, 2), (13, 4), (14, 42), (15, 12), (16, 25), (18, 80)]
+result route detector count: count 272, min 1.00 (7), max 4.00 (0), mean 2.45 Q1 2.00, median 3.00, Q3 3.00
+ histogram: [(1, 33), (2, 89), (3, 144), (4, 6)]
+GEH: count 29, min 0.00 ([gneE0.12 115872656#13.8] 12 12), max 3.46 ([115872656#10.14 638636924#1] 6 0), mean 0.48 Q1 0.00, median 0.00, Q3 0.21
+Warning: underflow locations: count 6, min 1.00 (('115872656#10.14', '638636924#1')), max 1.00 (('115872656#10.14', '638636924#1')), mean 1.00 Q1 1.00, median 1.00, Q3 1.00 (total 6)
+Warning: overflow locations: count 2, min -1.00 (('834845345#1', '834845345#1-AddedOffRampEdge')), max -1.00 (('834845345#1', '834845345#1-AddedOffRampEdge')), mean -1.00 Q1 -1.00, median -1.00, Q3 -1.00 (total -2)
+Optimization succeeded
+0: Wrote 272 routes (41 distinct) achieving total count 639 (98.76%) at 29 locations. GEH<5 for 100.00%
+result route edge count: count 272, min 3.00 (22), max 18.00 (16), mean 11.37 Q1 6.00, median 13.00, Q3 18.00
+ histogram: [(3, 5), (4, 37), (5, 24), (6, 20), (7, 11), (8, 9), (9, 10), (10, 6), (11, 4), (12, 10), (13, 2), (14, 39), (15, 8), (16, 16), (18, 71)]
+result route detector count: count 272, min 1.00 (3), max 4.00 (9), mean 2.35 Q1 2.00, median 3.00, Q3 3.00
+ histogram: [(1, 49), (2, 82), (3, 138), (4, 3)]
+GEH: count 29, min 0.00 ([gneE0.12 115872656#13.8] 30 30), max 3.46 ([gneE18 gneE23] 6 0), mean 0.42 Q1 0.00, median 0.00, Q3 0.31
+Warning: underflow locations: count 9, min 1.00 (('834845345#1', '834845345#1-AddedOffRampEdge')), max 1.00 (('834845345#1', '834845345#1-AddedOffRampEdge')), mean 1.00 Q1 1.00, median 1.00, Q3 1.00 (total 9)
+Warning: overflow locations: count 1, min -1.00 (('834845345#6', 'gneE29')), max -1.00 (('834845345#6', 'gneE29')), mean -1.00 Q1 -1.00, median -1.00, Q3 -1.00 (total -1)
+Optimization succeeded
+1800: Wrote 373 routes (39 distinct) achieving total count 948 (98.75%) at 29 locations. GEH<5 for 100.00%
+result route edge count: count 373, min 3.00 (112), max 18.00 (3), mean 12.38 Q1 6.00, median 14.00, Q3 18.00
+ histogram: [(3, 5), (4, 57), (5, 21), (6, 13), (7, 12), (8, 6), (9, 7), (10, 6), (11, 4), (12, 7), (13, 5), (14, 78), (15, 11), (16, 25), (18, 116)]
+result route detector count: count 373, min 1.00 (2), max 4.00 (26), mean 2.54 Q1 2.00, median 3.00, Q3 3.00
+ histogram: [(1, 36), (2, 106), (3, 224), (4, 7)]
+GEH: count 29, min 0.00 ([gneE0.12 115872656#13.8] 30 30), max 3.46 ([gneE18 gneE23] 6 0), mean 0.53 Q1 0.00, median 0.00, Q3 0.79
+Warning: underflow locations: count 8, min 1.00 (('gneE18', 'gneE23')), max 5.00 (('834845345#4', '834845345#5.74')), mean 1.88 Q1 1.00, median 1.00, Q3 3.00 (total 15)
+Warning: overflow locations: count 3, min -1.00 (('834845345#1', '834845345#1-AddedOffRampEdge')), max -1.00 (('834845345#1', '834845345#1-AddedOffRampEdge')), mean -1.00 Q1 -1.00, median -1.00, Q3 -1.00 (total -3)
+Optimization succeeded
+4200: Wrote 443 routes (41 distinct) achieving total count 1079 (98.99%) at 29 locations. GEH<5 for 100.00%
+result route edge count: count 443, min 3.00 (18), max 18.00 (0), mean 12.09 Q1 6.00, median 14.00, Q3 18.00
+ histogram: [(3, 5), (4, 65), (5, 28), (6, 25), (7, 13), (8, 8), (9, 21), (10, 6), (11, 6), (12, 5), (13, 5), (14, 78), (15, 10), (16, 35), (18, 133)]
+result route detector count: count 443, min 1.00 (3), max 4.00 (119), mean 2.44 Q1 2.00, median 3.00, Q3 3.00
+ histogram: [(1, 62), (2, 132), (3, 243), (4, 6)]
+GEH: count 29, min 0.00 ([834845345#1 834845345#1-AddedOffRampEdge] 1212 1212), max 3.46 ([gneE18 gneE23] 6 0), mean 0.45 Q1 0.00, median 0.00, Q3 0.50
+Warning: underflow locations: count 9, min 1.00 (('115872656#10.14', '638636924#1')), max 3.00 (('834845345#8', '834845345#8.20')), mean 1.33 Q1 1.00, median 1.00, Q3 1.00 (total 12)
+Warning: overflow locations: count 1, min -1.00 (('115872656#5', '115872656#6')), max -1.00 (('115872656#5', '115872656#6')), mean -1.00 Q1 -1.00, median -1.00, Q3 -1.00 (total -1)
+Optimization succeeded
+3600: Wrote 360 routes (38 distinct) achieving total count 894 (98.57%) at 29 locations. GEH<5 for 100.00%
+result route edge count: count 360, min 3.00 (54), max 18.00 (4), mean 12.30 Q1 6.00, median 14.00, Q3 18.00
+ histogram: [(3, 6), (4, 55), (5, 20), (6, 18), (7, 7), (8, 6), (9, 7), (10, 5), (11, 4), (12, 5), (13, 5), (14, 71), (15, 12), (16, 36), (18, 103)]
+result route detector count: count 360, min 1.00 (7), max 4.00 (10), mean 2.48 Q1 2.00, median 3.00, Q3 3.00
+ histogram: [(1, 44), (2, 106), (3, 202), (4, 8)]
+GEH: count 29, min 0.00 ([834845345#1 834845345#1-AddedOffRampEdge] 960 960), max 4.90 ([660891910#1.19 834845345#6] 12 0), mean 0.50 Q1 0.00, median 0.00, Q3 0.26
+Warning: underflow locations: count 10, min 1.00 (('115872656#10.14', '638636924#1')), max 3.00 (('115872656#9', '115872656#10')), mean 1.30 Q1 1.00, median 1.00, Q3 1.00 (total 13)
+/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/scipy/optimize/_linprog.py:512: OptimizeWarning: x0 is used only when method is 'revised simplex'. 
+  warn(warning_message, OptimizeWarning)
+/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/scipy/optimize/_linprog.py:512: OptimizeWarning: x0 is used only when method is 'revised simplex'. 
+  warn(warning_message, OptimizeWarning)
+/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/scipy/optimize/_linprog.py:512: OptimizeWarning: x0 is used only when method is 'revised simplex'. 
+  warn(warning_message, OptimizeWarning)
+/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/scipy/optimize/_linprog.py:512: OptimizeWarning: x0 is used only when method is 'revised simplex'. 
+  warn(warning_message, OptimizeWarning)
+/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/scipy/optimize/_linprog.py:512: OptimizeWarning: x0 is used only when method is 'revised simplex'. 
+  warn(warning_message, OptimizeWarning)
+/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/scipy/optimize/_linprog.py:512: OptimizeWarning: x0 is used only when method is 'revised simplex'. 
+  warn(warning_message, OptimizeWarning)
+/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/scipy/optimize/_linprog.py:512: OptimizeWarning: x0 is used only when method is 'revised simplex'. 
+  warn(warning_message, OptimizeWarning)
+/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/scipy/optimize/_linprog.py:512: OptimizeWarning: x0 is used only when method is 'revised simplex'. 
+  warn(warning_message, OptimizeWarning)
+all interval underflow: count 8, min 5.00 (1200.0), max 15.00 (1800.0), mean 10.00 Q1 7.00, median 12.00, Q3 13.00
+all interval overflow: count 8, min -6.00 (1200.0), max 0.00 (2400.0), mean -1.75 Q1 -2.00, median -1.00, Q3 0.00
+all interval GEH%: count 8, min 100.00 (0.0), max 100.00 (0.0), mean 100.00 Q1 100.00, median 100.00, Q3 100.00
+WARNING:tensorflow:From /home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/tensorflow/python/compat/v2_compat.py:96: disable_resource_variables (from tensorflow.python.ops.variable_scope) is deprecated and will be removed in a future version.
+Instructions for updating:
+non-resource variables are not supported in the long term
+2021-04-23 13:12:32,487	INFO services.py:1174 -- View the Ray dashboard at [1m[32mhttp://127.0.0.1:8265[39m[22m
+[2m[36m(pid=60400)[0m WARNING:tensorflow:From /home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/tensorflow/python/compat/v2_compat.py:96: disable_resource_variables (from tensorflow.python.ops.variable_scope) is deprecated and will be removed in a future version.
+[2m[36m(pid=60400)[0m Instructions for updating:
+[2m[36m(pid=60400)[0m non-resource variables are not supported in the long term
+2021-04-23 13:12:35,642	ERROR trial_runner.py:616 -- Trial ES_TLEnv-v0_79f9b_00000: Error processing event.
+Traceback (most recent call last):
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/trial_runner.py", line 586, in _process_trial
+    results = self.trial_executor.fetch_result(trial)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/ray_trial_executor.py", line 609, in fetch_result
+    result = ray.get(trial_future[0], timeout=DEFAULT_GET_TIMEOUT)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/_private/client_mode_hook.py", line 47, in wrapper
+    return func(*args, **kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/worker.py", line 1456, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(ModuleNotFoundError): [36mray::ESTrainer.train_buffered()[39m (pid=60400, ip=10.115.104.56)
+  File "python/ray/_raylet.pyx", line 439, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 473, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 476, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 480, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 432, in ray._raylet.execute_task.function_executor
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/trainer.py", line 486, in __init__
+    super().__init__(config, logger_creator)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/trainable.py", line 97, in __init__
+    self.setup(copy.deepcopy(self.config))
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/trainer.py", line 654, in setup
+    self._init(self.config, self.env_creator)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/es/es.py", line 204, in _init
+    env = env_creator(env_context)
+  File "/home/max/remote/airport-harper-sumo/reinforcement-learning-sumo/rl_sumo/helpers/register_environment.py", line 36, in create_env
+    return gym.envs.make(env_name)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 145, in make
+    return registry.make(id, **kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 90, in make
+    env = spec.make(**kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 59, in make
+    cls = load(self.entry_point)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 18, in load
+    mod = importlib.import_module(mod_name)
+  File "/usr/lib/python3.6/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 994, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 971, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 941, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 219, in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 994, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 971, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 953, in _find_and_load_unlocked
+ModuleNotFoundError: No module named 'my_gym'
+2021-04-23 13:12:35,644	INFO trial_runner.py:890 -- Trial ES_TLEnv-v0_79f9b_00000: Attempting to restore trial state from last checkpoint.
+[2m[36m(pid=60400)[0m 2021-04-23 13:12:35,634	INFO trainer.py:616 -- Tip: set framework=tfe or the --eager flag to enable TensorFlow eager execution
+[2m[36m(pid=60400)[0m 2021-04-23 13:12:35,634	INFO trainer.py:643 -- Current log_level is WARN. For more information, set 'log_level': 'INFO' / 'DEBUG' or use the -v and -vv flags.
+[2m[36m(pid=60398)[0m WARNING:tensorflow:From /home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/tensorflow/python/compat/v2_compat.py:96: disable_resource_variables (from tensorflow.python.ops.variable_scope) is deprecated and will be removed in a future version.
+[2m[36m(pid=60398)[0m Instructions for updating:
+[2m[36m(pid=60398)[0m non-resource variables are not supported in the long term
+2021-04-23 13:12:37,306	ERROR trial_runner.py:616 -- Trial ES_TLEnv-v0_79f9b_00000: Error processing event.
+Traceback (most recent call last):
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/trial_runner.py", line 586, in _process_trial
+    results = self.trial_executor.fetch_result(trial)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/ray_trial_executor.py", line 609, in fetch_result
+    result = ray.get(trial_future[0], timeout=DEFAULT_GET_TIMEOUT)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/_private/client_mode_hook.py", line 47, in wrapper
+    return func(*args, **kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/worker.py", line 1456, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(ModuleNotFoundError): [36mray::ESTrainer.train_buffered()[39m (pid=60398, ip=10.115.104.56)
+  File "python/ray/_raylet.pyx", line 439, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 473, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 476, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 480, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 432, in ray._raylet.execute_task.function_executor
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/trainer.py", line 486, in __init__
+    super().__init__(config, logger_creator)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/trainable.py", line 97, in __init__
+    self.setup(copy.deepcopy(self.config))
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/trainer.py", line 654, in setup
+    self._init(self.config, self.env_creator)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/es/es.py", line 204, in _init
+    env = env_creator(env_context)
+  File "/home/max/remote/airport-harper-sumo/reinforcement-learning-sumo/rl_sumo/helpers/register_environment.py", line 36, in create_env
+    return gym.envs.make(env_name)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 145, in make
+    return registry.make(id, **kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 90, in make
+    env = spec.make(**kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 59, in make
+    cls = load(self.entry_point)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 18, in load
+    mod = importlib.import_module(mod_name)
+  File "/usr/lib/python3.6/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 994, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 971, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 941, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 219, in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 994, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 971, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 953, in _find_and_load_unlocked
+ModuleNotFoundError: No module named 'my_gym'
+2021-04-23 13:12:37,307	INFO trial_runner.py:890 -- Trial ES_TLEnv-v0_79f9b_00000: Attempting to restore trial state from last checkpoint.
+[2m[36m(pid=60398)[0m 2021-04-23 13:12:37,299	INFO trainer.py:616 -- Tip: set framework=tfe or the --eager flag to enable TensorFlow eager execution
+[2m[36m(pid=60398)[0m 2021-04-23 13:12:37,300	INFO trainer.py:643 -- Current log_level is WARN. For more information, set 'log_level': 'INFO' / 'DEBUG' or use the -v and -vv flags.
+[2m[36m(pid=60396)[0m WARNING:tensorflow:From /home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/tensorflow/python/compat/v2_compat.py:96: disable_resource_variables (from tensorflow.python.ops.variable_scope) is deprecated and will be removed in a future version.
+[2m[36m(pid=60396)[0m Instructions for updating:
+[2m[36m(pid=60396)[0m non-resource variables are not supported in the long term
+2021-04-23 13:12:38,980	ERROR trial_runner.py:616 -- Trial ES_TLEnv-v0_79f9b_00000: Error processing event.
+Traceback (most recent call last):
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/trial_runner.py", line 586, in _process_trial
+    results = self.trial_executor.fetch_result(trial)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/ray_trial_executor.py", line 609, in fetch_result
+    result = ray.get(trial_future[0], timeout=DEFAULT_GET_TIMEOUT)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/_private/client_mode_hook.py", line 47, in wrapper
+    return func(*args, **kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/worker.py", line 1456, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(ModuleNotFoundError): [36mray::ESTrainer.train_buffered()[39m (pid=60396, ip=10.115.104.56)
+  File "python/ray/_raylet.pyx", line 439, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 473, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 476, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 480, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 432, in ray._raylet.execute_task.function_executor
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/trainer.py", line 486, in __init__
+    super().__init__(config, logger_creator)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/trainable.py", line 97, in __init__
+    self.setup(copy.deepcopy(self.config))
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/trainer.py", line 654, in setup
+    self._init(self.config, self.env_creator)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/es/es.py", line 204, in _init
+    env = env_creator(env_context)
+  File "/home/max/remote/airport-harper-sumo/reinforcement-learning-sumo/rl_sumo/helpers/register_environment.py", line 36, in create_env
+    return gym.envs.make(env_name)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 145, in make
+    return registry.make(id, **kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 90, in make
+    env = spec.make(**kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 59, in make
+    cls = load(self.entry_point)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 18, in load
+    mod = importlib.import_module(mod_name)
+  File "/usr/lib/python3.6/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 994, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 971, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 941, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 219, in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 994, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 971, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 953, in _find_and_load_unlocked
+ModuleNotFoundError: No module named 'my_gym'
+2021-04-23 13:12:38,981	INFO trial_runner.py:890 -- Trial ES_TLEnv-v0_79f9b_00000: Attempting to restore trial state from last checkpoint.
+[2m[36m(pid=60396)[0m 2021-04-23 13:12:38,973	INFO trainer.py:616 -- Tip: set framework=tfe or the --eager flag to enable TensorFlow eager execution
+[2m[36m(pid=60396)[0m 2021-04-23 13:12:38,973	INFO trainer.py:643 -- Current log_level is WARN. For more information, set 'log_level': 'INFO' / 'DEBUG' or use the -v and -vv flags.
+[2m[36m(pid=60395)[0m WARNING:tensorflow:From /home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/tensorflow/python/compat/v2_compat.py:96: disable_resource_variables (from tensorflow.python.ops.variable_scope) is deprecated and will be removed in a future version.
+[2m[36m(pid=60395)[0m Instructions for updating:
+[2m[36m(pid=60395)[0m non-resource variables are not supported in the long term
+2021-04-23 13:12:40,553	ERROR trial_runner.py:616 -- Trial ES_TLEnv-v0_79f9b_00000: Error processing event.
+Traceback (most recent call last):
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/trial_runner.py", line 586, in _process_trial
+    results = self.trial_executor.fetch_result(trial)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/ray_trial_executor.py", line 609, in fetch_result
+    result = ray.get(trial_future[0], timeout=DEFAULT_GET_TIMEOUT)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/_private/client_mode_hook.py", line 47, in wrapper
+    return func(*args, **kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/worker.py", line 1456, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(ModuleNotFoundError): [36mray::ESTrainer.train_buffered()[39m (pid=60395, ip=10.115.104.56)
+  File "python/ray/_raylet.pyx", line 439, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 473, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 476, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 480, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 432, in ray._raylet.execute_task.function_executor
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/trainer.py", line 486, in __init__
+    super().__init__(config, logger_creator)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/trainable.py", line 97, in __init__
+    self.setup(copy.deepcopy(self.config))
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/trainer.py", line 654, in setup
+    self._init(self.config, self.env_creator)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/es/es.py", line 204, in _init
+    env = env_creator(env_context)
+  File "/home/max/remote/airport-harper-sumo/reinforcement-learning-sumo/rl_sumo/helpers/register_environment.py", line 36, in create_env
+    return gym.envs.make(env_name)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 145, in make
+    return registry.make(id, **kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 90, in make
+    env = spec.make(**kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 59, in make
+    cls = load(self.entry_point)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 18, in load
+    mod = importlib.import_module(mod_name)
+  File "/usr/lib/python3.6/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 994, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 971, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 941, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 219, in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 994, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 971, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 953, in _find_and_load_unlocked
+ModuleNotFoundError: No module named 'my_gym'
+2021-04-23 13:12:40,554	INFO trial_runner.py:890 -- Trial ES_TLEnv-v0_79f9b_00000: Attempting to restore trial state from last checkpoint.
+[2m[36m(pid=60395)[0m 2021-04-23 13:12:40,546	INFO trainer.py:616 -- Tip: set framework=tfe or the --eager flag to enable TensorFlow eager execution
+[2m[36m(pid=60395)[0m 2021-04-23 13:12:40,547	INFO trainer.py:643 -- Current log_level is WARN. For more information, set 'log_level': 'INFO' / 'DEBUG' or use the -v and -vv flags.
+[2m[36m(pid=60494)[0m WARNING:tensorflow:From /home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/tensorflow/python/compat/v2_compat.py:96: disable_resource_variables (from tensorflow.python.ops.variable_scope) is deprecated and will be removed in a future version.
+[2m[36m(pid=60494)[0m Instructions for updating:
+[2m[36m(pid=60494)[0m non-resource variables are not supported in the long term
+2021-04-23 13:12:42,190	ERROR trial_runner.py:616 -- Trial ES_TLEnv-v0_79f9b_00000: Error processing event.
+Traceback (most recent call last):
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/trial_runner.py", line 586, in _process_trial
+    results = self.trial_executor.fetch_result(trial)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/ray_trial_executor.py", line 609, in fetch_result
+    result = ray.get(trial_future[0], timeout=DEFAULT_GET_TIMEOUT)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/_private/client_mode_hook.py", line 47, in wrapper
+    return func(*args, **kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/worker.py", line 1456, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(ModuleNotFoundError): [36mray::ESTrainer.train_buffered()[39m (pid=60494, ip=10.115.104.56)
+  File "python/ray/_raylet.pyx", line 439, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 473, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 476, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 480, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 432, in ray._raylet.execute_task.function_executor
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/trainer.py", line 486, in __init__
+    super().__init__(config, logger_creator)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/trainable.py", line 97, in __init__
+    self.setup(copy.deepcopy(self.config))
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/trainer.py", line 654, in setup
+    self._init(self.config, self.env_creator)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/es/es.py", line 204, in _init
+    env = env_creator(env_context)
+  File "/home/max/remote/airport-harper-sumo/reinforcement-learning-sumo/rl_sumo/helpers/register_environment.py", line 36, in create_env
+    return gym.envs.make(env_name)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 145, in make
+    return registry.make(id, **kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 90, in make
+    env = spec.make(**kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 59, in make
+    cls = load(self.entry_point)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 18, in load
+    mod = importlib.import_module(mod_name)
+  File "/usr/lib/python3.6/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 994, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 971, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 941, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 219, in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 994, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 971, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 953, in _find_and_load_unlocked
+ModuleNotFoundError: No module named 'my_gym'
+2021-04-23 13:12:42,191	INFO trial_runner.py:890 -- Trial ES_TLEnv-v0_79f9b_00000: Attempting to restore trial state from last checkpoint.
+[2m[36m(pid=60494)[0m 2021-04-23 13:12:42,183	INFO trainer.py:616 -- Tip: set framework=tfe or the --eager flag to enable TensorFlow eager execution
+[2m[36m(pid=60494)[0m 2021-04-23 13:12:42,183	INFO trainer.py:643 -- Current log_level is WARN. For more information, set 'log_level': 'INFO' / 'DEBUG' or use the -v and -vv flags.
+[2m[36m(pid=60504)[0m WARNING:tensorflow:From /home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/tensorflow/python/compat/v2_compat.py:96: disable_resource_variables (from tensorflow.python.ops.variable_scope) is deprecated and will be removed in a future version.
+[2m[36m(pid=60504)[0m Instructions for updating:
+[2m[36m(pid=60504)[0m non-resource variables are not supported in the long term
+2021-04-23 13:12:43,805	ERROR trial_runner.py:616 -- Trial ES_TLEnv-v0_79f9b_00000: Error processing event.
+Traceback (most recent call last):
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/trial_runner.py", line 586, in _process_trial
+    results = self.trial_executor.fetch_result(trial)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/ray_trial_executor.py", line 609, in fetch_result
+    result = ray.get(trial_future[0], timeout=DEFAULT_GET_TIMEOUT)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/_private/client_mode_hook.py", line 47, in wrapper
+    return func(*args, **kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/worker.py", line 1456, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(ModuleNotFoundError): [36mray::ESTrainer.train_buffered()[39m (pid=60504, ip=10.115.104.56)
+  File "python/ray/_raylet.pyx", line 439, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 473, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 476, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 480, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 432, in ray._raylet.execute_task.function_executor
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/trainer.py", line 486, in __init__
+    super().__init__(config, logger_creator)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/trainable.py", line 97, in __init__
+    self.setup(copy.deepcopy(self.config))
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/trainer.py", line 654, in setup
+    self._init(self.config, self.env_creator)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/es/es.py", line 204, in _init
+    env = env_creator(env_context)
+  File "/home/max/remote/airport-harper-sumo/reinforcement-learning-sumo/rl_sumo/helpers/register_environment.py", line 36, in create_env
+    return gym.envs.make(env_name)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 145, in make
+    return registry.make(id, **kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 90, in make
+    env = spec.make(**kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 59, in make
+    cls = load(self.entry_point)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 18, in load
+    mod = importlib.import_module(mod_name)
+  File "/usr/lib/python3.6/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 994, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 971, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 941, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 219, in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 994, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 971, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 953, in _find_and_load_unlocked
+ModuleNotFoundError: No module named 'my_gym'
+2021-04-23 13:12:43,806	INFO trial_runner.py:890 -- Trial ES_TLEnv-v0_79f9b_00000: Attempting to restore trial state from last checkpoint.
+[2m[36m(pid=60504)[0m 2021-04-23 13:12:43,798	INFO trainer.py:616 -- Tip: set framework=tfe or the --eager flag to enable TensorFlow eager execution
+[2m[36m(pid=60504)[0m 2021-04-23 13:12:43,799	INFO trainer.py:643 -- Current log_level is WARN. For more information, set 'log_level': 'INFO' / 'DEBUG' or use the -v and -vv flags.
+[2m[36m(pid=60518)[0m WARNING:tensorflow:From /home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/tensorflow/python/compat/v2_compat.py:96: disable_resource_variables (from tensorflow.python.ops.variable_scope) is deprecated and will be removed in a future version.
+[2m[36m(pid=60518)[0m Instructions for updating:
+[2m[36m(pid=60518)[0m non-resource variables are not supported in the long term
+2021-04-23 13:12:45,422	ERROR trial_runner.py:616 -- Trial ES_TLEnv-v0_79f9b_00000: Error processing event.
+Traceback (most recent call last):
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/trial_runner.py", line 586, in _process_trial
+    results = self.trial_executor.fetch_result(trial)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/ray_trial_executor.py", line 609, in fetch_result
+    result = ray.get(trial_future[0], timeout=DEFAULT_GET_TIMEOUT)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/_private/client_mode_hook.py", line 47, in wrapper
+    return func(*args, **kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/worker.py", line 1456, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(ModuleNotFoundError): [36mray::ESTrainer.train_buffered()[39m (pid=60518, ip=10.115.104.56)
+  File "python/ray/_raylet.pyx", line 439, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 473, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 476, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 480, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 432, in ray._raylet.execute_task.function_executor
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/trainer.py", line 486, in __init__
+    super().__init__(config, logger_creator)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/trainable.py", line 97, in __init__
+    self.setup(copy.deepcopy(self.config))
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/trainer.py", line 654, in setup
+    self._init(self.config, self.env_creator)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/es/es.py", line 204, in _init
+    env = env_creator(env_context)
+  File "/home/max/remote/airport-harper-sumo/reinforcement-learning-sumo/rl_sumo/helpers/register_environment.py", line 36, in create_env
+    return gym.envs.make(env_name)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 145, in make
+    return registry.make(id, **kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 90, in make
+    env = spec.make(**kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 59, in make
+    cls = load(self.entry_point)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 18, in load
+    mod = importlib.import_module(mod_name)
+  File "/usr/lib/python3.6/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 994, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 971, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 941, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 219, in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 994, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 971, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 953, in _find_and_load_unlocked
+ModuleNotFoundError: No module named 'my_gym'
+2021-04-23 13:12:45,425	INFO trial_runner.py:890 -- Trial ES_TLEnv-v0_79f9b_00000: Attempting to restore trial state from last checkpoint.
+[2m[36m(pid=60518)[0m 2021-04-23 13:12:45,416	INFO trainer.py:616 -- Tip: set framework=tfe or the --eager flag to enable TensorFlow eager execution
+[2m[36m(pid=60518)[0m 2021-04-23 13:12:45,416	INFO trainer.py:643 -- Current log_level is WARN. For more information, set 'log_level': 'INFO' / 'DEBUG' or use the -v and -vv flags.
+[2m[36m(pid=60516)[0m WARNING:tensorflow:From /home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/tensorflow/python/compat/v2_compat.py:96: disable_resource_variables (from tensorflow.python.ops.variable_scope) is deprecated and will be removed in a future version.
+[2m[36m(pid=60516)[0m Instructions for updating:
+[2m[36m(pid=60516)[0m non-resource variables are not supported in the long term
+2021-04-23 13:12:46,992	ERROR trial_runner.py:616 -- Trial ES_TLEnv-v0_79f9b_00000: Error processing event.
+Traceback (most recent call last):
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/trial_runner.py", line 586, in _process_trial
+    results = self.trial_executor.fetch_result(trial)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/ray_trial_executor.py", line 609, in fetch_result
+    result = ray.get(trial_future[0], timeout=DEFAULT_GET_TIMEOUT)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/_private/client_mode_hook.py", line 47, in wrapper
+    return func(*args, **kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/worker.py", line 1456, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(ModuleNotFoundError): [36mray::ESTrainer.train_buffered()[39m (pid=60516, ip=10.115.104.56)
+  File "python/ray/_raylet.pyx", line 439, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 473, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 476, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 480, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 432, in ray._raylet.execute_task.function_executor
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/trainer.py", line 486, in __init__
+    super().__init__(config, logger_creator)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/trainable.py", line 97, in __init__
+    self.setup(copy.deepcopy(self.config))
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/trainer.py", line 654, in setup
+    self._init(self.config, self.env_creator)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/es/es.py", line 204, in _init
+    env = env_creator(env_context)
+  File "/home/max/remote/airport-harper-sumo/reinforcement-learning-sumo/rl_sumo/helpers/register_environment.py", line 36, in create_env
+    return gym.envs.make(env_name)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 145, in make
+    return registry.make(id, **kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 90, in make
+    env = spec.make(**kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 59, in make
+    cls = load(self.entry_point)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 18, in load
+    mod = importlib.import_module(mod_name)
+  File "/usr/lib/python3.6/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 994, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 971, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 941, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 219, in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 994, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 971, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 953, in _find_and_load_unlocked
+ModuleNotFoundError: No module named 'my_gym'
+2021-04-23 13:12:46,993	INFO trial_runner.py:890 -- Trial ES_TLEnv-v0_79f9b_00000: Attempting to restore trial state from last checkpoint.
+[2m[36m(pid=60516)[0m 2021-04-23 13:12:46,986	INFO trainer.py:616 -- Tip: set framework=tfe or the --eager flag to enable TensorFlow eager execution
+[2m[36m(pid=60516)[0m 2021-04-23 13:12:46,986	INFO trainer.py:643 -- Current log_level is WARN. For more information, set 'log_level': 'INFO' / 'DEBUG' or use the -v and -vv flags.
+[2m[36m(pid=60524)[0m WARNING:tensorflow:From /home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/tensorflow/python/compat/v2_compat.py:96: disable_resource_variables (from tensorflow.python.ops.variable_scope) is deprecated and will be removed in a future version.
+[2m[36m(pid=60524)[0m Instructions for updating:
+[2m[36m(pid=60524)[0m non-resource variables are not supported in the long term
+2021-04-23 13:12:48,600	ERROR trial_runner.py:616 -- Trial ES_TLEnv-v0_79f9b_00000: Error processing event.
+Traceback (most recent call last):
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/trial_runner.py", line 586, in _process_trial
+    results = self.trial_executor.fetch_result(trial)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/ray_trial_executor.py", line 609, in fetch_result
+    result = ray.get(trial_future[0], timeout=DEFAULT_GET_TIMEOUT)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/_private/client_mode_hook.py", line 47, in wrapper
+    return func(*args, **kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/worker.py", line 1456, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(ModuleNotFoundError): [36mray::ESTrainer.train_buffered()[39m (pid=60524, ip=10.115.104.56)
+  File "python/ray/_raylet.pyx", line 439, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 473, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 476, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 480, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 432, in ray._raylet.execute_task.function_executor
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/trainer.py", line 486, in __init__
+    super().__init__(config, logger_creator)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/trainable.py", line 97, in __init__
+    self.setup(copy.deepcopy(self.config))
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/trainer.py", line 654, in setup
+    self._init(self.config, self.env_creator)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/es/es.py", line 204, in _init
+    env = env_creator(env_context)
+  File "/home/max/remote/airport-harper-sumo/reinforcement-learning-sumo/rl_sumo/helpers/register_environment.py", line 36, in create_env
+    return gym.envs.make(env_name)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 145, in make
+    return registry.make(id, **kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 90, in make
+    env = spec.make(**kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 59, in make
+    cls = load(self.entry_point)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 18, in load
+    mod = importlib.import_module(mod_name)
+  File "/usr/lib/python3.6/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 994, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 971, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 941, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 219, in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 994, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 971, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 953, in _find_and_load_unlocked
+ModuleNotFoundError: No module named 'my_gym'
+2021-04-23 13:12:48,601	INFO trial_runner.py:890 -- Trial ES_TLEnv-v0_79f9b_00000: Attempting to restore trial state from last checkpoint.
+[2m[36m(pid=60524)[0m 2021-04-23 13:12:48,592	INFO trainer.py:616 -- Tip: set framework=tfe or the --eager flag to enable TensorFlow eager execution
+[2m[36m(pid=60524)[0m 2021-04-23 13:12:48,593	INFO trainer.py:643 -- Current log_level is WARN. For more information, set 'log_level': 'INFO' / 'DEBUG' or use the -v and -vv flags.
+[2m[36m(pid=60506)[0m WARNING:tensorflow:From /home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/tensorflow/python/compat/v2_compat.py:96: disable_resource_variables (from tensorflow.python.ops.variable_scope) is deprecated and will be removed in a future version.
+[2m[36m(pid=60506)[0m Instructions for updating:
+[2m[36m(pid=60506)[0m non-resource variables are not supported in the long term
+2021-04-23 13:12:50,153	ERROR trial_runner.py:616 -- Trial ES_TLEnv-v0_79f9b_00000: Error processing event.
+Traceback (most recent call last):
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/trial_runner.py", line 586, in _process_trial
+    results = self.trial_executor.fetch_result(trial)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/ray_trial_executor.py", line 609, in fetch_result
+    result = ray.get(trial_future[0], timeout=DEFAULT_GET_TIMEOUT)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/_private/client_mode_hook.py", line 47, in wrapper
+    return func(*args, **kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/worker.py", line 1456, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(ModuleNotFoundError): [36mray::ESTrainer.train_buffered()[39m (pid=60506, ip=10.115.104.56)
+  File "python/ray/_raylet.pyx", line 439, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 473, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 476, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 480, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 432, in ray._raylet.execute_task.function_executor
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/trainer.py", line 486, in __init__
+    super().__init__(config, logger_creator)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/trainable.py", line 97, in __init__
+    self.setup(copy.deepcopy(self.config))
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/trainer.py", line 654, in setup
+    self._init(self.config, self.env_creator)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/es/es.py", line 204, in _init
+    env = env_creator(env_context)
+  File "/home/max/remote/airport-harper-sumo/reinforcement-learning-sumo/rl_sumo/helpers/register_environment.py", line 36, in create_env
+    return gym.envs.make(env_name)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 145, in make
+    return registry.make(id, **kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 90, in make
+    env = spec.make(**kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 59, in make
+    cls = load(self.entry_point)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 18, in load
+    mod = importlib.import_module(mod_name)
+  File "/usr/lib/python3.6/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 994, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 971, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 941, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 219, in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 994, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 971, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 953, in _find_and_load_unlocked
+ModuleNotFoundError: No module named 'my_gym'
+2021-04-23 13:12:50,155	INFO trial_runner.py:890 -- Trial ES_TLEnv-v0_79f9b_00000: Attempting to restore trial state from last checkpoint.
+[2m[36m(pid=60506)[0m 2021-04-23 13:12:50,147	INFO trainer.py:616 -- Tip: set framework=tfe or the --eager flag to enable TensorFlow eager execution
+[2m[36m(pid=60506)[0m 2021-04-23 13:12:50,147	INFO trainer.py:643 -- Current log_level is WARN. For more information, set 'log_level': 'INFO' / 'DEBUG' or use the -v and -vv flags.
+[2m[36m(pid=60510)[0m WARNING:tensorflow:From /home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/tensorflow/python/compat/v2_compat.py:96: disable_resource_variables (from tensorflow.python.ops.variable_scope) is deprecated and will be removed in a future version.
+[2m[36m(pid=60510)[0m Instructions for updating:
+[2m[36m(pid=60510)[0m non-resource variables are not supported in the long term
+2021-04-23 13:12:51,944	ERROR trial_runner.py:616 -- Trial ES_TLEnv-v0_79f9b_00000: Error processing event.
+Traceback (most recent call last):
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/trial_runner.py", line 586, in _process_trial
+    results = self.trial_executor.fetch_result(trial)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/ray_trial_executor.py", line 609, in fetch_result
+    result = ray.get(trial_future[0], timeout=DEFAULT_GET_TIMEOUT)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/_private/client_mode_hook.py", line 47, in wrapper
+    return func(*args, **kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/worker.py", line 1456, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(ModuleNotFoundError): [36mray::ESTrainer.train_buffered()[39m (pid=60510, ip=10.115.104.56)
+  File "python/ray/_raylet.pyx", line 439, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 473, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 476, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 480, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 432, in ray._raylet.execute_task.function_executor
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/trainer.py", line 486, in __init__
+    super().__init__(config, logger_creator)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/trainable.py", line 97, in __init__
+    self.setup(copy.deepcopy(self.config))
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/trainer.py", line 654, in setup
+    self._init(self.config, self.env_creator)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/es/es.py", line 204, in _init
+    env = env_creator(env_context)
+  File "/home/max/remote/airport-harper-sumo/reinforcement-learning-sumo/rl_sumo/helpers/register_environment.py", line 36, in create_env
+    return gym.envs.make(env_name)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 145, in make
+    return registry.make(id, **kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 90, in make
+    env = spec.make(**kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 59, in make
+    cls = load(self.entry_point)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 18, in load
+    mod = importlib.import_module(mod_name)
+  File "/usr/lib/python3.6/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 994, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 971, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 941, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 219, in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 994, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 971, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 953, in _find_and_load_unlocked
+ModuleNotFoundError: No module named 'my_gym'
+2021-04-23 13:12:51,946	INFO trial_runner.py:890 -- Trial ES_TLEnv-v0_79f9b_00000: Attempting to restore trial state from last checkpoint.
+[2m[36m(pid=60510)[0m 2021-04-23 13:12:51,938	INFO trainer.py:616 -- Tip: set framework=tfe or the --eager flag to enable TensorFlow eager execution
+[2m[36m(pid=60510)[0m 2021-04-23 13:12:51,938	INFO trainer.py:643 -- Current log_level is WARN. For more information, set 'log_level': 'INFO' / 'DEBUG' or use the -v and -vv flags.
+[2m[36m(pid=60520)[0m WARNING:tensorflow:From /home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/tensorflow/python/compat/v2_compat.py:96: disable_resource_variables (from tensorflow.python.ops.variable_scope) is deprecated and will be removed in a future version.
+[2m[36m(pid=60520)[0m Instructions for updating:
+[2m[36m(pid=60520)[0m non-resource variables are not supported in the long term
+2021-04-23 13:12:53,546	ERROR trial_runner.py:616 -- Trial ES_TLEnv-v0_79f9b_00000: Error processing event.
+Traceback (most recent call last):
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/trial_runner.py", line 586, in _process_trial
+    results = self.trial_executor.fetch_result(trial)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/ray_trial_executor.py", line 609, in fetch_result
+    result = ray.get(trial_future[0], timeout=DEFAULT_GET_TIMEOUT)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/_private/client_mode_hook.py", line 47, in wrapper
+    return func(*args, **kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/worker.py", line 1456, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(ModuleNotFoundError): [36mray::ESTrainer.train_buffered()[39m (pid=60520, ip=10.115.104.56)
+  File "python/ray/_raylet.pyx", line 439, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 473, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 476, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 480, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 432, in ray._raylet.execute_task.function_executor
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/trainer.py", line 486, in __init__
+    super().__init__(config, logger_creator)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/trainable.py", line 97, in __init__
+    self.setup(copy.deepcopy(self.config))
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/trainer.py", line 654, in setup
+    self._init(self.config, self.env_creator)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/es/es.py", line 204, in _init
+    env = env_creator(env_context)
+  File "/home/max/remote/airport-harper-sumo/reinforcement-learning-sumo/rl_sumo/helpers/register_environment.py", line 36, in create_env
+    return gym.envs.make(env_name)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 145, in make
+    return registry.make(id, **kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 90, in make
+    env = spec.make(**kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 59, in make
+    cls = load(self.entry_point)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 18, in load
+    mod = importlib.import_module(mod_name)
+  File "/usr/lib/python3.6/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 994, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 971, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 941, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 219, in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 994, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 971, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 953, in _find_and_load_unlocked
+ModuleNotFoundError: No module named 'my_gym'
+2021-04-23 13:12:53,548	INFO trial_runner.py:890 -- Trial ES_TLEnv-v0_79f9b_00000: Attempting to restore trial state from last checkpoint.
+[2m[36m(pid=60520)[0m 2021-04-23 13:12:53,540	INFO trainer.py:616 -- Tip: set framework=tfe or the --eager flag to enable TensorFlow eager execution
+[2m[36m(pid=60520)[0m 2021-04-23 13:12:53,540	INFO trainer.py:643 -- Current log_level is WARN. For more information, set 'log_level': 'INFO' / 'DEBUG' or use the -v and -vv flags.
+[2m[36m(pid=60482)[0m WARNING:tensorflow:From /home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/tensorflow/python/compat/v2_compat.py:96: disable_resource_variables (from tensorflow.python.ops.variable_scope) is deprecated and will be removed in a future version.
+[2m[36m(pid=60482)[0m Instructions for updating:
+[2m[36m(pid=60482)[0m non-resource variables are not supported in the long term
+2021-04-23 13:12:55,261	ERROR trial_runner.py:616 -- Trial ES_TLEnv-v0_79f9b_00000: Error processing event.
+Traceback (most recent call last):
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/trial_runner.py", line 586, in _process_trial
+    results = self.trial_executor.fetch_result(trial)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/ray_trial_executor.py", line 609, in fetch_result
+    result = ray.get(trial_future[0], timeout=DEFAULT_GET_TIMEOUT)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/_private/client_mode_hook.py", line 47, in wrapper
+    return func(*args, **kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/worker.py", line 1456, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(ModuleNotFoundError): [36mray::ESTrainer.train_buffered()[39m (pid=60482, ip=10.115.104.56)
+  File "python/ray/_raylet.pyx", line 439, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 473, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 476, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 480, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 432, in ray._raylet.execute_task.function_executor
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/trainer.py", line 486, in __init__
+    super().__init__(config, logger_creator)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/tune/trainable.py", line 97, in __init__
+    self.setup(copy.deepcopy(self.config))
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/trainer.py", line 654, in setup
+    self._init(self.config, self.env_creator)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/ray/rllib/agents/es/es.py", line 204, in _init
+    env = env_creator(env_context)
+  File "/home/max/remote/airport-harper-sumo/reinforcement-learning-sumo/rl_sumo/helpers/register_environment.py", line 36, in create_env
+    return gym.envs.make(env_name)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 145, in make
+    return registry.make(id, **kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 90, in make
+    env = spec.make(**kwargs)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 59, in make
+    cls = load(self.entry_point)
+  File "/home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/gym/envs/registration.py", line 18, in load
+    mod = importlib.import_module(mod_name)
+  File "/usr/lib/python3.6/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 994, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 971, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 941, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 219, in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 994, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 971, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 953, in _find_and_load_unlocked
+ModuleNotFoundError: No module named 'my_gym'
+2021-04-23 13:12:55,262	INFO trial_runner.py:890 -- Trial ES_TLEnv-v0_79f9b_00000: Attempting to restore trial state from last checkpoint.
+[2m[36m(pid=60482)[0m 2021-04-23 13:12:55,254	INFO trainer.py:616 -- Tip: set framework=tfe or the --eager flag to enable TensorFlow eager execution
+[2m[36m(pid=60482)[0m 2021-04-23 13:12:55,255	INFO trainer.py:643 -- Current log_level is WARN. For more information, set 'log_level': 'INFO' / 'DEBUG' or use the -v and -vv flags.
+[2m[36m(pid=60500)[0m WARNING:tensorflow:From /home/max/remote/airport-harper-sumo/venv/lib/python3.6/site-packages/tensorflow/python/compat/v2_compat.py:96: disable_resource_variables (from tensorflow.python.ops.variable_scope) is deprecated and will be removed in a future version.
+[2m[36m(pid=60500)[0m Instructions for updating:
+[2m[36m(pid=60500)[0m non-resource variables are not supported in the long term
+2021-04-23 13:12:56,840	ERROR import_thread.py:89 -- ImportThread: Connection closed by server.
+2021-04-23 13:12:56,844	ERROR worker.py:919 -- print_logs: Connection closed by server.
+2021-04-23 13:12:56,845	ERROR worker.py:1109 -- listen_error_messages_raylet: Connection closed by server.

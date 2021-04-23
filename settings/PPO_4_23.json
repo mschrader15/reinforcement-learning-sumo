@@ -1,15 +1,15 @@
 {
-  "Name": "ES-tester",
+  "Name": "ES-short-2",
   "Environment": {
     "algorithm": "ES",
     "warmup_time": 3600,
     "sims_per_step": 1,
-    "horizon": 1800,
+    "horizon": 300,
     "reward_class": "FCIC",
     "environment_location": "rl_sumo.environment",
     "environment_name": "TLEnv",
-    "num_rollouts": 50,
-    "cpu_num": 60
+    "num_rollouts": 60,
+    "cpu_num": 64
   },
   "Simulation": {
     "file_root": "/home/max/remote/airport-harper-sumo",
@@ -25,6 +25,7 @@
     "tl_file": "sumo-xml/traffic-lights/tls.rl.add.xml",
     "sim_step": 0.5,
     "start_time": "2020-02-24 06:00:00.000",
-    "gui": 0
+    "gui": 0,
+    "central_junction": "63082003"
   }
 }

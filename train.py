@@ -2,9 +2,9 @@ import importlib
 import argparse
 import sys
 from copy import deepcopy
-from my_gym.helpers import make_create_env
-from my_gym.helpers import execute_preprocessing_tasks
-from my_gym.helpers import get_parameters
+from rl_sumo.helpers import make_create_env
+from rl_sumo.helpers import execute_preprocessing_tasks
+from rl_sumo.helpers import get_parameters
 from trainers import TRAINING_FUNCTIONS
 
 
@@ -43,7 +43,7 @@ def main(cmd_line_args):
     env_params, sim_params = get_parameters(args.config_path)
 
     # preprocessing
-    # preprocessing(sim_params)
+    preprocessing(sim_params)
 
     TRAINING_FUNCTIONS[env_params.algorithm.lower()](sim_params, env_params)
 
