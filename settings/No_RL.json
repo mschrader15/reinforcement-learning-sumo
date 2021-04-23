@@ -16,7 +16,9 @@
     "net_file": "sumo-xml/simplified_reworked.net.xml",
     "route_file": "sumo-xml/route-sampler/rl_route_sampler.route.xml",
     "additional_files": [
-      "sumo-xml/traffic-lights/constant_green.add.xml",
+      "sumo-xml/traffic-lights/dual_ring_ready.63082002.xml",
+      "sumo-xml/traffic-lights/dual_ring_ready.63082003.xml",
+      "sumo-xml/traffic-lights/dual_ring_ready.63082004.xml",
       "sumo-xml/traffic-lights/tls.rl.add.xml",
       "sumo-xml/veh-descript/vTypeDistributions.add.xml"
     ],

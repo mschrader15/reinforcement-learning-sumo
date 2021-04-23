@@ -1,5 +1,6 @@
 # project specific ignores
 tmp/
+*.out*
 
 # pycharm specific
 .idea/
