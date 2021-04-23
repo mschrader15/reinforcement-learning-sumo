@@ -42,8 +42,6 @@ def main(cmd_line_args):
     # get the sim and environment parameters
     env_params, sim_params = get_parameters(args.config_path)
 
-    # TODO: dump json of the parameters
-
     # preprocessing
     # preprocessing(sim_params)
 

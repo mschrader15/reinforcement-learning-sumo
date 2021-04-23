@@ -74,7 +74,6 @@ class Kernel(object):
 
         # connect to traci
         traci_c = traci.connect(port=self.sim_params.port, numRetries=100)
-        # TODO: is this needed?? It throws an error
         traci_c.setOrder(0)
         traci_c.simulationStep()
 

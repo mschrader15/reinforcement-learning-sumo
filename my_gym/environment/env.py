@@ -100,7 +100,6 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
             dtype=np.float32
         )
 
-        # # TODO: maybe change this to a discrete
         # traffic_light_transition_active = Box(
         #     low=0,
         #     high=1,
@@ -197,7 +196,6 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
 
         # restart completely if we should restart
         if self.step_counter > 1e6:
-            # TODO put this back to the way that it was. Need a better way to load the simulation
             self._hard_reset()
 
         # # else reset the simulation
