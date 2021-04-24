@@ -58,6 +58,8 @@ class Kernel(object):
         self.traci_calls = []
         self.sim_data = {}
 
+        self._initial_tl_colors = {}
+
     def set_seed(self, seed):
         self.seed = seed
 
@@ -103,10 +105,18 @@ class Kernel(object):
         for veh_id in traci_c.vehicle.getIDList():
             traci_c.vehicle.subscribe(veh_id, VEHICLE_SUBSCRIPTIONS)
 
+        # get the light states
+        for tl_id in self.sim_params.tl_ids:
+            self._initial_tl_colors[tl_id] = traci_c.trafficlight.getRedYellowGreenState(tl_id)
+
         # set the traffic lights to the all green program
         if not self.sim_params.no_actor:
             for tl_id in self.sim_params.tl_ids:
                 traci_c.trafficlight.setProgram(tl_id, f'{tl_id}-2')
+        
+        # overwrite the default traffic light states to what they where
+        for tl_id in self.sim_params.tl_ids:
+            traci_c.trafficlight.setRedYellowGreenState(tl_id, self._initial_tl_colors[tl_id])
 
         # saving the beginning state of the simulation
         traci_c.simulation.saveState(self.state_file)
@@ -141,6 +151,10 @@ class Kernel(object):
 
         logging.info('resetting the simulation')
         self.traci_c.simulation.loadState(self.state_file)
+
+        # overwrite the default traffic light states to what they where
+        for tl_id in self.sim_params.tl_ids:
+            self.traci_c.trafficlight.setRedYellowGreenState(tl_id, self._initial_tl_colors[tl_id])
 
         # subscribe to all vehicles in the simulation at this point
         # subscribe to all new vehicle positions and fuel consumption

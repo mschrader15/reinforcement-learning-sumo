@@ -79,19 +79,25 @@ class TrafficLightManager(_Base):
         self.action_space, self.action_space_index_dict = self._create_states()
         self.action_space_length = len(self.action_space)
         self.phase_num_name_eq = self.read_in_tls_xml(tl_file)
-        # self.light_heads = self._compose_light_heads(tl_details)
         self._task_list = []
-        self._last_light_string = ""
         self._last_green_time = 0
-        self._transition_active = False
+        # self._transition_active = False
         self._sim_time = 0
         self._last_changed_time = 0
+        self._color = 'g'
         self._minimum_times = {
-            'r': float(self.tl_details['phases']['2']['min_red_time']),
-            'y': float(self.tl_details['phases']['2']['min_yellow_time']),
-            'g': float(self.tl_details['phases']['2']['min_green_time'])
+            'r': 3,  # this is really the time from yellow -> red
+            'y': 5,  # this is green -> yellow
+            'g': 1   # this is red -> green
         }
+        self._color_int = {
+            'r': 0,
+            'y': 1,
+            'g': 2
+        }
+
         super().__init__()
+        
         self.traci_c = None
 
     def compose_minimum_times(self, ):
@@ -114,6 +120,7 @@ class TrafficLightManager(_Base):
             end_index = self.tl_details['phases'][str(phase)]['lane_num'] + 1 if bool(
                 strtobool(self.tl_details['phases'][str(phase)]['right_on_red'])) else self.tl_details['phases'][str(
                     phase)]['lane_num']
+            end_index = start_index + end_index
             substring = light_string[start_index:end_index]
             if 'G' in substring:
                 actual_state.append(phase)
@@ -183,10 +190,6 @@ class TrafficLightManager(_Base):
     def tasks_are_empty(self, ):
         return False if len(self._task_list) else True
 
-    # @staticmethod
-    # def compose_phase_name(c_phase, d_phase, color):
-    #     # return "-".join(["+".join(c_phase), "+".join(d_phase), color])
-
     def update_state(self, action, sim_time):
         success = False
         desired_state = self._int_to_action(action)
@@ -194,12 +197,12 @@ class TrafficLightManager(_Base):
         if (desired_state != self.current_state) and (desired_state in self.action_space):
             if self.tasks_are_empty():
                 # set the transition to being active
-                self._transition_active = True
+                # self._transition_active = True
 
                 states = [*self.current_state, *desired_state]
 
-                state_progression = [[[self.set_light_state, (states, 'y')]], [[self.set_light_state, (states, 'r')]],
-                                     [[self.set_light_state, (states, 'g')], [self._update_state, desired_state],
+                state_progression = [[[self.set_light_state, states, 'y']], [[self.set_light_state, states, 'r']],
+                                     [[self.set_light_state, desired_state, 'g'], [self._update_state, desired_state],
                                       [self._update_timer, ()]]]
 
                 self._task_list.extend(state_progression)
@@ -210,12 +213,11 @@ class TrafficLightManager(_Base):
 
     def _update_state(self, state):
         self.current_state = state
-        self._transition_active = False
+        # self._transition_active = False
         return True
 
     def _update_timer(self, *args, **kwargs):
         self._last_green_time = _Timer.get_time()
-        # signifies a sucessful function completion
         return True
 
     def _step(self, ):
@@ -236,45 +238,32 @@ class TrafficLightManager(_Base):
     def set_light_state(self, phase_list, color):
         if self._check_timer(color):
             self._last_changed_time = self._sim_time
-            self.traci_c.trafficlight.setPhase(self._get_index(phase_list, color))
+            try:
+                self.traci_c.trafficlight.setPhase(self.tl_id, self._get_index(phase_list, color))
+            except Exception:
+                # have to set to the correct program first
+                self.traci_c.trafficlight.setProgram(self.tl_id, f'{self.tl_id}-2')
+                self.traci_c.trafficlight.setPhase(self.tl_id, self._get_index(phase_list, color))
+            self._color = color
             return True
         return False
 
     def _get_index(self, phase_list, color):
         phase_dict = self.phase_num_name_eq[phase_list[0]]
         if len(phase_list) > 1:
+            # iter_list = phase_list[1:-1] if color in 'g' else phase_list[1:] 
             for phase in phase_list[1:]:
                 phase_dict = phase_dict[phase]
         return phase_dict[color]
 
     def get_current_state(self, ):
-        """
-        Generates the enumerated state for an input to the RL algorithm
-
-        state is the form (2, 6)
-
-        the result will be 2261 if 2 is green and 6 is yellow
-
-        @return: int <= 6383
-        """
-        # states = []
-        # for phase in self.current_state:
-        #     states.append(phase * 10 + self.light_heads[phase].state.value)
-        # if len(states) > 1:
-        #     return states[0] * 100 + states[1]
-        # return states[0]
         return self.action_space_index_dict[tuple(self.current_state)]
 
     def get_last_green_time(self, ):
         return _Timer.time - self._last_green_time
 
-    def get_light_head_colors(self, ):
-        pass
-
-        # colors = [self.light_heads[phase].state.value for phase in self.current_state]
-        # if len(colors) < 2:
-        #     colors.append(_TL_HEAD.INACTIVE.value)
-        # return colors
+    def get_light_head_color(self, ):
+        return self._color_int[self._color]
 
 
 class GlobalActor:
@@ -316,7 +305,7 @@ class GlobalActor:
     def size(self, ) -> int:
         return {
             'state': [tl_manager.action_space_length for tl_manager in self],
-            'color': [_TL_HEAD.INACTIVE.value + 1 for _ in range(len(self.tls) * 2)],
+            'color': [3 for _ in range(len(self.tls))],
             'last_time': len(self.tls)
         }
 
@@ -337,8 +326,8 @@ class GlobalActor:
         _Timer.time = sim_time
         for action, tl_manager in zip(action_list, self):
             # if action < tl_manager.action_space_length:
-            tl_manager.update_state(action)
-            tl_manager.update_sumo()
+            tl_manager.update_state(action, sim_time)
+            # tl_manager.update_sumo()
         # return {tl_id: self.tls[tl_id].update_state(action) for tl_id, action in action_dict.items()}
 
     def get_current_state(self, ) -> [
@@ -356,6 +345,6 @@ class GlobalActor:
         for tl in self:
             states.append(tl.get_current_state())
             last_green_times.append(tl.get_last_green_time())
-            light_head_colors.extend(tl.get_light_head_colors())
+            light_head_colors.append(tl.get_light_head_color())
 
         return states, last_green_times, light_head_colors

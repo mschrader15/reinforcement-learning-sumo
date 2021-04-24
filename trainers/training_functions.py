@@ -16,7 +16,7 @@ def run_no_rl(sim_params, env_params):
     # with env(env_params=env_params, sim_params=sim_params) as e:
 
     # for _ in range(10):
-    for i in range(1):
+    for i in range(2):
 
         env.reset()
 

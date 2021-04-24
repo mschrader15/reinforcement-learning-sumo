@@ -43,7 +43,7 @@ def main(cmd_line_args):
     env_params, sim_params = get_parameters(args.config_path)
 
     # preprocessing
-    preprocessing(sim_params)
+    # preprocessing(sim_params)
 
     TRAINING_FUNCTIONS[env_params.algorithm.lower()](sim_params, env_params)
 
