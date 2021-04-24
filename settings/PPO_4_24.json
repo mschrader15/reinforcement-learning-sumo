@@ -1,10 +1,10 @@
 {
-  "Name": "ES-short-2",
+  "Name": "PPO-test",
   "Environment": {
-    "algorithm": "ES",
+    "algorithm": "PPO",
     "warmup_time": 3600,
     "sims_per_step": 1,
-    "horizon": 300,
+    "horizon": 900,
     "reward_class": "FCIC",
     "environment_location": "rl_sumo.environment",
     "environment_name": "TLEnv",
@@ -16,16 +16,23 @@
     "net_file": "sumo-xml/simplified_reworked.net.xml",
     "route_file": "sumo-xml/route-sampler/rl_route_sampler.route.xml",
     "additional_files": [
-      "sumo-xml/traffic-lights/constant_green.add.xml",
+      "sumo-xml/traffic-lights/dual_ring_ready.63082002.xml",
+      "sumo-xml/traffic-lights/dual_ring_ready.63082003.xml",
+      "sumo-xml/traffic-lights/dual_ring_ready.63082004.xml",
       "sumo-xml/traffic-lights/tls.rl.add.xml",
       "sumo-xml/veh-descript/vTypeDistributions.add.xml"
     ],
     "tl_ids": ["63082002", "63082003", "63082004"],
     "tl_settings": "sumo-xml/settings.json",
     "tl_file": "sumo-xml/traffic-lights/tls.rl.add.xml",
-    "sim_step": 0.5,
-    "start_time": "2020-02-24 06:00:00.000",
+    "sim_step": 0.1,
+    "start_time": "2020-02-24 06:30:00.000",
     "gui": 0,
-    "central_junction": "63082003"
+    "central_junction": "63082003",
+    "tl_file_dict": {
+      "63082002": "/home/max/remote/airport-harper-sumo/sumo-xml/traffic-lights/dual_ring_ready.63082002.xml",
+      "63082003": "/home/max/remote/airport-harper-sumo/sumo-xml/traffic-lights/dual_ring_ready.63082003.xml",
+      "63082004": "/home/max/remote/airport-harper-sumo/sumo-xml/traffic-lights/dual_ring_ready.63082004.xml"
+    }
   }
 }

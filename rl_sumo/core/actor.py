@@ -3,6 +3,7 @@ import json
 import copy
 from distutils.util import strtobool
 from xml.dom import minidom
+import traci
 
 
 def read_settings(settings_path):
@@ -35,14 +36,6 @@ def safe_int(prospective_int):
         return int(prospective_int)
     except (ValueError, TypeError):
         return prospective_int
-
-
-class _TL_HEAD(enum.Enum):
-    RED = 0
-    YELLOW = 1
-    GREEN = 2
-    YIELD = 3
-    INACTIVE = 4
 
 
 class _Timer:
@@ -88,16 +81,12 @@ class TrafficLightManager(_Base):
         self._minimum_times = {
             'r': 3,  # this is really the time from yellow -> red
             'y': 5,  # this is green -> yellow
-            'g': 1   # this is red -> green
+            'g': 1  # this is red -> green
         }
-        self._color_int = {
-            'r': 0,
-            'y': 1,
-            'g': 2
-        }
+        self._color_int = {'r': 0, 'y': 1, 'g': 2}
 
         super().__init__()
-        
+
         self.traci_c = None
 
     def compose_minimum_times(self, ):
@@ -188,25 +177,28 @@ class TrafficLightManager(_Base):
             _dict[keys[0]] = value
 
     def tasks_are_empty(self, ):
-        return False if len(self._task_list) else True
+        return not len(self._task_list)
 
     def update_state(self, action, sim_time):
         success = False
         desired_state = self._int_to_action(action)
         self._sim_time = sim_time
-        if (desired_state != self.current_state) and (desired_state in self.action_space):
-            if self.tasks_are_empty():
-                # set the transition to being active
-                # self._transition_active = True
+        if (
+            (desired_state != self.current_state)
+            and (desired_state in self.action_space)
+            and self.tasks_are_empty()
+        ):
+            # set the transition to being active
+            # self._transition_active = True
 
-                states = [*self.current_state, *desired_state]
+            states = [*self.current_state, *desired_state]
 
-                state_progression = [[[self.set_light_state, states, 'y']], [[self.set_light_state, states, 'r']],
-                                     [[self.set_light_state, desired_state, 'g'], [self._update_state, desired_state],
-                                      [self._update_timer, ()]]]
+            state_progression = [[[self.set_light_state, states, 'y']], [[self.set_light_state, states, 'r']],
+                                 [[self.set_light_state, desired_state, 'g'], [self._update_state, desired_state],
+                                  [self._update_timer, ()]]]
 
-                self._task_list.extend(state_progression)
-                success = True
+            self._task_list.extend(state_progression)
+            success = True
 
         light_heads_success = self._step()
         return success * light_heads_success
@@ -233,17 +225,19 @@ class TrafficLightManager(_Base):
         return True * result
 
     def _check_timer(self, color):
-        return True if self._sim_time - self._last_changed_time >= self._minimum_times[color] else False
+        return self._sim_time - self._last_changed_time >= self._minimum_times[color]
 
     def set_light_state(self, phase_list, color):
         if self._check_timer(color):
             self._last_changed_time = self._sim_time
-            try:
-                self.traci_c.trafficlight.setPhase(self.tl_id, self._get_index(phase_list, color))
-            except Exception:
-                # have to set to the correct program first
-                self.traci_c.trafficlight.setProgram(self.tl_id, f'{self.tl_id}-2')
-                self.traci_c.trafficlight.setPhase(self.tl_id, self._get_index(phase_list, color))
+            success = False
+            while not success:
+                try:
+                    self.traci_c.trafficlight.setPhase(self.tl_id, self._get_index(phase_list, color))
+                    success = True
+                except traci.exceptions.TraCIException:
+                    self.traci_c.trafficlight.setProgram(self.tl_id, f'{self.tl_id}-2')
+            # print(self.traci_c._socket.getpeername(), "set successfully")
             self._color = color
             return True
         return False
@@ -251,7 +245,7 @@ class TrafficLightManager(_Base):
     def _get_index(self, phase_list, color):
         phase_dict = self.phase_num_name_eq[phase_list[0]]
         if len(phase_list) > 1:
-            # iter_list = phase_list[1:-1] if color in 'g' else phase_list[1:] 
+            # iter_list = phase_list[1:-1] if color in 'g' else phase_list[1:]
             for phase in phase_list[1:]:
                 phase_dict = phase_dict[phase]
         return phase_dict[color]
@@ -271,8 +265,7 @@ class GlobalActor:
         self.tls = self.create_tl_managers(read_settings(tl_settings_file), tl_file_dicts)
 
     def __iter__(self) -> TrafficLightManager:
-        for item in self.tls:
-            yield item
+        yield from self.tls
 
     def __getitem__(self, item: str) -> TrafficLightManager:
         """

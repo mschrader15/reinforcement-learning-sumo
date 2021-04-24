@@ -106,8 +106,8 @@ class Kernel(object):
             traci_c.vehicle.subscribe(veh_id, VEHICLE_SUBSCRIPTIONS)
 
         # get the light states
-        for tl_id in self.sim_params.tl_ids:
-            self._initial_tl_colors[tl_id] = traci_c.trafficlight.getRedYellowGreenState(tl_id)
+        # for tl_id in self.sim_params.tl_ids:
+        #     self._initial_tl_colors[tl_id] = traci_c.trafficlight.getRedYellowGreenState(tl_id)
 
         # set the traffic lights to the all green program
         if not self.sim_params.no_actor:
@@ -116,7 +116,7 @@ class Kernel(object):
         
         # overwrite the default traffic light states to what they where
         for tl_id in self.sim_params.tl_ids:
-            traci_c.trafficlight.setRedYellowGreenState(tl_id, self._initial_tl_colors[tl_id])
+            traci_c.trafficlight.setPhase(tl_id, 0)
 
         # saving the beginning state of the simulation
         traci_c.simulation.saveState(self.state_file)
@@ -152,9 +152,15 @@ class Kernel(object):
         logging.info('resetting the simulation')
         self.traci_c.simulation.loadState(self.state_file)
 
+        # set the traffic lights to the correct program
+                # set the traffic lights to the all green program
+        if not self.sim_params.no_actor:
+            for tl_id in self.sim_params.tl_ids:
+                self.traci_c.trafficlight.setProgram(tl_id, f'{tl_id}-2')
+
         # overwrite the default traffic light states to what they where
         for tl_id in self.sim_params.tl_ids:
-            self.traci_c.trafficlight.setRedYellowGreenState(tl_id, self._initial_tl_colors[tl_id])
+            self.traci_c.trafficlight.setPhase(tl_id, 0)
 
         # subscribe to all vehicles in the simulation at this point
         # subscribe to all new vehicle positions and fuel consumption
@@ -186,7 +192,8 @@ class Kernel(object):
             # self.traci_c.close()
             self.kill_simulation()
         else:
-            self.traci_c.close()
+            if self.traci_c:
+                self.traci_c.close()
         self.traci_calls.clear()
 
     def simulation_step(self, ):

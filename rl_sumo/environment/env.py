@@ -42,9 +42,7 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
         self.k = Kernel(self.sim_params)
 
         # create the observer
-        self.observer = GlobalObservations(net_file=sim_params.net_file,
-                                           tl_ids=sim_params.tl_ids,
-                                           name="Global")
+        self.observer = GlobalObservations(net_file=sim_params.net_file, tl_ids=sim_params.tl_ids, name="Global")
 
         # create the action space
         self.actor = GlobalActor(tl_settings_file=sim_params.tl_settings_file, tl_file_dicts=sim_params['tl_file_dict'])
@@ -62,9 +60,7 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
         # self.actor.register_traci(traci_c)
 
         # create the reward function
-        self.rewarder = getattr(rewarder,
-                                self.env_params.reward_class)(sim_params,
-                                                              env_params)
+        self.rewarder = getattr(rewarder, self.env_params.reward_class)(sim_params, env_params)
 
         # pass the rewarder traci function call back to the kernel
         # self.k.add_traci_call(self.rewarder.register_traci(traci_c))
@@ -87,8 +83,7 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
 
         # traffic_light_shapes = self.actor.size['']
 
-        traffic_light_states = MultiDiscrete(
-            [*self.actor.discrete_space_shape])
+        traffic_light_states = MultiDiscrete([*self.actor.discrete_space_shape])
 
         traffic_light_colors = MultiDiscrete(self.actor.size['color'])
 
@@ -122,8 +117,7 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
             dtype=np.float32,
         )
 
-        return Tuple((traffic_light_states, traffic_light_times,
-                      traffic_light_colors, vehicle_num))
+        return Tuple((traffic_light_states, traffic_light_times, traffic_light_colors, vehicle_num))
 
     def apply_rl_actions(self, rl_actions):
         """Specify the actions to be performed by the rl agent(s).
@@ -136,16 +130,14 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
         if rl_actions is None:
             return
 
-        actions = self.clip_actions(
-            rl_actions) if self.env_params.clip_actions else rl_actions
+        actions = self.clip_actions(rl_actions) if self.env_params.clip_actions else rl_actions
 
         # convert the actions to integers
         # actions = list(map(floor, rl_actions))
 
         # update the lights
         if not self.sim_params.no_actor:
-            self.actor.update_lights(action_list=actions,
-                                     sim_time=self.k.sim_time)
+            self.actor.update_lights(action_list=actions, sim_time=self.k.sim_time)
 
     def get_state(self, subscription_data):
         """
@@ -215,11 +207,11 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
             except traci.exceptions.FatalTraCIError:
                 self.reset()
         subscription_data = self.k.simulation_step()
-        
+
         # reset the counters
         self.master_reset_count += 1
         self.step_counter = 0
-        
+
         return self.get_state(subscription_data)
 
     def _hard_reset(self):
@@ -286,9 +278,9 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
             if crash:
                 print("There was a crash")
                 break
-        
+
         observation = self.get_state(subscription_data)
-        
+
         reward = self.calculate_reward(subscription_data)
 
         done = (self.step_counter >= self.horizon) or crash

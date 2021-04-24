@@ -10,9 +10,7 @@ def minimize_fuel(subscription_values):
     @return:
     """
     vehicle_list = list(subscription_values[tc.VAR_VEHICLE].values())
-    fc = 0
-    for vehicle_data in vehicle_list:
-        fc += vehicle_data[tc.VAR_FUELCONSUMPTION]
+    fc = sum(vehicle_data[tc.VAR_FUELCONSUMPTION] for vehicle_data in vehicle_list)
     return -1 * fc
 
 
@@ -74,8 +72,7 @@ class FCIC(Rewarder):
             running = len(rel_speeds)
             # stopped = len([1 for d in sc_results.values() if d[tc.VAR_SPEED] < 0.1])
             mean_speed_relative = sum(rel_speeds) / running
-            delay = (1 - mean_speed_relative) * running * self.sim_step
-            return delay
+            return (1 - mean_speed_relative) * running * self.sim_step
         return 0
 
     def _get_sorted_stopped(self, sc_results):
@@ -87,7 +84,7 @@ class FCIC(Rewarder):
                         k_s[0] += self.k_array[0][1]
                     else:
                         k_s[1] += self.k_array[1][1]
-            return sum([k * self.sim_step for k in k_s])
+            return sum(k * self.sim_step for k in k_s)
         return sum(k_s)
 
 

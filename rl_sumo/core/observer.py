@@ -57,7 +57,7 @@ class _Base:
         self.freeze()
 
     def get_lane_count(self, ):
-        return sum([child.get_lane_count() for child in self])
+        return sum(child.get_lane_count() for child in self)
 
     def register_traci(self, traci_c):
         # self.traci_c = traci_c
@@ -70,8 +70,7 @@ class _Base:
                 return child
 
     def __iter__(self):
-        for child in self._children:
-            yield child
+        yield from self._children
 
     def update_counts(self, **kwargs):
         """

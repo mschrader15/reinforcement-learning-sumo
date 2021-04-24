@@ -41,7 +41,6 @@ Here the arguments are:
 2 - the number of the checkpoint
 """
 
-
 def visualizer_rllib(args):
     """Visualizer for RLlib experiments.
 
@@ -78,33 +77,6 @@ def visualizer_rllib(args):
     if 'my_gym' in env_params.environment_location:
         env_params.environment_location = 'rl_sumo.environment'
 
-    # hack for old pkl files
-    # sim_params = flow_params['sim']
-    # setattr(sim_params, 'num_clients', 1)
-
-    # if not hasattr(sim_params, 'use_ballistic'):
-    #     sim_params.use_ballistic = False
-
-    # Determine agent and checkpoint
-    # config_run = config['env_config']['run'] if 'run' in config['env_config'] else None
-    # if args.run and config_run:
-    #     if args.run != config_run:
-    #         print('visualizer_rllib.py: error: run argument '
-    #               + '\'{}\' passed in '.format(args.run)
-    #               + 'differs from the one stored in params.json '
-    #               + '\'{}\''.format(config_run))
-    #         sys.exit(1)
-    # if args.run:
-    #     agent_cls = get_agent_class(args.run)
-    # elif config_run:
-    #     agent_cls = get_agent_class(config_run)
-    # else:
-    #     print('visualizer_rllib.py: error: could not find flow parameter '
-    #           '\'run\' in params.json, '
-    #           'add argument --run to provide the algorithm or model used '
-    #           'to train the results\n e.g. '
-    #           'python ./visualizer_rllib.py /tmp/ray/result_dir 1 --run PPO')
-    #     sys.exit(1)
     agent_cls = get_agent_class(env_params.algorithm)
 
     # sim_params.restart_instance = True
@@ -116,18 +88,6 @@ def visualizer_rllib(args):
 
     gym_name, create_env = make_create_env(env_params=env_params, sim_params=sim_params)
     register_env(gym_name, create_env)
-    # check if the environment is a single or multiagent environment, and
-    # get the right address accordingly
-    # single_agent_envs = [env for env in dir(flow.envs)
-    #                      if not env.startswith('__')]
-
-    # if flow_params['env_name'] in single_agent_envs:
-    #     env_loc = 'flow.envs'
-    # else:
-    #     env_loc = 'flow.envs.multiagent'
-
-    # Start the environment with the gui turned on and a path for the
-    # emission file
 
     # lower the horizon if testing
     if args.horizon:
@@ -149,27 +109,24 @@ def visualizer_rllib(args):
     else:
         env = gym.make(gym_name)
 
-    # if args.render_mode == 'sumo_gui':
-    # env.sim_params.render = True  # set to True after initializing agent and env
-
     if multiagent:
-        rets = {}
         # map the agent id to its policy
         policy_map_fn = config['multiagent']['policy_mapping_fn']
-        for key in config['multiagent']['policies'].keys():
-            rets[key] = []
+        rets = {key: [] for key in config['multiagent']['policies'].keys()}
     else:
         rets = []
 
     if config['model']['use_lstm']:
         use_lstm = True
         if multiagent:
-            state_init = {}
             # map the agent id to its policy
             policy_map_fn = config['multiagent']['policy_mapping_fn']
             size = config['model']['lstm_cell_size']
-            for key in config['multiagent']['policies'].keys():
-                state_init[key] = [np.zeros(size, np.float32), np.zeros(size, np.float32)]
+            state_init = {
+                key: [np.zeros(size, np.float32), np.zeros(size, np.float32)]
+                for key in config['multiagent']['policies'].keys()
+            }
+
         else:
             state_init = [
                 np.zeros(config['model']['lstm_cell_size'], np.float32),
@@ -178,33 +135,13 @@ def visualizer_rllib(args):
     else:
         use_lstm = False
 
-    # if restart_instance, don't restart here because env.reset will restart later
-    # if not sim_params.restart_instance:
-    #     env.restart_simulation(sim_params=sim_params, render=sim_params.render)
-
-    # Simulate and collect metrics
-    # final_outflows = []
-    # final_inflows = []
-    # mean_speed = []
-    # std_speed = []
     for i in range(args.num_rollouts):
-        # vel = []
 
         rewards = [["sim_time", "reward"]]
 
         state = env.reset()
-        if multiagent:
-            ret = {key: [0] for key in rets.keys()}
-        else:
-            ret = 0
+        ret = {key: [0] for key in rets.keys()} if multiagent else 0
         for _ in range(env_params.horizon):
-            # vehicles = env.unwrapped.k.vehicle
-            # speeds = vehicles.get_speed(vehicles.get_ids())
-
-            # only include non-empty speeds
-            # if speeds:
-            #     vel.append(np.mean(speeds))
-
             if multiagent:
                 action = {}
                 for agent_id in state.keys():
@@ -215,14 +152,12 @@ def visualizer_rllib(args):
                             policy_id=policy_map_fn(agent_id))
                     else:
                         action[agent_id] = agent.compute_action(state[agent_id], policy_id=policy_map_fn(agent_id))
+                for actor, rew in reward.items():
+                    ret[policy_map_fn(actor)][0] += rew
             else:
                 action = agent.compute_action(state)
                 state, reward, done, _ = env.step(action)
                 rewards.append([env.k.sim_time, reward])
-            if multiagent:
-                for actor, rew in reward.items():
-                    ret[policy_map_fn(actor)][0] += rew
-            else:
                 ret += reward
             if multiagent and done['__all__']:
                 break
@@ -236,7 +171,9 @@ def visualizer_rllib(args):
             rets.append(ret)
 
     if args.emissions_output:
-        reward_file = os.path.join(*os.path.split(args.emissions_output)[:-1], f'rewards_run_{i}.csv')
+        path = result_dir if '/' not in args.emissions_output else args.emissions_output
+
+        reward_file = os.path.join(*os.path.split(path)[:-1], f'rewards_run_{i}.csv')
         with open(reward_file, 'w') as f:
             writer = csv.writer(f, dialect='excel')
             writer.writerows(rewards)
@@ -259,18 +196,10 @@ def visualizer_rllib(args):
     # if prompted, convert the emission file into a csv file
     if args.emissions_output:
 
-        # let sumo finish building the output file
         time.sleep(0.5)
 
-        # dir_path = os.path.dirname(os.path.realpath(__file__))
-        # emission_filename = '{0}-emission.xml'.format(env.network.name)
-
-        # emission_path = \
-        #     '{0}/test_time_rollout/{1}'.format(dir_path, emission_filename)
-
-        # convert the emission file into a csv file
         emission_path_csv = args.emissions_output[:-4] + ".csv"
-        xml2csv(args.emmissions_output, 'emissions', emission_path_csv)
+        xml2csv(args.emissions_output, 'emissions', emission_path_csv)
         os.remove(args.emissions_output)
 
         # print the location of the emission csv file
