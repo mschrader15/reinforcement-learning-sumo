@@ -82,7 +82,7 @@ class Kernel(object):
         sumo_call = [sumo_binary] + sumo_cmd_line(self.sim_params, self)
 
         # start the process
-        self.sumo_proc = subprocess.Popen(sumo_call, stdout=subprocess.DEVNULL)
+        self.sumo_proc = subprocess.Popen(sumo_call, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
 
         # sleep before trying to connect with TRACI
         time.sleep(1)
