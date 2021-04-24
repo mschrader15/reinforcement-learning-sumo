@@ -2,6 +2,7 @@ import enum
 import json
 import copy
 from distutils.util import strtobool
+from xml.dom import minidom
 
 
 def read_settings(settings_path):
@@ -21,6 +22,13 @@ def _value_error_handler(tuple_obj, default):
         return x, y
     except ValueError:
         return default
+
+
+def tls_file(path):
+    tls_obj = minidom.parse(path)
+    for i, phase in enumerate(tls_obj.getElementsByTagName("phase")):
+        yield phase, i
+    
 
 
 class _TL_HEAD(enum.Enum):
@@ -57,25 +65,32 @@ class _Base:
 
 class TrafficLightManager(_Base):
 
-    def __init__(self, tl_id, tl_details):
+    def __init__(self, tl_id, tl_details, tl_file):
 
         self.tl_id = tl_id
         self.current_state: list = [2, 6]
+        self.tl_details = tl_details
         self.potential_movements = list(map(int, tl_details['phase_order']))
         self.action_space, self.action_space_index_dict = self._create_states()
         self.action_space_length = len(self.action_space)
+        self.phase_num_name_eq = self.read_in_tls_xml(tl_file)
         # self.light_heads = self._compose_light_heads(tl_details)
         self._task_list = []
         self._last_light_string = ""
         self._last_green_time = 0
         self._transition_active = False
+        self._sim_time = 0
+        self._last_changed_time = 0
+        self._minimum_times = {
+            'r': float(self.tl_details[2]['min_red_time']),
+            'y': float(self.tl_details[2]['min_yellow_time']),
+            'g': float(self.tl_details[2]['min_green_time'])
+        }
         super().__init__()
         self.traci_c = None
 
-    # def re_initialize(self, ):
-    #     self._re_initialize()
-    #     for _, light_head in self.light_heads.items():
-    #         light_head._re_initialize()
+    def compose_minimum_times(self, ):
+        pass
 
     def _set_initial_states(self, light_string: str):
         """
@@ -88,19 +103,10 @@ class TrafficLightManager(_Base):
         start_index = 0
         actual_state = []
         for phase in self.potential_movements:
-            # light_head = self.light_heads[phase]
-            end_index = start_index + len(light_head.light_strings[_TL_HEAD.RED])
+            end_index = self.tl_details[phase]['lane_num'] + 1 if bool(strtobool(self.tl_details[phase]['right_on_red'])) else self.tl_details[phase]['lane_num']
             substring = light_string[start_index:end_index]
             if 'G' in substring:
-                # light_head.transition(_TL_HEAD.GREEN, force=True)
                 actual_state.append(phase)
-            # elif 'y' in substring:
-            #     # light_head.transition(_TL_HEAD.YELLOW, force=True)
-            # elif 'g' in substring:
-            #     # light_head.transition(_TL_HEAD.YIELD, force=True)
-            # else:
-                # light_head.transition(_TL_HEAD.RED, force=True)
-            # move the start_index along
             start_index = end_index
         if actual_state in self.action_space:
             self.current_state = actual_state
@@ -140,66 +146,57 @@ class TrafficLightManager(_Base):
                     possible_states.append([j])
         return possible_states, {tuple(state): i for i, state in enumerate(possible_states)}
 
-    # def _compose_light_heads(self, tl_details):
-    #     linked_phases = []
-    #     light_heads = {}
-    #     for phase, phase_info in tl_details['phases'].items():
-    #         light_heads[int(phase)] = LightHead(
-    #             name="-".join([self.tl_id, phase]),
-    #             phase=phase,
-    #             phase_info=phase_info,
-    #             initial_state=_TL_HEAD.GREEN if int(phase) in self.current_state else _TL_HEAD.RED)
-    #         if light_heads[int(phase)].yield_allowed:
-    #             linked_phases.append(int(phase))
-    #     for yield_phase in linked_phases:
-    #         phase_info = tl_details['phases'][str(yield_phase)]
-    #         for paired_info in phase_info['yield_for'].items():
-    #             paired_light = light_heads[int(paired_info[1])]
-    #             light_heads[yield_phase].link_yield_observer(priority=paired_info[0], paired_phase=paired_light)
+    def read_in_tls_xml(self, file_path):
+        phase_dict = {}
+        for phase, i in tls_file(file_path):
+            name = phase.getAttribute('name').split("-")
+            split_name = [inner_data.split('+') for inner_data in name]
+            flattened_name = [inner_2 for inner_2 in inner_data for inner_data in flattened_name]
+            if len(flattened_name) < 3:
+                split_name.extend(['g'])
+            self.recursive_dict_constructor(flattened_name, split_name, i)
+        return phase_dict
 
-    #     # freezing the state again after initialization
-    #     for head in light_heads.values():
-    #         head.freeze()
-
-    #     return light_heads
+    def recursive_dict_constructor(self, _dict, keys, value):
+        if len(_dict) > 1:
+            try:
+                next_dict = _dict[keys[0]]
+            except KeyError:
+                _dict[keys[0]] = {}
+                next_dict = _dict
+            self.recursive_dict_constructor(next_dict, keys[1:], value)
+        else:
+            _dict[keys[0]] = value
 
     def tasks_are_empty(self, ):
         return False if len(self._task_list) else True
 
-    @staticmethod
-    def compose_phase_name(c_phase, d_phase, color):
-        return "-".join(["+".join(c_phase), "+".join(d_phase), color])
+    # @staticmethod
+    # def compose_phase_name(c_phase, d_phase, color):
+    #     # return "-".join(["+".join(c_phase), "+".join(d_phase), color])
 
 
-    def update_state(self, action):
+
+    def update_state(self, action, sim_time):
         success = False
         desired_state = self._int_to_action(action)
+        self._sim_time = sim_time
         if (desired_state != self.current_state) and (desired_state in self.action_space):
             if self.tasks_are_empty():
                 # set the transition to being active
                 self._transition_active = True
 
-                # yellow_to_red_states = [state for state in self.current_state if state not in desired_state]
-
-                # state_progression = [[(self.light_heads[head].transition, light_state) for head in yellow_to_red_states] for light_state in [_TL_HEAD.YELLOW, _TL_HEAD.RED]] + \
-                #                     [[(self.light_heads[head].transition, _TL_HEAD.GREEN) for head in desired_state]]
-
-                yellow_name = self.compose_phase_name(self.current_state, desired_state, 'y')
-                red_name = yellow_name[:-1] + 'r'
-
-                state_progression = [[[self.set_light_state, yellow_name]], 
-                                     [[self.set_light_state, red_name]],
-                                     [[self.set_light_state, "+".join(desired_state)], [self._update_state, desired_state], [self._update_timer, ()]]
+                states = [*self.current_state, *desired_state]
+  
+                state_progression = [
+                                     [[self.set_light_state, (states, 'y')]], 
+                                     [[self.set_light_state, (states, 'r')]],
+                                     [[self.set_light_state, (states, 'g')], [self._update_state, desired_state], [self._update_timer, ()]]
                                     ]
-
-                # tell myself that I have changed
-                # state_progression[-1] += [(self._update_state, desired_state)]
-
-                # update the timer
-                # state_progression[-1] += [(self._update_timer, ())]
 
                 self._task_list.extend(state_progression)
                 success = True
+
         light_heads_success = self._step()
         return success * light_heads_success
 
@@ -225,25 +222,22 @@ class TrafficLightManager(_Base):
             # self.update_sumo()
         return True * result
 
-    def _generate_string(self, ):
-        return "".join([self.light_heads[phase].get_string() for phase in self.potential_movements])
+    def _check_timer(self, color):
+        return True if self._sim_time - self._last_changed_time >= self._minimum_times[color] else False
 
-    def update_sumo(self, ):
-        new_string = self._generate_string()
-        if new_string not in self._last_light_string:
-            self.traci_c.trafficlight.setRedYellowGreenState(self.tl_id, new_string)
-            # print(self.tl_id, new_string)
-            self._last_light_string = new_string
+    def set_light_state(self, phase_list, color):
+        if self._check_timer(color):
+            self._last_changed_time = self._sim_time
+            self.traci_c.trafficlight.setPhase(self._get_index(phase_list, color))
+            return True
+        return False
 
-    def _check_timer(self, ):
-            def _check_timer(self, ):
-        return True if _Timer.time - self._timers[self.state] >= self._minimum_times[self.state] \
-            else False
-
-
-    def set_light_state(self, phase_name, color):
-        if 
-
+    def _get_index(self, phase_list, color):
+        phase_dict = self.phase_num_name_eq[phase_list[0]]
+        if len(phase_list) > 1:
+            for phase in phase_list[1:]:
+                phase_dict = phase_dict[phase]
+        return phase_dict[color]            
 
 
     def get_current_state(self, ):
@@ -268,10 +262,12 @@ class TrafficLightManager(_Base):
         return _Timer.time - self._last_green_time
 
     def get_light_head_colors(self, ):
-        colors = [self.light_heads[phase].state.value for phase in self.current_state]
-        if len(colors) < 2:
-            colors.append(_TL_HEAD.INACTIVE.value)
-        return colors
+        pass
+
+        # colors = [self.light_heads[phase].state.value for phase in self.current_state]
+        # if len(colors) < 2:
+        #     colors.append(_TL_HEAD.INACTIVE.value)
+        # return colors
 
 
 class GlobalActor:
