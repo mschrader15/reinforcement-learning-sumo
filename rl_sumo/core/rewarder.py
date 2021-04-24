@@ -43,6 +43,7 @@ class FCIC(Rewarder):
             'gneE0.12', 'gneE17', '-638636924#1.9', '660891910#1.19', '660891910#1', 'gneE18', 'gneE13', 'gneE20',
             '-8867312#6', 'gneE22', 'gneE22.27'
         ], 100], [[], 190]]
+        self.min_reward = 0 
 
     def register_traci(self, traci_c):
         
@@ -55,7 +56,9 @@ class FCIC(Rewarder):
         relevant_data = subscription_dict[self.junction_id]
         delay = self._get_delay(relevant_data)
         k_s = self._get_sorted_stopped(relevant_data)
-        return -1 * (delay + k_s / 3600)
+        r = -1 * (delay + k_s / 3600)
+        self.min_reward = min(r, self.min_reward)
+        return -1 * (r / self.min_reward)
 
     def get_stops(self):
         pass

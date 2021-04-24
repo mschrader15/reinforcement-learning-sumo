@@ -1,6 +1,7 @@
 CONFIG_PATH="./settings/PPO_4_24.json"
 
-source ../venv/bin/activate
-nohup python train.py --config_path $CONFIG_PATH > run.out 2>&1
+rm ~/train.out
 
-# tensorboard --log_dir "~/ray_results"
+source ../venv/bin/activate
+nohup python train.py --config_path $CONFIG_PATH > ~/train.out 2>&1
+

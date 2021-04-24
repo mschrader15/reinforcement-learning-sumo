@@ -25,7 +25,7 @@
     "tl_ids": ["63082002", "63082003", "63082004"],
     "tl_settings": "sumo-xml/settings.json",
     "tl_file": "sumo-xml/traffic-lights/tls.rl.add.xml",
-    "sim_step": 0.1,
+    "sim_step": 0.5,
     "start_time": "2020-02-24 06:30:00.000",
     "gui": 0,
     "central_junction": "63082003",
