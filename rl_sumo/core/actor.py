@@ -28,7 +28,13 @@ def tls_file(path):
     tls_obj = minidom.parse(path)
     for i, phase in enumerate(tls_obj.getElementsByTagName("phase")):
         yield phase, i
-    
+
+
+def safe_int(prospective_int):
+    try:
+        return int(prospective_int)
+    except (ValueError, TypeError):
+        return prospective_int
 
 
 class _TL_HEAD(enum.Enum):
@@ -64,7 +70,6 @@ class _Base:
 
 
 class TrafficLightManager(_Base):
-
     def __init__(self, tl_id, tl_details, tl_file):
 
         self.tl_id = tl_id
@@ -82,15 +87,18 @@ class TrafficLightManager(_Base):
         self._sim_time = 0
         self._last_changed_time = 0
         self._minimum_times = {
-            'r': float(self.tl_details[2]['min_red_time']),
-            'y': float(self.tl_details[2]['min_yellow_time']),
-            'g': float(self.tl_details[2]['min_green_time'])
+            'r': float(self.tl_details['phases']['2']['min_red_time']),
+            'y': float(self.tl_details['phases']['2']['min_yellow_time']),
+            'g': float(self.tl_details['phases']['2']['min_green_time'])
         }
         super().__init__()
         self.traci_c = None
 
     def compose_minimum_times(self, ):
         pass
+
+    def re_initialize(self, ):
+        self._re_initialize()
 
     def _set_initial_states(self, light_string: str):
         """
@@ -103,7 +111,9 @@ class TrafficLightManager(_Base):
         start_index = 0
         actual_state = []
         for phase in self.potential_movements:
-            end_index = self.tl_details[phase]['lane_num'] + 1 if bool(strtobool(self.tl_details[phase]['right_on_red'])) else self.tl_details[phase]['lane_num']
+            end_index = self.tl_details['phases'][str(phase)]['lane_num'] + 1 if bool(
+                strtobool(self.tl_details['phases'][str(phase)]['right_on_red'])) else self.tl_details['phases'][str(
+                    phase)]['lane_num']
             substring = light_string[start_index:end_index]
             if 'G' in substring:
                 actual_state.append(phase)
@@ -151,20 +161,22 @@ class TrafficLightManager(_Base):
         for phase, i in tls_file(file_path):
             name = phase.getAttribute('name').split("-")
             split_name = [inner_data.split('+') for inner_data in name]
-            flattened_name = [inner_2 for inner_2 in inner_data for inner_data in flattened_name]
+            flattened_name = [safe_int(inner_2) for inner_data in split_name for inner_2 in inner_data]
             if len(flattened_name) < 3:
-                split_name.extend(['g'])
-            self.recursive_dict_constructor(flattened_name, split_name, i)
+                flattened_name.extend(['g'])
+            self.recursive_dict_constructor(phase_dict, flattened_name, i)
         return phase_dict
 
     def recursive_dict_constructor(self, _dict, keys, value):
-        if len(_dict) > 1:
+        if len(keys) > 1:
+            # try:
             try:
-                next_dict = _dict[keys[0]]
+                result = _dict[keys[0]]
+                keys.pop(0)
             except KeyError:
                 _dict[keys[0]] = {}
-                next_dict = _dict
-            self.recursive_dict_constructor(next_dict, keys[1:], value)
+                result = _dict
+            self.recursive_dict_constructor(result, keys, value)
         else:
             _dict[keys[0]] = value
 
@@ -174,8 +186,6 @@ class TrafficLightManager(_Base):
     # @staticmethod
     # def compose_phase_name(c_phase, d_phase, color):
     #     # return "-".join(["+".join(c_phase), "+".join(d_phase), color])
-
-
 
     def update_state(self, action, sim_time):
         success = False
@@ -187,12 +197,10 @@ class TrafficLightManager(_Base):
                 self._transition_active = True
 
                 states = [*self.current_state, *desired_state]
-  
-                state_progression = [
-                                     [[self.set_light_state, (states, 'y')]], 
-                                     [[self.set_light_state, (states, 'r')]],
-                                     [[self.set_light_state, (states, 'g')], [self._update_state, desired_state], [self._update_timer, ()]]
-                                    ]
+
+                state_progression = [[[self.set_light_state, (states, 'y')]], [[self.set_light_state, (states, 'r')]],
+                                     [[self.set_light_state, (states, 'g')], [self._update_state, desired_state],
+                                      [self._update_timer, ()]]]
 
                 self._task_list.extend(state_progression)
                 success = True
@@ -237,8 +245,7 @@ class TrafficLightManager(_Base):
         if len(phase_list) > 1:
             for phase in phase_list[1:]:
                 phase_dict = phase_dict[phase]
-        return phase_dict[color]            
-
+        return phase_dict[color]
 
     def get_current_state(self, ):
         """
@@ -271,11 +278,8 @@ class TrafficLightManager(_Base):
 
 
 class GlobalActor:
-    def __init__(
-        self,
-        tl_settings_file,
-    ):
-        self.tls = self.create_tl_managers(read_settings(tl_settings_file))
+    def __init__(self, tl_settings_file, tl_file_dicts):
+        self.tls = self.create_tl_managers(read_settings(tl_settings_file), tl_file_dicts)
 
     def __iter__(self) -> TrafficLightManager:
         for item in self.tls:
@@ -321,10 +325,13 @@ class GlobalActor:
         return [tl_manager.action_space_length for tl_manager in self]
 
     @staticmethod
-    def create_tl_managers(settings: dict) -> [
+    def create_tl_managers(settings: dict, tl_files: dict) -> [
             TrafficLightManager,
     ]:
-        return [TrafficLightManager(tl_id, tl_details) for tl_id, tl_details in settings['traffic_lights'].items()]
+        return [
+            TrafficLightManager(tl_id, tl_details, tl_files[tl_id])
+            for tl_id, tl_details in settings['traffic_lights'].items()
+        ]
 
     def update_lights(self, action_list: list, sim_time: float) -> None:
         _Timer.time = sim_time

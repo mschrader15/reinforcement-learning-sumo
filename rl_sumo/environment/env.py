@@ -47,7 +47,7 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
                                            name="Global")
 
         # create the action space
-        self.actor = GlobalActor(tl_settings_file=sim_params.tl_settings_file)
+        self.actor = GlobalActor(tl_settings_file=sim_params.tl_settings_file, tl_file_dicts=sim_params['tl_file_dict'])
 
         # run the simulation to create the traci connection. I think this makes everything pickle-able!
         # traci_c = self.k.start_simulation()
