@@ -204,13 +204,21 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
             try:
                 self.k.reset_simulation()
                 self._reset_action_obs_rewarder()
-            except traci.exceptions.FatalTraCIError:
-                self.reset()
+            except Exception:
+                print("I am hard reseting b.c. of kernel exception")
+                self._hard_reset()
+
         subscription_data = self.k.simulation_step()
+
+        if not subscription_data:
+            self.reset()
 
         # reset the counters
         self.master_reset_count += 1
         self.step_counter = 0
+
+        # reset the reward class
+        self.rewarder.re_initialize()
 
         return self.get_state(subscription_data)
 
@@ -258,6 +266,9 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
             info (dict): contains auxiliary diagnostic information (helpful for debugging, and sometimes learning)
         """
 
+        sim_broke = False
+        crash = False
+
         for _ in range(self.env_params.sims_per_step):
 
             # increment the step counter
@@ -271,6 +282,11 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
             # step the simulation
             subscription_data = self.k.simulation_step()
 
+            # check to see if there was a failure
+            if not subscription_data:
+                sim_broke = True
+                break
+
             # check for collisions and kill the simulation if so.
             # TODO: Actually implement this
             crash = self.k.check_collision()
@@ -278,15 +294,19 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
             if crash:
                 print("There was a crash")
                 break
+        
+        if not sim_broke:
+            observation = self.get_state(subscription_data)
+            reward = self.calculate_reward(subscription_data)
+        else:
+            observation = []
+            reward = 1
 
-        observation = self.get_state(subscription_data)
-
-        reward = self.calculate_reward(subscription_data)
-
-        done = (self.step_counter >= self.horizon) or crash
+        done = (self.step_counter >= self.horizon) or crash or sim_broke
 
         info = {
             'sim_time': self.k.sim_time,
+            'broken': sim_broke
         }
 
         return observation, reward, done, info

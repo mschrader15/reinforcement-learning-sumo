@@ -1,5 +1,6 @@
 import traci.constants as tc
 from copy import deepcopy
+from scipy.ndimage.filters import uniform_filter1d
 
 
 def minimize_fuel(subscription_values):
@@ -43,10 +44,26 @@ class FCIC(Rewarder):
             'gneE0.12', 'gneE17', '-638636924#1.9', '660891910#1.19', '660891910#1', 'gneE18', 'gneE13', 'gneE20',
             '-8867312#6', 'gneE22', 'gneE22.27'
         ], 100], [[], 190]]
-        self.min_reward = 0 
+        # normailize by the worst case scenario
+        self.min_reward = -200
+        self.window_size = int(10 / self.sim_step)
+        self._reward_array = []
+
+    def re_initialize(self):
+        self._reward_array.clear()
+
+
+    def _running_mean(self, ):
+        """
+        From https://stackoverflow.com/a/43200476/13186064
+        """
+        return uniform_filter1d(self._reward_array, self.window_size, mode='constant',
+                                origin=-(self.window_size // 2))[:-(self.window_size - 1)]
 
     def register_traci(self, traci_c):
-        
+
+        self._reward_array.clear()
+
         traci_c.junction.subscribeContext(self.junction_id, tc.CMD_GET_VEHICLE_VARIABLE, 1000000,
                                           [tc.VAR_SPEED, tc.VAR_ALLOWED_SPEED, tc.VAR_ROAD_ID])
 
@@ -57,8 +74,18 @@ class FCIC(Rewarder):
         delay = self._get_delay(relevant_data)
         k_s = self._get_sorted_stopped(relevant_data)
         r = -1 * (delay + k_s / 3600)
-        self.min_reward = min(r, self.min_reward)
-        return -1 * (r / self.min_reward)
+        self._reward_array.append(r)
+
+        r_array = self._running_mean()
+
+        r_r = r_array[-1] if len(r_array) else r
+        
+        print("reward", r_r)
+        # print("min_reward", self.min_reward)
+        
+        # self.min_reward = min(r_r, self.min_reward)
+        
+        return -1 * (r_r / self.min_reward)
 
     def get_stops(self):
         pass
@@ -87,13 +114,5 @@ class FCIC(Rewarder):
                         k_s[0] += self.k_array[0][1]
                     else:
                         k_s[1] += self.k_array[1][1]
-            return sum(k * self.sim_step for k in k_s)
+            return sum(k_s) * self.sim_step
         return sum(k_s)
-
-
-# def fcic_pi(subscription_values, ):
-#         nonlocal x
-#         print(x)
-#         x += 1
-#
-#     return fcic_pi

@@ -82,7 +82,7 @@ class Kernel(object):
         sumo_call = [sumo_binary] + sumo_cmd_line(self.sim_params, self)
 
         # start the process
-        self.sumo_proc = subprocess.Popen(sumo_call, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+        self.sumo_proc = subprocess.Popen(sumo_call, ) # stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
 
         # sleep before trying to connect with TRACI
         time.sleep(1)
@@ -130,6 +130,8 @@ class Kernel(object):
             ],
         ])
 
+        self.sim_time = 0
+
         return traci_c
 
     @staticmethod
@@ -139,47 +141,65 @@ class Kernel(object):
             traci_c.vehicle.subscribe(veh_id, VEHICLE_SUBSCRIPTIONS)
 
     def reset_simulation(self, ):
-        self.sim_time = 0
-        # self.traci_c.close()
 
-        # self.traci_c.load(sumo_cmd_line(self.sim_params))
-        self.traci_c.simulation.clearPending()
+        try:
+            self.sim_time = 0
+            # self.traci_c.close()
 
-        # unsubscribe from all the vehicles at the end state
-        for veh_id in self.traci_c.vehicle.getIDList():
-            self.traci_c.vehicle.unsubscribe(veh_id)
+            # self.traci_c.load(sumo_cmd_line(self.sim_params))
+            try:
+                self.traci_c.simulation.clearPending()
+            except AttributeError:
+                pass
 
-        logging.info('resetting the simulation')
-        self.traci_c.simulation.loadState(self.state_file)
 
-        # set the traffic lights to the correct program
-                # set the traffic lights to the all green program
-        if not self.sim_params.no_actor:
+            # unsubscribe from all the vehicles at the end state
+            for veh_id in self.traci_c.vehicle.getIDList():
+                self.traci_c.vehicle.unsubscribe(veh_id)
+
+            logging.info('resetting the simulation')
+            self.traci_c.simulation.loadState(self.state_file)
+
+            # set the traffic lights to the correct program
+                    # set the traffic lights to the all green program
+            if not self.sim_params.no_actor:
+                for tl_id in self.sim_params.tl_ids:
+                    self.traci_c.trafficlight.setProgram(tl_id, f'{tl_id}-2')
+
+            # overwrite the default traffic light states to what they where
             for tl_id in self.sim_params.tl_ids:
-                self.traci_c.trafficlight.setProgram(tl_id, f'{tl_id}-2')
+                self.traci_c.trafficlight.setPhase(tl_id, 0)
 
-        # overwrite the default traffic light states to what they where
-        for tl_id in self.sim_params.tl_ids:
-            self.traci_c.trafficlight.setPhase(tl_id, 0)
+            # subscribe to all vehicles in the simulation at this point
+            # subscribe to all new vehicle positions and fuel consumption
+            self.simulation_step()
 
-        # subscribe to all vehicles in the simulation at this point
-        # subscribe to all new vehicle positions and fuel consumption
-        self.simulation_step()
-
-        # subscribe to all of the vehicles again
-        # unsubscribe from all the vehicles at the end state
-        for veh_id in self.traci_c.vehicle.getIDList():
-            self.traci_c.vehicle.subscribe(veh_id, VEHICLE_SUBSCRIPTIONS)
+            # subscribe to all of the vehicles again
+            # unsubscribe from all the vehicles at the end state
+            for veh_id in self.traci_c.vehicle.getIDList():
+                self.traci_c.vehicle.subscribe(veh_id, VEHICLE_SUBSCRIPTIONS)
+        except Exception as e:
+            print("Something in TRACI failed")
+            raise e
 
     def kill_simulation(self, ):
-        try:
-            self.sumo_proc.kill()
-            os.killpg(self.sumo_proc.pid, signal.SIGTERM)
-        except Exception as e:
-            print("Error during teardown: {}".format(e))
+        for fn, args in [[self._kill_sumo_proc, ()], [self._os_pg_killer, ()], [self._close_traci, ()]]:
+            try:
+                fn(*args)
+            except Exception:
+                pass
 
-    # def register_traci_function(self, fn: object):
-    #     self.parent_fns.append(fn)
+    def _kill_sumo_proc(self, ):
+        if self.sumo_proc:
+            self.sumo_proc.kill()
+
+    def _close_traci(self, ):
+        if self.traci_c:
+            self.traci_c.close()
+
+    def _os_pg_killer(self, ):
+        if self.sumo_proc:
+            os.killpg(self.sumo_proc.pid, signal.SIGTERM)
 
     def _execute_traci_fns(self):
         for fn in self.parent_fns:
@@ -188,17 +208,16 @@ class Kernel(object):
     def close_simulation(self, ):
         logging.info('closing the simulation')
         # kill the simulation if using the gui.
-        if self.sim_params.gui:
-            # self.traci_c.close()
-            self.kill_simulation()
-        else:
-            if self.traci_c:
-                self.traci_c.close()
+        self.kill_simulation()
         self.traci_calls.clear()
 
     def simulation_step(self, ):
         # step the simulation
-        self.traci_c.simulationStep()
+        try:
+            self.traci_c.simulationStep()
+        except traci.exceptions.FatalTraCIError:
+            logging.error("sumo crashed on a step")
+            return False
 
         self._subscribe_to_vehicles(self.traci_c)
 

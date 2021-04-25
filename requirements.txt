@@ -1,6 +1,7 @@
 ray
 gym
 numpy
+scipy
 sumolib
 traci
 dm-tree
