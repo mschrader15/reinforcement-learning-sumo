@@ -86,7 +86,6 @@ class _XML2CSV:
             del context
         except Exception as e:
             print(e)
-            pass
 
     def main(self, ):
         header_fields = self._fields
@@ -100,7 +99,7 @@ class _XML2CSV:
 
 def xml2csv(file_path: str, file_type: str, save_path: str):
     xml_fields = [col_name.split(sep="_")[-1] for col_name in FIELD_NAMES[file_type]]
-    header_fields = FIELD_NAMES[file_type]
+    header_fields = ['interval_begin'] + FIELD_NAMES[file_type] if file_type in 'emissions' else FIELD_NAMES[file_type]
     _XML2CSV(file_path=file_path,
              fields=header_fields,
              xml_fields=xml_fields,
