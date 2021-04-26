@@ -3,6 +3,9 @@ from copy import deepcopy
 from rl_sumo.helpers import make_create_env
 
 
+CHECKPOINT_FREQEUNCY = 10
+
+
 def run_no_rl(sim_params, env_params):
     import csv
     from rl_sumo.helpers import xml2csv
@@ -16,7 +19,7 @@ def run_no_rl(sim_params, env_params):
     # with env(env_params=env_params, sim_params=sim_params) as e:
 
     # for _ in range(10):
-    for i in range(2):
+    for i in range(1):
 
         env.reset()
 
@@ -24,7 +27,6 @@ def run_no_rl(sim_params, env_params):
 
         done = False
         while not done:
-
             action = env.action_space.sample()
             observation, reward, done, info = env.step(action)
             if sim_params['gather_reward']:
@@ -103,13 +105,16 @@ def run_rllib_es(sim_params, env_params):
         "config": {
             **config
         },
-        "checkpoint_freq": 25,
+        "checkpoint_freq": CHECKPOINT_FREQEUNCY,
         "max_failures": 999,
         "stop": {
             "training_iteration": 500
         },
         "num_samples": 1,
     }
+
+    if env_params['restore_checkpoint']:
+        exp_tag['restore'] = env_params['restore_checkpoint']
 
     #
     trials = run_experiments({env_params.name: exp_tag})
@@ -171,13 +176,16 @@ def run_rllib_ppo(sim_params, env_params):
         "config": {
             **config
         },
-        "checkpoint_freq": 25,
+        "checkpoint_freq": CHECKPOINT_FREQEUNCY,
         "max_failures": 999,
         "stop": {
             "training_iteration": 500
         },
         "num_samples": 3,
     }
+
+    if env_params['restore_checkpoint']:
+        exp_tag['restore'] = env_params['restore_checkpoint']
 
     trials = run_experiments({env_params.name: exp_tag})
 

@@ -4,12 +4,12 @@
     "algorithm": "no-rl",
     "warmup_time": 3600,
     "sims_per_step": 1,
-    "horizon": 500,
+    "horizon": 900,
     "reward_class": "FCIC",
     "environment_location": "rl_sumo.environment",
     "environment_name": "TLEnv",
-    "num_rollouts": 50,
-    "cpu_num": 60
+    "num_rollouts": 60,
+    "cpu_num": 64
   },
   "Simulation": {
     "file_root": "/home/max/remote/airport-harper-sumo",
@@ -29,8 +29,8 @@
     "start_time": "2020-02-24 06:00:00.000",
     "gui": true,
     "central_junction": "63082003",
-    "no_actor": false,
-    "emissions": "/home/max/rl-learning-sumo/results/emissions.out.xml",
+    "no_actor": true,
+    "emissions": "/BittleLab/7 DOE Project/rl-sumo/baseline/ES-v0/emissions.out.xml",
     "gather_reward": true,
     "tl_file_dict": {
       "63082002": "sumo-xml/traffic-lights/dual_ring_ready.63082002.xml",

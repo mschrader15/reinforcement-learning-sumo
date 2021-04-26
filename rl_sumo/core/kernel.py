@@ -165,10 +165,7 @@ class Kernel(object):
             if not self.sim_params.no_actor:
                 for tl_id in self.sim_params.tl_ids:
                     self.traci_c.trafficlight.setProgram(tl_id, f'{tl_id}-2')
-
-            # overwrite the default traffic light states to what they where
-            for tl_id in self.sim_params.tl_ids:
-                self.traci_c.trafficlight.setPhase(tl_id, 0)
+                    self.traci_c.trafficlight.setPhase(tl_id, 0)
 
             # subscribe to all vehicles in the simulation at this point
             # subscribe to all new vehicle positions and fuel consumption

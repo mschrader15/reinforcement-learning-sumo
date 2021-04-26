@@ -42,9 +42,13 @@ Here the arguments are:
 """
 
 
-@click.argument('result_dir', nargs=1, help="Path to the rllib results folder", type=click.Path(exists=True))
-@click.argument('checkpoint_num', nargs=1, help="The number of the checkpoint to simulate")
-def get_config(result_dir, checkpoint_num):
+def get_config(result_dir, checkpoint_num, emissions_output):
+    """Generates the configuration
+
+    Args:
+        result_dir: Path to the rllib results folder
+        checkpoint_num: The number of the checkpoint to simulate
+    """
 
     result_dir = result_dir if result_dir[-1] != '/' else result_dir[:-1]
 
@@ -70,6 +74,15 @@ def get_config(result_dir, checkpoint_num):
 
     agent_cls = get_agent_class(env_params.algorithm)
 
+    # set the gui to true
+    sim_params.gui = True
+
+    if emissions_output:
+        emissions_output = os.path.join(result_dir, emissions_output)
+        # add the emissions path to the environment parameters
+        setattr(sim_params, 'emissions', emissions_output)
+
+
     gym_name, create_env = make_create_env(env_params=env_params, sim_params=sim_params)
     register_env(gym_name, create_env)
 
@@ -78,14 +91,15 @@ def get_config(result_dir, checkpoint_num):
     checkpoint = checkpoint + '/checkpoint-' + checkpoint_num
     agent.restore(checkpoint)
 
-    return agent, gym_name, config, multiagent, env_params, sim_params, result_dir
+    return agent, gym_name, config, multiagent, env_params, result_dir, sim_params
 
 
-
+@click.argument('result_dir', type=click.Path(exists=True))
+@click.argument('checkpoint_num', )
 @click.option('--emissions_output', default=None)
 @click.option('--horizon', type=int, help='Specifies the horizon.', default=None)
 @click.option('--num_rollouts', type=int, help='The number of rollouts to visualize.', default=1)
-def _visualizer_rllib(emissions_output, horizon, num_rollouts):
+def _visualizer_rllib(result_dir, checkpoint_num, emissions_output, horizon, num_rollouts):
     """Visualizer for RLlib experiments.
 
     This function takes args (see function create_parser below for
@@ -103,14 +117,8 @@ def _visualizer_rllib(emissions_output, horizon, num_rollouts):
     # start up ray
     ray.init(num_cpus=1)
     
-
     # pylint: disable=no-value-for-parameter
-    agent, gym_name, config, multiagent, env_params, sim_params, result_dir = get_config()
-
-    setattr(sim_params, 'emissions_path', emissions_output)
-
-    # set the gui to true
-    sim_params.gui = True
+    agent, gym_name, config, multiagent, env_params, result_dir, sim_params = get_config(result_dir, checkpoint_num, emissions_output)
 
     # lower the horizon if testing
     if horizon:
@@ -214,9 +222,9 @@ def _visualizer_rllib(emissions_output, horizon, num_rollouts):
 
         time.sleep(0.5)
 
-        emission_path_csv = emissions_output[:-4] + ".csv"
-        xml2csv(emissions_output, 'emissions', emission_path_csv)
-        os.remove(emissions_output)
+        emission_path_csv = os.path.splitext(sim_params['emissions'])[0] + ".csv"
+        xml2csv(sim_params['emissions'], 'emissions', emission_path_csv)
+        os.remove(sim_params['emissions'])
 
         # print the location of the emission csv file
         print("\nGenerated emission file at " + emission_path_csv)
