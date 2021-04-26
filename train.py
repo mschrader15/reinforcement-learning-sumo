@@ -1,6 +1,7 @@
 import importlib
 import argparse
 import sys
+import click
 from copy import deepcopy
 from rl_sumo.helpers import make_create_env
 from rl_sumo.helpers import execute_preprocessing_tasks
@@ -19,37 +20,25 @@ def preprocessing(sim_params, *args, **kwargs):
     execute_preprocessing_tasks([['tools.preprocessing.generate_input_files', (sim_params, )]])
 
 
-def commandline_parser(args):
-
-    parser = argparse.ArgumentParser(
-        # formatter_class=argparse.RawDescriptionHelpFormatter,
-        description="Parse argument used when running a Flow simulation.",
-        epilog="python train.py EXP_CONFIG"
-    )
-
-    parser.add_argument(
-        '--config_path', type=str, default='./settings/4_16_2020.json', help='path to the configuration file'
-    )
-
-    return parser.parse_known_args(args)[0]
-
-
-def main(cmd_line_args):
-
-    # parse the command line arguments
-    args = commandline_parser(cmd_line_args)
+@click.option('--config_path', help="Path to the configuration file", )
+def _main(config_path):
+    
 
     # get the sim and environment parameters
-    env_params, sim_params = get_parameters(args.config_path)
+    env_params, sim_params = get_parameters(config_path)
 
     # preprocessing
     preprocessing(sim_params)
 
     TRAINING_FUNCTIONS[env_params.algorithm.lower()](sim_params, env_params)
 
+
+# this is to bypass the pylint errors
+main = click.command()(_main)
+
 if __name__ == "__main__":
 
-    main(sys.argv[1:])
+    main()
 
 
 

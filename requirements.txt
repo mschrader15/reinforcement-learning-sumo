@@ -10,3 +10,4 @@ tabulate
 lz4
 tensorboardX
 lxml
+click

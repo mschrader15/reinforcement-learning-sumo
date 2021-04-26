@@ -12,7 +12,7 @@ parser : ArgumentParser
     Command-line argument parser
 """
 
-import argparse
+import click
 import gym
 import numpy as np
 import os
@@ -41,15 +41,12 @@ Here the arguments are:
 2 - the number of the checkpoint
 """
 
-def visualizer_rllib(args):
-    """Visualizer for RLlib experiments.
 
-    This function takes args (see function create_parser below for
-    more detailed information on what information can be fed to this
-    visualizer), and renders the experiment associated with it.
-    """
-    result_dir = args.result_dir if args.result_dir[-1] != '/' \
-        else args.result_dir[:-1]
+@click.argument('result_dir', nargs=1, help="Path to the rllib results folder", type=click.Path(exists=True))
+@click.argument('checkpoint_num', nargs=1, help="The number of the checkpoint to simulate")
+def get_config(result_dir, checkpoint_num):
+
+    result_dir = result_dir if result_dir[-1] != '/' else result_dir[:-1]
 
     config = get_rllib_pkl(result_dir)
 
@@ -62,13 +59,7 @@ def visualizer_rllib(args):
     else:
         multiagent = False
 
-    # flow_params = get_agent_class(config)
-
-    # this is the input file that was passed to train
-    # master_input = config['env_config']['settings_input']
-
     try:
-
         env_params, sim_params = get_parameters(config['env_config']['settings_input'])
     except KeyError:
         env_params, sim_params = get_parameters(input("Config file cannot be found. Enter the path: "))
@@ -79,32 +70,57 @@ def visualizer_rllib(args):
 
     agent_cls = get_agent_class(env_params.algorithm)
 
-    # sim_params.restart_instance = True
-    # dir_path = os.path.dirname(os.path.realpath(__file__))
-    setattr(sim_params, 'emissions_path', args.emissions_output)
+    gym_name, create_env = make_create_env(env_params=env_params, sim_params=sim_params)
+    register_env(gym_name, create_env)
+
+    agent = agent_cls(env=gym_name, config=config)
+    checkpoint = result_dir + '/checkpoint_' + checkpoint_num
+    checkpoint = checkpoint + '/checkpoint-' + checkpoint_num
+    agent.restore(checkpoint)
+
+    return agent, gym_name, config, multiagent, env_params, sim_params, result_dir
+
+
+
+@click.option('--emissions_output', default=None)
+@click.option('--horizon', type=int, help='Specifies the horizon.', default=None)
+@click.option('--num_rollouts', type=int, help='The number of rollouts to visualize.', default=1)
+def _visualizer_rllib(emissions_output, horizon, num_rollouts):
+    """Visualizer for RLlib experiments.
+
+    This function takes args (see function create_parser below for
+    more detailed information on what information can be fed to this
+    visualizer), and renders the experiment associated with it.
+
+    example usage:
+    python ./visualizer_rllib.py /ray_results/experiment_dir/result_dir 1
+
+    Here the arguments are:
+    1 - the path to the simulation results
+    2 - the number of the checkpoint
+
+    """
+    # start up ray
+    ray.init(num_cpus=1)
+    
+
+    # pylint: disable=no-value-for-parameter
+    agent, gym_name, config, multiagent, env_params, sim_params, result_dir = get_config()
+
+    setattr(sim_params, 'emissions_path', emissions_output)
 
     # set the gui to true
     sim_params.gui = True
 
-    gym_name, create_env = make_create_env(env_params=env_params, sim_params=sim_params)
-    register_env(gym_name, create_env)
-
     # lower the horizon if testing
-    if args.horizon:
-        config['horizon'] = args.horizon
-        env_params.horizon = args.horizon
+    if horizon:
+        config['horizon'] = horizon
+        env_params.horizon = horizon
 
     # just use 1 cpu for replay
     config['num_workers'] = 1 if env_params.algorithm.lower() in 'es' else 0
 
-    # create the agent that will be used to compute the actions
-    agent = agent_cls(env=gym_name, config=config)
-    checkpoint = result_dir + '/checkpoint_' + args.checkpoint_num
-    checkpoint = checkpoint + '/checkpoint-' + args.checkpoint_num
-    agent.restore(checkpoint)
-
-    if hasattr(agent, "local_evaluator") and \
-            os.environ.get("TEST_FLAG") != 'True':
+    if hasattr(agent, "local_evaluator") and os.environ.get("TEST_FLAG") != 'True':
         env = agent.local_evaluator.env
     else:
         env = gym.make(gym_name)
@@ -135,7 +151,7 @@ def visualizer_rllib(args):
     else:
         use_lstm = False
 
-    for i in range(args.num_rollouts):
+    for i in range(num_rollouts):
 
         rewards = [["sim_time", "reward"]]
 
@@ -170,8 +186,8 @@ def visualizer_rllib(args):
         else:
             rets.append(ret)
 
-    if args.emissions_output:
-        path = result_dir if '/' not in args.emissions_output else args.emissions_output
+    if emissions_output:
+        path = result_dir if '/' not in emissions_output else emissions_output
 
         reward_file = os.path.join(*os.path.split(path)[:-1], f'rewards_run_{i}.csv')
         with open(reward_file, 'w') as f:
@@ -194,64 +210,20 @@ def visualizer_rllib(args):
     env.unwrapped.terminate()
 
     # if prompted, convert the emission file into a csv file
-    if args.emissions_output:
+    if emissions_output:
 
         time.sleep(0.5)
 
-        emission_path_csv = args.emissions_output[:-4] + ".csv"
-        xml2csv(args.emissions_output, 'emissions', emission_path_csv)
-        os.remove(args.emissions_output)
+        emission_path_csv = emissions_output[:-4] + ".csv"
+        xml2csv(emissions_output, 'emissions', emission_path_csv)
+        os.remove(emissions_output)
 
         # print the location of the emission csv file
         print("\nGenerated emission file at " + emission_path_csv)
 
 
-def create_parser():
-    """Create the parser to capture CLI arguments."""
-    parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
-                                     description='[Flow] Evaluates a reinforcement learning agent '
-                                     'given a checkpoint.',
-                                     epilog=EXAMPLE_USAGE)
-
-    # required input parameters
-    parser.add_argument('result_dir', type=str, help='Directory containing results')
-
-    parser.add_argument('checkpoint_num', type=str, help='Checkpoint number.')
-
-    # optional input parameters
-    parser.add_argument('--run',
-                        type=str,
-                        help='The algorithm or model to train. This may refer to '
-                        'the name of a built-on algorithm (e.g. RLLib\'s DQN '
-                        'or PPO), or a user-defined trainable function or '
-                        'class registered in the tune registry. '
-                        'Required for results trained with flow-0.2.0 and before.')
-    parser.add_argument('--num_rollouts', type=int, default=1, help='The number of rollouts to visualize.')
-    parser.add_argument(
-        '--emissions_output',
-        type=str,
-        default=None,  # this is obvi inconsistant with the type but :shrug:
-        help='Specifies whether to generate an emission file from the '
-        'simulation')
-    parser.add_argument('--evaluate',
-                        action='store_true',
-                        help='Specifies whether to use the \'evaluate\' reward '
-                        'for the environment.')
-    parser.add_argument('--render_mode',
-                        type=str,
-                        default='sumo_gui',
-                        help='Pick the render mode. Options include sumo_web3d, '
-                        'rgbd and sumo_gui')
-    parser.add_argument('--save_render',
-                        action='store_true',
-                        help='Saves a rendered video to a file. NOTE: Overrides render_mode '
-                        'with pyglet rendering.')
-    parser.add_argument('--horizon', type=int, help='Specifies the horizon.')
-    return parser
-
+main = click.command()(_visualizer_rllib)
 
 if __name__ == '__main__':
-    parser = create_parser()
-    args = parser.parse_args()
-    ray.init(num_cpus=1)
-    visualizer_rllib(args)
+    
+    main()
