@@ -80,7 +80,7 @@ class FCIC(Rewarder):
 
         r_r = r_array[-1] if len(r_array) else r
         
-        print("reward", r_r)
+        # print("reward", r_r)
         # print("min_reward", self.min_reward)
         
         # self.min_reward = min(r_r, self.min_reward)
