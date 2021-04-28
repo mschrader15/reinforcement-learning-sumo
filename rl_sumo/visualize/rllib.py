@@ -195,9 +195,7 @@ def _visualizer_rllib(result_dir, checkpoint_num, emissions_output, horizon, num
             rets.append(ret)
 
     if emissions_output:
-        path = result_dir if '/' not in emissions_output else emissions_output
-
-        reward_file = os.path.join(*os.path.split(path)[:-1], f'rewards_run_{i}.csv')
+        reward_file = os.path.join(result_dir, f'rewards_run_{i}.csv') if '/' not in emissions_output else os.path.join(*os.path.split(path)[:-1], f'rewards_run_{i}.csv')
         with open(reward_file, 'w') as f:
             writer = csv.writer(f, dialect='excel')
             writer.writerows(rewards)
