@@ -11,7 +11,9 @@ import subprocess
 
 def sumo_cmd_line(params, kernel):
 
-    cmd = [
+    cmd = ['-c', params['gui_config_file']] if params['gui_config_file'] else []
+
+    cmd.extend([
         '-n',
         params.net_file,
         '-e',
@@ -28,12 +30,14 @@ def sumo_cmd_line(params, kernel):
         "-1",
         "--collision.action",
         "remove",
-    ]
+    ])
+
     if params.gui:
         cmd.extend(['--start'])
 
     if params['emissions']:
         cmd.extend(['--emission-output', params['emissions']])
+
     return cmd
 
 
@@ -51,8 +55,7 @@ class Kernel(object):
         self.parent_fns = []
         self.sim_params = deepcopy(sim_params)
         self.sim_step_size = self.sim_params.sim_step
-        self.state_file = os.path.join(sim_params.sim_state_dir,
-                                       f"start_state_{sim_params.port}.xml")
+        self.state_file = os.path.join(sim_params.sim_state_dir, f"start_state_{sim_params.port}.xml")
         self.sim_time = 0
         self.seed = 5
         self.traci_calls = []
@@ -75,14 +78,16 @@ class Kernel(object):
         # pylint: disable=maybe-no-member
 
         # find SUMO
-        sumo_binary = checkBinary(
-            'sumo-gui') if self.sim_params.gui else checkBinary('sumo')
+        sumo_binary = checkBinary('sumo-gui') if self.sim_params.gui else checkBinary('sumo')
 
         # create the command line call
         sumo_call = [sumo_binary] + sumo_cmd_line(self.sim_params, self)
 
         # start the process
-        self.sumo_proc = subprocess.Popen(sumo_call, stdout=subprocess.DEVNULL,) # stderr=subprocess.STDOUT)
+        self.sumo_proc = subprocess.Popen(
+            sumo_call,
+            stdout=subprocess.DEVNULL,
+        )  # stderr=subprocess.STDOUT)
 
         # sleep before trying to connect with TRACI
         time.sleep(1)
@@ -97,8 +102,7 @@ class Kernel(object):
             traci_c.trafficlight.setProgram(tl_id, f'{tl_id}-1')
 
         # run for an hour to warm up the simulation
-        for _ in range(
-                int(self.sim_params.warmup_time * 1 / self.sim_step_size)):
+        for _ in range(int(self.sim_params.warmup_time * 1 / self.sim_step_size)):
             traci_c.simulationStep()
 
         # subscribe to all the vehicles in the network at this state
@@ -113,7 +117,7 @@ class Kernel(object):
         if not self.sim_params.no_actor:
             for tl_id in self.sim_params.tl_ids:
                 traci_c.trafficlight.setProgram(tl_id, f'{tl_id}-2')
-        
+
         # overwrite the default traffic light states to what they where
         for tl_id in self.sim_params.tl_ids:
             traci_c.trafficlight.setPhase(tl_id, 0)
@@ -124,10 +128,7 @@ class Kernel(object):
         traci_c.simulation.subscribe([tc.VAR_COLLIDING_VEHICLES_NUMBER])
 
         self.add_traci_call([
-            [
-                traci_c.lane.getAllSubscriptionResults, (),
-                tc.VAR_COLLIDING_VEHICLES_NUMBER
-            ],
+            [traci_c.lane.getAllSubscriptionResults, (), tc.VAR_COLLIDING_VEHICLES_NUMBER],
         ])
 
         self.sim_time = 0
@@ -152,7 +153,6 @@ class Kernel(object):
             except AttributeError:
                 pass
 
-
             # unsubscribe from all the vehicles at the end state
             for veh_id in self.traci_c.vehicle.getIDList():
                 self.traci_c.vehicle.unsubscribe(veh_id)
@@ -161,7 +161,7 @@ class Kernel(object):
             self.traci_c.simulation.loadState(self.state_file)
 
             # set the traffic lights to the correct program
-                    # set the traffic lights to the all green program
+            # set the traffic lights to the all green program
             if not self.sim_params.no_actor:
                 for tl_id in self.sim_params.tl_ids:
                     self.traci_c.trafficlight.setProgram(tl_id, f'{tl_id}-2')

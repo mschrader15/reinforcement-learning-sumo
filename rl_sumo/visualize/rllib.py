@@ -42,7 +42,7 @@ Here the arguments are:
 """
 
 
-def get_config(result_dir, checkpoint_num, emissions_output):
+def get_config(result_dir, emissions_output, gui_config_file):
     """Generates the configuration
 
     Args:
@@ -68,6 +68,9 @@ def get_config(result_dir, checkpoint_num, emissions_output):
     except KeyError:
         env_params, sim_params = get_parameters(input("Config file cannot be found. Enter the path: "))
 
+    if gui_config_file:
+        setattr(sim_params, 'gui_config_file', gui_config_file)
+
     # HACK: for old environment names
     if 'my_gym' in env_params.environment_location:
         env_params.environment_location = 'rl_sumo.environment'
@@ -82,24 +85,92 @@ def get_config(result_dir, checkpoint_num, emissions_output):
         # add the emissions path to the environment parameters
         setattr(sim_params, 'emissions', emissions_output)
 
-
     gym_name, create_env = make_create_env(env_params=env_params, sim_params=sim_params)
     register_env(gym_name, create_env)
 
     agent = agent_cls(env=gym_name, config=config)
-    checkpoint = result_dir + '/checkpoint_' + checkpoint_num
-    checkpoint = checkpoint + '/checkpoint-' + checkpoint_num
-    agent.restore(checkpoint)
 
     return agent, gym_name, config, multiagent, env_params, result_dir, sim_params
 
 
+def restore_checkpoint(agent, result_dir, checkpoint_num):
+    checkpoint = result_dir + '/checkpoint_' + checkpoint_num + '/checkpoint-' + checkpoint_num
+    agent.restore(checkpoint)
+    return agent
+
+
+def make_video_directory(video_dir, checkpoint_num):
+    current_vid_dir = os.path.join(video_dir, checkpoint_num)
+    # try:
+    os.mkdir(current_vid_dir)
+    # except
+    return current_vid_dir
+
+
+def run_simulation(agent, env, multiagent, config, env_params, use_lstm, state_init, video_dir):
+
+    if multiagent:
+        # map the agent id to its policy
+        policy_map_fn = config['multiagent']['policy_mapping_fn']
+        rets = {key: [] for key in config['multiagent']['policies'].keys()}
+    else:
+        rets = []
+
+    # for i in range(num_rollouts):
+
+    rewards = [["sim_time", "reward"]]
+
+    state = env.reset()
+    # ret = {key: [0] for key in rets.keys()} if multiagent else 0
+    for _ in range(env_params.horizon):
+
+        # if multiagent:
+        #     action = {}
+        #     for agent_id in state.keys():
+        #         if use_lstm:
+        #             action[agent_id], state_init[agent_id], _ = \
+        #                 agent.compute_action(
+        #                 state[agent_id], state=state_init[agent_id],
+        #                 policy_id=policy_map_fn(agent_id))
+        #         else:
+        #             action[agent_id] = agent.compute_action(state[agent_id], policy_id=policy_map_fn(agent_id))
+        #     for actor, rew in reward.items():
+        #         ret[policy_map_fn(actor)][0] += rew
+
+        # else:
+        action = agent.compute_action(state)
+        state, reward, done, _ = env.step(action)
+        rewards.append([env.k.sim_time, reward])
+        # ret += reward
+
+        # save the image
+        if video_dir and not env.k.sim_time % 1:
+            env.k.traci_c.gui.screenshot("View #0", os.path.join(video_dir, "frame_%06d.png" % env.k.sim_time))
+
+        if multiagent and done['__all__']:
+            break
+        if not multiagent and done:
+            break
+
+    # if multiagent:
+    #     for key in rets.keys():
+    #         rets[key].append(ret[key])
+    # else:
+    #     rets.append(ret)
+
+    return rewards
+
+
 @click.argument('result_dir', type=click.Path(exists=True))
-@click.argument('checkpoint_num', )
+@click.argument('checkpoints', nargs=-1)
 @click.option('--emissions_output', default=None)
 @click.option('--horizon', type=int, help='Specifies the horizon.', default=None)
-@click.option('--num_rollouts', type=int, help='The number of rollouts to visualize.', default=1)
-def _visualizer_rllib(result_dir, checkpoint_num, emissions_output, horizon, num_rollouts):
+@click.option('--video_dir', type=click.Path(exists=True), help='The number of rollouts to visualize.', default=None)
+@click.option('--gui_config_file',
+              type=str,
+              help='A SUMO configuration file pointing a simulation and a network',
+              default=None)
+def _visualizer_rllib(result_dir, checkpoints, emissions_output, horizon, video_dir, gui_config_file):
     """Visualizer for RLlib experiments.
 
     This function takes args (see function create_parser below for
@@ -116,9 +187,10 @@ def _visualizer_rllib(result_dir, checkpoint_num, emissions_output, horizon, num
     """
     # start up ray
     ray.init(num_cpus=1)
-    
+
     # pylint: disable=no-value-for-parameter
-    agent, gym_name, config, multiagent, env_params, result_dir, sim_params = get_config(result_dir, checkpoint_num, emissions_output)
+    agent, gym_name, config, multiagent, env_params, result_dir, sim_params = get_config(
+        result_dir, emissions_output, gui_config_file)
 
     # lower the horizon if testing
     if horizon:
@@ -133,103 +205,75 @@ def _visualizer_rllib(result_dir, checkpoint_num, emissions_output, horizon, num
     else:
         env = gym.make(gym_name)
 
-    if multiagent:
-        # map the agent id to its policy
-        policy_map_fn = config['multiagent']['policy_mapping_fn']
-        rets = {key: [] for key in config['multiagent']['policies'].keys()}
-    else:
-        rets = []
-
     if config['model']['use_lstm']:
         use_lstm = True
-        if multiagent:
-            # map the agent id to its policy
-            policy_map_fn = config['multiagent']['policy_mapping_fn']
-            size = config['model']['lstm_cell_size']
-            state_init = {
-                key: [np.zeros(size, np.float32), np.zeros(size, np.float32)]
-                for key in config['multiagent']['policies'].keys()
-            }
+        # if multiagent:
+        #     # map the agent id to its policy
+        #     policy_map_fn = config['multiagent']['policy_mapping_fn']
+        #     size = config['model']['lstm_cell_size']
+        #     state_init = {
+        #         key: [np.zeros(size, np.float32), np.zeros(size, np.float32)]
+        #         for key in config['multiagent']['policies'].keys()
+        #     }
 
-        else:
-            state_init = [
-                np.zeros(config['model']['lstm_cell_size'], np.float32),
-                np.zeros(config['model']['lstm_cell_size'], np.float32)
-            ]
+        # else:
+        state_init = [
+            np.zeros(config['model']['lstm_cell_size'], np.float32),
+            np.zeros(config['model']['lstm_cell_size'], np.float32)
+        ]
     else:
         use_lstm = False
+        state_init = []
 
-    for i in range(num_rollouts):
+    for checkpoint in checkpoints:
 
-        rewards = [["sim_time", "reward"]]
+        agent = restore_checkpoint(agent, result_dir, checkpoint)
 
-        state = env.reset()
-        ret = {key: [0] for key in rets.keys()} if multiagent else 0
-        for _ in range(env_params.horizon):
-            if multiagent:
-                action = {}
-                for agent_id in state.keys():
-                    if use_lstm:
-                        action[agent_id], state_init[agent_id], logits = \
-                            agent.compute_action(
-                            state[agent_id], state=state_init[agent_id],
-                            policy_id=policy_map_fn(agent_id))
-                    else:
-                        action[agent_id] = agent.compute_action(state[agent_id], policy_id=policy_map_fn(agent_id))
-                for actor, rew in reward.items():
-                    ret[policy_map_fn(actor)][0] += rew
-            else:
-                action = agent.compute_action(state)
-                state, reward, done, _ = env.step(action)
-                rewards.append([env.k.sim_time, reward])
-                ret += reward
-            if multiagent and done['__all__']:
-                break
-            if not multiagent and done:
-                break
+        video_dir_chekpoint = make_video_directory(video_dir, checkpoint) if video_dir else None
 
-        if multiagent:
-            for key in rets.keys():
-                rets[key].append(ret[key])
-        else:
-            rets.append(ret)
+        rewards = run_simulation(agent, env, multiagent, config, env_params, use_lstm, state_init, video_dir_chekpoint)
 
-    if emissions_output:
-        reward_file = os.path.join(result_dir, f'rewards_run_{i}.csv') if '/' not in emissions_output else os.path.join(*os.path.split(path)[:-1], f'rewards_run_{i}.csv')
-        with open(reward_file, 'w') as f:
-            writer = csv.writer(f, dialect='excel')
-            writer.writerows(rewards)
+        if emissions_output:
+            reward_file = os.path.join(
+                result_dir,
+                f'rewards_run_checkpoint_{checkpoint}.csv') if '/' not in emissions_output else os.path.join(
+                    *os.path.split(emissions_output)[:-1], f'rewards_run_checkpoint_{checkpoint}.csv')
+            with open(reward_file, 'w') as f:
+                writer = csv.writer(f, dialect='excel')
+                writer.writerows(rewards)
 
-    print('==== Summary of results ====')
-    print("Return:")
-    # print(mean_speed)
-    if multiagent:
-        for agent_id, rew in rets.items():
-            print('For agent', agent_id)
-            print(rew)
-            print('Average, std return: {}, {} for agent {}'.format(np.mean(rew), np.std(rew), agent_id))
-    else:
-        print(rets)
-        print('Average, std: {}, {}'.format(np.mean(rets), np.std(rets)))
+        # print('==== Summary of results ====')
+        # print("Return:")
+        # # print(mean_speed)
+        # if multiagent:
+        #     for agent_id, rew in rets.items():
+        #         print('For agent', agent_id)
+        #         print(rew)
+        #         print('Average, std return: {}, {} for agent {}'.format(np.mean(rew), np.std(rew), agent_id))
+        # else:
+        #     print(rets)
+        #     print('Average, std: {}, {}'.format(np.mean(rets), np.std(rets)))
 
-    # terminate the environment
-    env.unwrapped.terminate()
+        # terminate the environment
+        env.unwrapped.terminate()
 
-    # if prompted, convert the emission file into a csv file
-    if emissions_output:
+        # if prompted, convert the emission file into a csv file
+        if emissions_output:
+
+            time.sleep(0.5)
+
+            emission_path_csv = os.path.splitext(sim_params['emissions'])[0] + f"_checkpoint_{checkpoint}.csv"
+            xml2csv(sim_params['emissions'], 'emissions', emission_path_csv)
+            os.remove(sim_params['emissions'])
+
+            # print the location of the emission csv file
+            print("\nGenerated emission file at " + emission_path_csv)
 
         time.sleep(0.5)
-
-        emission_path_csv = os.path.splitext(sim_params['emissions'])[0] + ".csv"
-        xml2csv(sim_params['emissions'], 'emissions', emission_path_csv)
-        os.remove(sim_params['emissions'])
-
-        # print the location of the emission csv file
-        print("\nGenerated emission file at " + emission_path_csv)
 
 
 main = click.command()(_visualizer_rllib)
 
 if __name__ == '__main__':
-    
+
     main()

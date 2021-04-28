@@ -29,8 +29,7 @@ def run_no_rl(sim_params, env_params):
         while not done:
             action = env.action_space.sample()
             observation, reward, done, info = env.step(action)
-            if sim_params['gather_reward']:
-                rewards.append([env.k.sim_time, reward])
+            rewards.append([env.k.sim_time, reward])
 
         if sim_params['emissions']:
             reward_file = os.path.join(*os.path.split(sim_params['emissions'])[:-1], f'rewards_run_{i}.csv')
