@@ -1,4 +1,4 @@
-CONFIG_PATH="./settings/ES_4_25.json"
+CONFIG_PATH="./settings/ES_4_27_FC.json"
 
 rm ~/train.out
 

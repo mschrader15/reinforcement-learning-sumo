@@ -242,7 +242,9 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
         self.actor.register_traci(traci_c)
 
         # pass traci to the rewarder and then register the calls
-        self.k.add_traci_call(self.rewarder.register_traci(traci_c))
+        reward_calls = self.rewarder.register_traci(traci_c)
+        if reward_calls:
+            self.k.add_traci_call(reward_calls)
 
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)

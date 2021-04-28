@@ -37,7 +37,7 @@ def sumo_cmd_line(params, kernel):
     return cmd
 
 
-VEHICLE_SUBSCRIPTIONS = [tc.VAR_POSITION, tc.VAR_FUELCONSUMPTION]
+VEHICLE_SUBSCRIPTIONS = [tc.VAR_POSITION, tc.VAR_FUELCONSUMPTION, tc.VAR_SPEED]
 
 
 class Kernel(object):

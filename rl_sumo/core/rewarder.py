@@ -19,15 +19,42 @@ class Rewarder:
     def __init__(self, ):
         pass
 
-    @staticmethod
     def register_traci(self, traci_c):
-        return [[]]
+        return None
 
     def get_reward(self, *args, **kwargs):
         pass
 
     def re_initialize(self, ):
         pass
+
+
+class PureFuelMin(Rewarder):
+    def __init__(self, sim_params, *args, **kwargs):
+        super(PureFuelMin, self).__init__()
+        self.sim_step = deepcopy(sim_params.sim_step)
+        # self.min_reward = 50  # this corresponds to 50 mpg. But we want to penalize 0 mpg
+        # self.ml_2_l = 0.001
+        # self.m_2_km = 0.001
+
+        # # from PHEMLight
+        # self.m = 1235  # kg
+        # self.C_d = 0.3113
+        # self.rho = 1.204  # kg/m^3
+        self.normailizer = 10  # ml_s
+
+    def get_reward(self, subscription_dict):
+
+        vehicle_list = list(subscription_dict[tc.VAR_VEHICLE].values())
+        # l_100km = sum((vehicle_data[tc.VAR_SPEED] * self.sim_step / self.m_2_km) /
+        #            (vehicle_data[tc.VAR_FUELCONSUMPTION] * self.ml_2_l) * 100 for vehicle_data in vehicle_list)
+        
+        fc = sum(vehicle_data[tc.VAR_FUELCONSUMPTION] * self.sim_step for vehicle_data in vehicle_list) / len(vehicle_list)
+
+        return (-1 * fc) / self.normailizer
+
+
+    # def _calc_eff(self, veh_data):
 
 
 class FCIC(Rewarder):
@@ -51,7 +78,6 @@ class FCIC(Rewarder):
 
     def re_initialize(self):
         self._reward_array.clear()
-
 
     def _running_mean(self, ):
         """
@@ -79,12 +105,12 @@ class FCIC(Rewarder):
         r_array = self._running_mean()
 
         r_r = r_array[-1] if len(r_array) else r
-        
+
         # print("reward", r_r)
         # print("min_reward", self.min_reward)
-        
+
         # self.min_reward = min(r_r, self.min_reward)
-        
+
         return -1 * (r_r / self.min_reward)
 
     def get_stops(self):
