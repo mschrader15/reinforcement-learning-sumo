@@ -20,9 +20,6 @@ def sumo_cmd_line(params, kernel):
         str(params.sim_length),
         '--step-length',
         str(params.sim_step),
-        '-a',
-        ", ".join(params.additional_files + [params.route_file] +
-                  [params['tls_record_file']] if params['tls_record_file'] else []),
         '--remote-port',
         str(params.port),
         '--seed',
@@ -32,6 +29,13 @@ def sumo_cmd_line(params, kernel):
         "--collision.action",
         "remove",
     ])
+
+    additional_files = ", ".join(params.additional_files + [params.route_file])
+
+    if params['tls_record_file']:
+        additional_files = ", ".join([additional_files] + [params['tls_record_file']])
+
+    cmd.extend(["-a", additional_files])
 
     if params.gui:
         cmd.extend(['--start'])
