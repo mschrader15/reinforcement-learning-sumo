@@ -21,7 +21,8 @@ def sumo_cmd_line(params, kernel):
         '--step-length',
         str(params.sim_step),
         '-a',
-        ", ".join(params.additional_files + [params.route_file]),
+        ", ".join(params.additional_files + [params.route_file] +
+                  [params['tls_record_file']] if params['tls_record_file'] else []),
         '--remote-port',
         str(params.port),
         '--seed',

@@ -42,7 +42,7 @@ Here the arguments are:
 """
 
 
-def get_config(result_dir, emissions_output, gui_config_file):
+def get_config(result_dir, emissions_output, gui_config_file, tls_record_file):
     """Generates the configuration
 
     Args:
@@ -70,6 +70,10 @@ def get_config(result_dir, emissions_output, gui_config_file):
 
     if gui_config_file:
         setattr(sim_params, 'gui_config_file', gui_config_file)
+
+    if tls_record_file:
+        setattr(sim_params, 'tls_record_file', tls_record_file)
+
 
     # HACK: for old environment names
     if 'my_gym' in env_params.environment_location:
@@ -170,7 +174,11 @@ def run_simulation(agent, env, multiagent, config, env_params, use_lstm, state_i
               type=str,
               help='A SUMO configuration file pointing a simulation and a network',
               default=None)
-def _visualizer_rllib(result_dir, checkpoints, emissions_output, horizon, video_dir, gui_config_file):
+@click.option('--tls_record_file',
+              type=str,
+              help='An additional file to record traffic light states',
+              default=None)
+def _visualizer_rllib(result_dir, checkpoints, emissions_output, horizon, video_dir, gui_config_file, tls_record_file):
     """Visualizer for RLlib experiments.
 
     This function takes args (see function create_parser below for
@@ -190,7 +198,7 @@ def _visualizer_rllib(result_dir, checkpoints, emissions_output, horizon, video_
 
     # pylint: disable=no-value-for-parameter
     agent, gym_name, config, multiagent, env_params, result_dir, sim_params = get_config(
-        result_dir, emissions_output, gui_config_file)
+        result_dir, emissions_output, gui_config_file, tls_record_file)
 
     # lower the horizon if testing
     if horizon:
