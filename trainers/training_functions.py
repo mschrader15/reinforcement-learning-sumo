@@ -3,7 +3,7 @@ from copy import deepcopy
 from rl_sumo.helpers import make_create_env
 
 
-CHECKPOINT_FREQEUNCY = 5
+CHECKPOINT_FREQEUNCY = 10
 
 
 def run_no_rl(sim_params, env_params):
@@ -154,6 +154,8 @@ def run_rllib_ppo(sim_params, env_params):
     config["train_batch_size"] = env_params.horizon * env_params.num_rollouts
     config["use_gae"] = True
     config["horizon"] = env_params.horizon
+    config["noise_stdev"] = 0.02
+    config["stepsize"] = 0.02
     # gae_lambda = 0.97
     # step_size = 5e-4
     # if benchmark_name == "grid0":
