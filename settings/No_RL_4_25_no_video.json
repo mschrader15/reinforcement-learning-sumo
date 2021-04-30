@@ -9,8 +9,7 @@
     "environment_location": "rl_sumo.environment",
     "environment_name": "TLEnv",
     "num_rollouts": 60,
-    "cpu_num": 64,
-    "video_dir": "/home/max/rl-learning-sumo/results/rw_morning_video"
+    "cpu_num": 64
   },
   "Simulation": {
     "file_root": "/home/max/remote/airport-harper-sumo",
@@ -28,15 +27,14 @@
     "tl_file": "sumo-xml/traffic-lights/tls.rl.add.xml",
     "sim_step": 0.5,
     "start_time": "2020-02-24 06:30:00.000",
-    "gui": 1,
+    "gui": 0,
     "no_actor": true,
     "central_junction": "63082003",
-    "emissions": "/BittleLab/7 DOE Project/rl-sumo/baseline/ES-morning/emissions.out.xml",
+    "tls_record_file": "/home/max/remote/airport-harper-sumo/sumo-xml/traffic-lights/output.tls.add.xml",
     "tl_file_dict": {
       "63082002": "/home/max/remote/airport-harper-sumo/sumo-xml/traffic-lights/dual_ring_ready.63082002.xml",
       "63082003": "/home/max/remote/airport-harper-sumo/sumo-xml/traffic-lights/dual_ring_ready.63082003.xml",
       "63082004": "/home/max/remote/airport-harper-sumo/sumo-xml/traffic-lights/dual_ring_ready.63082004.xml"
-    },
-    "gui_config_file": "/home/max/remote/airport-harper-sumo/sumo-xml/background-images/background.sumocfg"
+    }
   }
 }

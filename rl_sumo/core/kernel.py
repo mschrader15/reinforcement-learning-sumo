@@ -122,10 +122,10 @@ class Kernel(object):
         if not self.sim_params.no_actor:
             for tl_id in self.sim_params.tl_ids:
                 traci_c.trafficlight.setProgram(tl_id, f'{tl_id}-2')
-
-        # overwrite the default traffic light states to what they where
-        for tl_id in self.sim_params.tl_ids:
-            traci_c.trafficlight.setPhase(tl_id, 0)
+                
+            # overwrite the default traffic light states to what they where
+            for tl_id in self.sim_params.tl_ids:
+                traci_c.trafficlight.setPhase(tl_id, 0)
 
         # saving the beginning state of the simulation
         traci_c.simulation.saveState(self.state_file)
@@ -168,6 +168,7 @@ class Kernel(object):
             # set the traffic lights to the correct program
             # set the traffic lights to the all green program
             if not self.sim_params.no_actor:
+
                 for tl_id in self.sim_params.tl_ids:
                     self.traci_c.trafficlight.setProgram(tl_id, f'{tl_id}-2')
                     self.traci_c.trafficlight.setPhase(tl_id, 0)
@@ -180,6 +181,7 @@ class Kernel(object):
             # unsubscribe from all the vehicles at the end state
             for veh_id in self.traci_c.vehicle.getIDList():
                 self.traci_c.vehicle.subscribe(veh_id, VEHICLE_SUBSCRIPTIONS)
+
         except Exception as e:
             print("Something in TRACI failed")
             raise e

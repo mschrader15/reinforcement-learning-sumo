@@ -3,7 +3,7 @@ from copy import deepcopy
 from rl_sumo.helpers import make_create_env
 
 
-CHECKPOINT_FREQEUNCY = 10
+CHECKPOINT_FREQEUNCY = 5
 
 
 def run_no_rl(sim_params, env_params):
@@ -31,11 +31,17 @@ def run_no_rl(sim_params, env_params):
             observation, reward, done, info = env.step(action)
             rewards.append([env.k.sim_time, reward])
 
+            if env_params['video_dir'] and not env.k.sim_time % 1 and env.k.sim_time < 300:
+                env.k.traci_c.gui.screenshot("View #0", os.path.join(env_params['video_dir'], "frame_%06d.png" % env.k.sim_time))
+        
+        
         if sim_params['emissions']:
             reward_file = os.path.join(*os.path.split(sim_params['emissions'])[:-1], f'rewards_run_{i}.csv')
             with open(reward_file, 'w') as f:
                 writer = csv.writer(f, dialect='excel')
                 writer.writerows(rewards)
+
+        
 
     env.close()
 
