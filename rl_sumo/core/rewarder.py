@@ -48,11 +48,11 @@ class PureFuelMin(Rewarder):
         vehicle_list = list(subscription_dict[tc.VAR_VEHICLE].values())
         # l_100km = sum((vehicle_data[tc.VAR_SPEED] * self.sim_step / self.m_2_km) /
         #            (vehicle_data[tc.VAR_FUELCONSUMPTION] * self.ml_2_l) * 100 for vehicle_data in vehicle_list)
-        
-        fc = sum(vehicle_data[tc.VAR_FUELCONSUMPTION] * self.sim_step for vehicle_data in vehicle_list) / len(vehicle_list)
+
+        fc = sum(vehicle_data[tc.VAR_FUELCONSUMPTION] * self.sim_step
+                 for vehicle_data in vehicle_list) / len(vehicle_list)
 
         return (-1 * fc) / self.normailizer
-
 
     # def _calc_eff(self, veh_data):
 
@@ -87,12 +87,9 @@ class FCIC(Rewarder):
                                 origin=-(self.window_size // 2))[:-(self.window_size - 1)]
 
     def register_traci(self, traci_c):
-
         self._reward_array.clear()
-
         traci_c.junction.subscribeContext(self.junction_id, tc.CMD_GET_VEHICLE_VARIABLE, 1000000,
                                           [tc.VAR_SPEED, tc.VAR_ALLOWED_SPEED, tc.VAR_ROAD_ID])
-
         return [[traci_c.junction.getContextSubscriptionResults, (self.junction_id, ), self.junction_id]]
 
     def get_reward(self, subscription_dict):
@@ -101,16 +98,8 @@ class FCIC(Rewarder):
         k_s = self._get_sorted_stopped(relevant_data)
         r = -1 * (delay + k_s / 3600)
         self._reward_array.append(r)
-
         r_array = self._running_mean()
-
         r_r = r_array[-1] if len(r_array) else r
-
-        # print("reward", r_r)
-        # print("min_reward", self.min_reward)
-
-        # self.min_reward = min(r_r, self.min_reward)
-
         return -1 * (r_r / self.min_reward)
 
     def get_stops(self):
