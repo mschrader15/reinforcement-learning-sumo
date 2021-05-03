@@ -5,20 +5,43 @@ from datetime import datetime
 
 
 def safe_getter(_dict: dict, param: str):
+    """
+    Get and remove an item from a dictionary. 
+    If the item doesn't exist, return None
+
+    Args:
+        _dict (dict): The dictionary from which to get item
+        param (str): the dictionary key
+
+    Returns:
+        [type]: either None or _dict[param]
+    """
     try:
-        popped = _dict.pop(param)
-        return popped
+        return _dict.pop(param)
     except KeyError:
         return None
 
 
 def make_directory(path):
+    """
+    make a directory if it doesn't exist
+
+    Args:
+        path ([type]): absolute path of the directory to create
+    """
 
     os.makedirs(path, exist_ok=True)
 
 
 class EnvParams(object):
     def __init__(self, settings_dict: dict):
+        """
+        The EnvParams used throughout rl_sumo. 
+        Contains various information. 
+
+        Args:
+            settings_dict (dict): a python dictionary from json.load
+        """
 
         # import the parameters
         self.json_input = settings_dict
@@ -61,6 +84,14 @@ class EnvParams(object):
 
 class SimParams(object):
     def __init__(self, env_params: EnvParams, settings_dict: dict):
+        """
+        The EnvParams used throughout rl_sumo. 
+        Listed are the must-have parameters but it can be extended 
+
+        Args:
+            env_params (EnvParams): 
+            settings_dict (dict): a python dictionary from json.load
+        """
 
         # import the parameters
         params = deepcopy(settings_dict['Simulation'])

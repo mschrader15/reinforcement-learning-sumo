@@ -1,3 +1,9 @@
+"""
+This was taken almost verbatim (besides package name and info) from FLOW
+
+https://github.com/flow-project/flow/blob/master/setup.py
+"""
+
 from os.path import dirname, realpath
 from setuptools import find_packages, setup, Distribution
 
@@ -19,7 +25,7 @@ class BinaryDistribution(Distribution):
 
 setup(
     name='rl_sumo',
-    version="1.0.1",
+    version="1.0.2",
     distclass=BinaryDistribution,
     # cmdclass={"build_ext": build_ext},
     packages=find_packages(),

@@ -7,6 +7,15 @@ import traci
 
 
 def read_settings(settings_path):
+    """Read in the traffic light settings file (this is probably custom 
+    to the UAs effort)
+
+    Args:
+        settings_path: path to json file
+
+    Returns:
+        [type]: [description]
+    """
     with open(settings_path, 'rb') as f:
         return json.load(f, )
 
@@ -26,12 +35,31 @@ def _value_error_handler(tuple_obj, default):
 
 
 def tls_file(path):
+    """
+    This function reads in a SUMO tls phasing file
+
+    It yields each phase and it's index
+
+    Args:
+        path (str): path to file
+    Yields:
+        phase: a mindom element
+        i: the phase object index
+    """
     tls_obj = minidom.parse(path)
     for i, phase in enumerate(tls_obj.getElementsByTagName("phase")):
         yield phase, i
 
 
 def safe_int(prospective_int):
+    """
+    safely convert a number to an integer
+
+    Args:
+        prospective_int (any)
+    Returns:
+        [any]: eithter int(number) or non-number
+    """
     try:
         return int(prospective_int)
     except (ValueError, TypeError):
@@ -39,6 +67,12 @@ def safe_int(prospective_int):
 
 
 class _Timer:
+    """
+    This class creates a global timer
+
+    Returns:
+        float: a copy of the current time
+    """
     time = 0.
 
     @staticmethod
@@ -47,23 +81,37 @@ class _Timer:
 
 
 class _Base:
+    """
+    This base class freezes and unfreezes the data
+    """
     def __init__(self, ):
         # self.parent = parent
         self.init_state = copy.deepcopy(self.__dict__)
 
     def _re_initialize(self, ):
+        """
+        This function "unfreeezes" the initial values that were saved in the call to freeze
+        """
         for name, value in self.init_state.items():
             self.__dict__[name] = value
 
     def freeze(self, ):
         """
-        This is gets called later than the init state. 
+        This is gets called later than the init state. and freezes all the values in self 
         """
         self.init_state = copy.deepcopy(self.__dict__)
 
 
 class TrafficLightManager(_Base):
     def __init__(self, tl_id, tl_details, tl_file):
+        """
+        TrafficLightManager represents a controller sitting at each traffic light
+
+        Args:
+            tl_id (str): a unique id for the traffic light 
+            tl_details (dict): a dictionary containing setup information about the traffic light
+            tl_file [str]: a string pointing to the xml file describing traffic light states 
+        """
 
         self.tl_id = tl_id
         self.current_state: list = [2, 6]
@@ -132,9 +180,25 @@ class TrafficLightManager(_Base):
         self._set_initial_states(self.traci_c.trafficlight.getRedYellowGreenState(self.tl_id))
 
     def _int_to_action(self, action: int) -> list:
+        """
+        convert an integer to an action
+
+        Args:
+            action (int): an integer from the RL-algorithm
+
+        Returns:
+            list: a list of [phase, phase]
+        """
         return self.action_space[action]
 
     def _create_states(self, ):
+        """
+        This is a helper function to create a list of possible states.
+        It is not pretty and based completely on the self.potential movements format
+
+        Returns:
+            possible states and an dict pointing to each states
+        """
         mainline = [move for move in self.potential_movements if move in [1, 2, 5, 6]]
         secondary = [move for move in self.potential_movements if move in [3, 4, 7, 8]]
         possible_states = []
@@ -153,6 +217,15 @@ class TrafficLightManager(_Base):
         return possible_states, {tuple(state): i for i, state in enumerate(possible_states)}
 
     def read_in_tls_xml(self, file_path):
+        """
+        This function reads in the traffic light settings
+
+        Args:
+            file_path (str): file path to traffic light simulation 
+
+        Returns:
+            dict: a dictionary pointing to the phase and its index
+        """
         phase_dict = {}
         for phase, i in tls_file(file_path):
             name = phase.getAttribute('name').split("-")
@@ -164,6 +237,14 @@ class TrafficLightManager(_Base):
         return phase_dict
 
     def recursive_dict_constructor(self, _dict, keys, value):
+        """
+        construct the output of self.read_in_tls_xml recursively
+
+        Args:
+            _dict ([dictionary]): 
+            keys ([]): 
+            value ([type]): 
+        """
         if len(keys) > 1:
             # try:
             try:
@@ -177,6 +258,7 @@ class TrafficLightManager(_Base):
             _dict[keys[0]] = value
 
     def tasks_are_empty(self, ):
+        # check to see if the task list is empty
         return not len(self._task_list)
 
     def update_state(self, action, sim_time):

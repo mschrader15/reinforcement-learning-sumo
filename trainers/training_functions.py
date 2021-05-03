@@ -1,12 +1,26 @@
+"""
+This function contains the main training functions ran by train.py
+
+"""
+
 import os
 from copy import deepcopy
 from rl_sumo.helpers import make_create_env
 
-
+# The frequency with which rllib checkpoints are saved 
 CHECKPOINT_FREQEUNCY = 10
 
 
 def run_no_rl(sim_params, env_params):
+    """
+    Run the environment specified in env_params without reinforcement learning.
+
+    The actions will be a random sample of the action space unless an override is desired
+
+    Args:
+        sim_params
+        env_params
+    """
     import csv
     from rl_sumo.helpers import xml2csv
     import time
@@ -16,9 +30,6 @@ def run_no_rl(sim_params, env_params):
 
     env = create_env()
 
-    # with env(env_params=env_params, sim_params=sim_params) as e:
-
-    # for _ in range(10):
     for i in range(1):
 
         env.reset()
@@ -27,14 +38,17 @@ def run_no_rl(sim_params, env_params):
 
         done = False
         while not done:
+            # step and act on the evironment
             action = env.action_space.sample()
             observation, reward, done, info = env.step(action)
+            # record the reward
             rewards.append([env.k.sim_time, reward])
 
+            # this is custom for recording video (taking SUMO gui pictures)
             if env_params['video_dir'] and not env.k.sim_time % 1 and env.k.sim_time < 300:
                 env.k.traci_c.gui.screenshot("View #0", os.path.join(env_params['video_dir'], "frame_%06d.png" % env.k.sim_time))
         
-        
+        # save the rewards if emissions are also required
         if sim_params['emissions']:
             reward_file = os.path.join(*os.path.split(sim_params['emissions'])[:-1], f'rewards_run_{i}.csv')
             with open(reward_file, 'w') as f:
@@ -42,7 +56,7 @@ def run_no_rl(sim_params, env_params):
                 writer.writerows(rewards)
 
         
-
+    # close the environment
     env.close()
 
     if sim_params['emissions']:
@@ -59,6 +73,13 @@ def run_no_rl(sim_params, env_params):
 
 
 def run_rllib_es(sim_params, env_params):
+    """
+    Run Rllib train with Evolutionary Strategies Algorithm
+
+    Args:
+        sim_params 
+        env_params 
+    """
 
     import ray
     from ray import tune
@@ -121,11 +142,18 @@ def run_rllib_es(sim_params, env_params):
     if env_params['restore_checkpoint']:
         exp_tag['restore'] = env_params['restore_checkpoint']
 
-    #
+    # pylint: disable=unused-variable
     trials = run_experiments({env_params.name: exp_tag})
 
 
 def run_rllib_ppo(sim_params, env_params):
+    """
+    Run Rllib train with PPO Algorithm
+
+    Args:
+        sim_params 
+        env_params 
+    """
 
     import ray
     from ray import tune
@@ -194,7 +222,9 @@ def run_rllib_ppo(sim_params, env_params):
     if env_params['restore_checkpoint']:
         exp_tag['restore'] = env_params['restore_checkpoint']
 
+    # pylint: disable=unused-variable
     trials = run_experiments({env_params.name: exp_tag})
 
 
+# a helper dictionary to make selecting the desired algorithm easier
 TRAINING_FUNCTIONS = {'no-rl': run_no_rl, 'es': run_rllib_es, 'ppo': run_rllib_ppo}

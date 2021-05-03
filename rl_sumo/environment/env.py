@@ -22,6 +22,14 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
         env_params,
         sim_params,
     ):
+        """
+        This is a gym environment that creates the OpenAI gym used in 
+        https://maxschrader.io/reinforcement_learning_and_sumo
+
+        Args:
+            env_params: an instance of EnvParams class
+            sim_params: an instance of SimParams class
+        """
 
         # counters
         self.step_counter = 0
@@ -47,23 +55,8 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
         # create the action space
         self.actor = GlobalActor(tl_settings_file=sim_params.tl_settings_file, tl_file_dicts=sim_params['tl_file_dict'])
 
-        # run the simulation to create the traci connection. I think this makes everything pickle-able!
-        # traci_c = self.k.start_simulation()
-
-        # pass the traci connection back to the kernel
-        # self.k.pass_traci_kernel(traci_c)
-
-        # pass the observer traci function call back to the kernel
-        # self.k.add_traci_call(self.observer.register_traci(traci_c))
-
-        # register the actor
-        # self.actor.register_traci(traci_c)
-
         # create the reward function
         self.rewarder = getattr(rewarder, self.env_params.reward_class)(sim_params, env_params)
-
-        # pass the rewarder traci function call back to the kernel
-        # self.k.add_traci_call(self.rewarder.register_traci(traci_c))
 
         # terminate sumo on exit
         atexit.register(self.terminate)
@@ -71,29 +64,13 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
     @property
     def action_space(self):
         return MultiDiscrete([*self.actor.discrete_space_shape])
-        # return Box(
-        #     low=0,
-        #     high=self.actor.max_value,
-        #     shape=(self.actor.size,),
-        #     dtype=np.float32,
-        # )
 
     @property
     def observation_space(self):
 
-        # traffic_light_shapes = self.actor.size['']
-
         traffic_light_states = MultiDiscrete([*self.actor.discrete_space_shape])
 
         traffic_light_colors = MultiDiscrete(self.actor.size['color'])
-
-        # # MultiDiscrete()
-        # traffic_light_states = Box(
-        #     low=0,
-        #     high=6383,  # this is per the enumeration format in the observer class
-        #     shape=self.action_space.shape,
-        #     dtype=np.float32
-        # )
 
         traffic_light_times = Box(
             low=0,
@@ -101,13 +78,6 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
             # the value is actually the time delta since the start of the last green state but theoretical max is sim length
             shape=self.action_space.shape,
             dtype=np.float32)
-
-        # traffic_light_transition_active = Box(
-        #     low=0,
-        #     high=1,
-        #     shape=self.action_space.shape,
-        #     dtype=np.float32
-        # )
 
         vehicle_num = Box(
             low=0,

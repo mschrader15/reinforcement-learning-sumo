@@ -1,15 +1,7 @@
-"""Visualizer for rllib experiments.
+"""
+Relied heavily on FLOW's similar script for this 
 
-Attributes
-----------
-EXAMPLE_USAGE : str
-    Example call to the function, which is
-    ::
-
-        python ./visualizer_rllib.py /tmp/ray/result_dir 1
-
-parser : ArgumentParser
-    Command-line argument parser
+https://github.com/flow-project/flow/blob/master/flow/visualize/visualizer_rllib.py
 """
 
 import click
@@ -24,6 +16,7 @@ try:
     from ray.rllib.agents.agent import get_agent_class
 except ImportError:
     from ray.rllib.agents.registry import get_agent_class
+
 from ray.tune.registry import register_env
 
 from rl_sumo.helpers import make_create_env
@@ -31,15 +24,6 @@ from rl_sumo.helpers import get_rllib_config
 from rl_sumo.helpers import get_rllib_pkl
 from rl_sumo.helpers import xml2csv
 from rl_sumo.helpers import get_parameters
-
-EXAMPLE_USAGE = """
-example usage:
-    python ./visualizer_rllib.py /ray_results/experiment_dir/result_dir 1
-
-Here the arguments are:
-1 - the path to the simulation results
-2 - the number of the checkpoint
-"""
 
 
 def get_config(result_dir, emissions_output, gui_config_file, tls_record_file):
@@ -181,17 +165,7 @@ def run_simulation(agent, env, multiagent, config, env_params, use_lstm, state_i
 def _visualizer_rllib(result_dir, checkpoints, emissions_output, horizon, video_dir, gui_config_file, tls_record_file):
     """Visualizer for RLlib experiments.
 
-    This function takes args (see function create_parser below for
-    more detailed information on what information can be fed to this
-    visualizer), and renders the experiment associated with it.
-
-    example usage:
-    python ./visualizer_rllib.py /ray_results/experiment_dir/result_dir 1
-
-    Here the arguments are:
-    1 - the path to the simulation results
-    2 - the number of the checkpoint
-
+    This function takes arg and replays the expirement with the SUMO gui.
     """
     # start up ray
     ray.init(num_cpus=1)

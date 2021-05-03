@@ -1,44 +1,32 @@
+"""
+This file reads the emissions output file of SUMO. Runs a little faster than SUMO's xml2csv.py script, 
+but not as fast as possible with reading file into memory 
+"""
 import csv
 from lxml import etree
 
+FIELD_NAMES = {
+    'emissions': [
+        'vehicle_CO', 'vehicle_CO2', 'vehicle_HC', 'vehicle_NOx', 'vehicle_PMx', 'vehicle_angle', 'vehicle_eclass',
+        'vehicle_electricity', 'vehicle_fuel', 'vehicle_id', 'vehicle_lane', 'vehicle_noise', 'vehicle_pos',
+        'vehicle_route', 'vehicle_speed', 'vehicle_type', 'vehicle_waiting', 'vehicle_x', 'vehicle_y'
+    ],
+    'e1': [
+        'interval_begin', 'interval_end', 'interval_flow', 'interval_harmonicMeanSpeed', 'interval_id',
+        'interval_length', 'interval_nVehContrib', 'interval_nVehEntered', 'interval_occupancy'
+    ],
+    'e2': [
+        'interval_begin',
+        'interval_end',
+        'interval_id',
+        'interval_sampledSeconds',
+        'interval_nVehEntered',
+        'interval_nVehLeft',
+        'interval_nVehSeen',
+        'interval_meanSpeed',
+    ]
+}
 
-FIELD_NAMES = {'emissions': ['vehicle_CO',
-                             'vehicle_CO2',
-                             'vehicle_HC',
-                             'vehicle_NOx',
-                             'vehicle_PMx',
-                             'vehicle_angle',
-                             'vehicle_eclass',
-                             'vehicle_electricity',
-                             'vehicle_fuel',
-                             'vehicle_id',
-                             'vehicle_lane',
-                             'vehicle_noise',
-                             'vehicle_pos',
-                             'vehicle_route',
-                             'vehicle_speed',
-                             'vehicle_type',
-                             'vehicle_waiting',
-                             'vehicle_x',
-                             'vehicle_y'],
-               'e1': ['interval_begin',
-                      'interval_end',
-                      'interval_flow',
-                      'interval_harmonicMeanSpeed',
-                      'interval_id',
-                      'interval_length',
-                      'interval_nVehContrib',
-                      'interval_nVehEntered',
-                      'interval_occupancy'],
-               'e2': ['interval_begin',
-                      'interval_end',
-                      'interval_id',
-                      'interval_sampledSeconds',
-                      'interval_nVehEntered',
-                      'interval_nVehLeft',
-                      'interval_nVehSeen',
-                      'interval_meanSpeed', ]
-               }
 
 def _parse_and_write_emissions(elem, csv_writer, fields, metadata):
     if (elem.tag == 'timestep') and (len(elem.attrib) > 0):
@@ -56,9 +44,12 @@ def _parse_and_write_detector(elem, csv_writer, fields, metadata):
     except KeyError:
         return 0
 
-PARSE_FUNCTION = {'emissions': _parse_and_write_emissions,
-                  'e1': _parse_and_write_detector,
-                  'e2': _parse_and_write_detector}
+
+PARSE_FUNCTION = {
+    'emissions': _parse_and_write_emissions,
+    'e1': _parse_and_write_detector,
+    'e2': _parse_and_write_detector
+}
 
 
 class _XML2CSV:

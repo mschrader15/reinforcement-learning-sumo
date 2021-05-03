@@ -4,11 +4,15 @@ from gym.envs.registration import register
 
 def make_create_env(env_params, sim_params, version=0) -> (str, object):
     """
+    This function makes the create_env() function that is used by ray.tune.registry.register_env
 
-    @param env_params:
-    @param sim_params:
-    @param version:
-    @return:
+    Args:
+        env_params: EnvParams class
+        sim_params: SimParams class
+        version: 0
+
+    Returns:
+        fn: a create_env() function
     """
 
     # deal with multiple environments being created under the same name

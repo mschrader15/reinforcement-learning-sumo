@@ -1,5 +1,11 @@
+"""
+This file contains various utilities for dealing with rllib files 
+
+
+"""
 import os
 import json
+
 
 def make_directory(path):
 
@@ -9,15 +15,12 @@ def make_directory(path):
 def get_rllib_pkl(path):
 
     from ray.cloudpickle import cloudpickle
-
     """Return the data from the specified rllib configuration file."""
     config_path = os.path.join(path, "params.pkl")
     if not os.path.exists(config_path):
         config_path = os.path.join(path, "../params.pkl")
     if not os.path.exists(config_path):
-        raise ValueError(
-            "Could not find params.pkl in either the checkpoint dir or "
-            "its parent directory.")
+        raise ValueError("Could not find params.pkl in either the checkpoint dir or " "its parent directory.")
     with open(config_path, 'rb') as f:
         config = cloudpickle.load(f)
     return config

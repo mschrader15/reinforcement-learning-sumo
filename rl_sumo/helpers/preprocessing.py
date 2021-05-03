@@ -5,6 +5,10 @@ from rl_sumo.parameters import EnvParams
 
 
 def get_parameters(input_object: str or dict) -> (EnvParams, SimParams):
+    """
+    loads the parameters from the rllib configuration dump
+
+    """
 
     if isinstance(input_object, dict):
         settings_dict = input_object
