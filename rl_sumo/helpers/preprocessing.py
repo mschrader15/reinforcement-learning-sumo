@@ -1,10 +1,11 @@
 import os
 import json
+from typing import Tuple
 from rl_sumo.parameters import SimParams
 from rl_sumo.parameters import EnvParams
 
 
-def get_parameters(input_object: str or dict) -> (EnvParams, SimParams):
+def get_parameters(input_object: str or dict) -> Tuple[EnvParams, SimParams]:
     """
     loads the parameters from the rllib configuration dump
 
