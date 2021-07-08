@@ -2,6 +2,7 @@ import enum
 import json
 import copy
 from distutils.util import strtobool
+from typing import List
 from xml.dom import minidom
 import traci
 
@@ -389,7 +390,7 @@ class GlobalActor:
         return [tl_manager.action_space_length for tl_manager in self]
 
     @staticmethod
-    def create_tl_managers(settings: dict, tl_files: dict) -> [
+    def create_tl_managers(settings: dict, tl_files: dict) -> List[
             TrafficLightManager,
     ]:
         return [
@@ -405,7 +406,7 @@ class GlobalActor:
             # tl_manager.update_sumo()
         # return {tl_id: self.tls[tl_id].update_state(action) for tl_id, action in action_dict.items()}
 
-    def get_current_state(self, ) -> [
+    def get_current_state(self, ) -> List[
             int,
     ]:
         """

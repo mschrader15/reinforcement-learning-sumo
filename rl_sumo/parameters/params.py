@@ -2,6 +2,7 @@ import os
 from distutils import util
 from copy import deepcopy
 from datetime import datetime
+from typing import List
 
 
 def safe_getter(_dict: dict, param: str):
@@ -117,9 +118,9 @@ class SimParams(object):
 
         self.route_file: str = os.path.join(root, safe_getter(params, 'route_file'))
 
-        self.additional_files: [str] = [os.path.join(root, file) for file in safe_getter(params, 'additional_files')]
+        self.additional_files: List[str] = [os.path.join(root, file) for file in safe_getter(params, 'additional_files')]
 
-        self.tl_ids: [str] = safe_getter(params, 'tl_ids')
+        self.tl_ids: List[str] = safe_getter(params, 'tl_ids')
 
         self.tl_settings_file: str = os.path.join(root, safe_getter(params, 'tl_settings'))
 
