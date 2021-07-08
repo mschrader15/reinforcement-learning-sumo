@@ -1,6 +1,6 @@
 import os
 import json
-from typing import Tuple
+from typing import Tuple, List
 from rl_sumo.parameters import SimParams
 from rl_sumo.parameters import EnvParams
 
@@ -26,7 +26,7 @@ def get_parameters(input_object: str or dict) -> Tuple[EnvParams, SimParams]:
     return env_params, sim_params
 
 
-def execute_preprocessing_tasks(fn_list: [[str, ()]]) -> None:
+def execute_preprocessing_tasks(fn_list: List[List[str, tuple]]) -> None:
     """
     This is a helper function for executing an arbitrary number of preprocessing functions.
     They should be past as a list of strings like: ['lib.module.function', ]
