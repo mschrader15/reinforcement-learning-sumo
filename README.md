@@ -13,7 +13,7 @@ This project follows the structure of [FLOW](https://github.com/flow-project/flo
 
 ## Results
 
-Full breakdown: https://maxschrader.io/reinforcement_learning_and_sumo
+Full breakdown: https://maxschrader.io/reinforcement-learning-and-sumo
 
 video [on Youtube](https://youtu.be/wDe6mTLmpL4)
 
