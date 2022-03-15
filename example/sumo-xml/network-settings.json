@@ -1,0 +1,338 @@
+{
+  "detector_types": {
+    "advanced": {
+      "length_ft": 0,
+      "distance_in_feet": 350
+    },
+    "stop_bar": {
+      "length_ft": 0,
+      "distance_in_feet": 50
+    },
+    "secondary": {
+      "length_ft": 1,
+      "distance_in_feet": 450
+    }
+  },
+  "traffic_lights": {
+    "63082002": {
+      "ip": "10.160.5.135",
+      "phases": {
+        "2": {
+          "min_yellow_time": 3,
+          "min_red_time": 1,
+          "min_green_time": 5,
+          "lane_num": 2,
+          "right_on_red": "No",
+          "yield_for": "None"
+        },
+        "4": {
+          "min_yellow_time": 3,
+          "min_red_time": 1,
+          "min_green_time": 5,
+          "lane_num": 1,
+          "right_on_red": "No",
+          "yield_for": "None"
+        },
+        "5": {
+          "min_yellow_time": 3,
+          "min_red_time": 1,
+          "min_green_time": 5,
+          "lane_num": 1,
+          "right_on_red": "No",
+          "yield_for": {
+            "secondary": 6,
+            "main": 2
+          }
+        },
+        "6": {
+          "min_yellow_time": 3,
+          "min_red_time": 1,
+          "min_green_time": 5,
+          "lane_num": 2,
+          "right_on_red": "No",
+          "yield_for": "None"
+        }
+      },
+      "phase_order": [
+        "2",
+        "5",
+        "4",
+        "6"
+      ],
+      "detectors": {
+        "2": "advanced",
+        "5": "stop_bar",
+        "4": "stop_bar",
+        "6": "advanced"
+      },
+      "additional_detectors": {
+        "9": {
+          "lane_num": 0,
+          "type": "secondary",
+          "parent": "6"
+        },
+        "10": {
+          "lane_num": 1,
+          "type": "secondary",
+          "parent": "6"
+        },
+        "11": {
+          "lane_num": 0,
+          "type": "secondary",
+          "parent": "2"
+        },
+        "12": {
+          "lane_num": 1,
+          "type": "secondary",
+          "parent": "2"
+        }
+      }
+    },
+    "63082003": {
+      "ip": "10.160.5.140",
+      "phases": {
+        "1": {
+          "min_yellow_time": 3,
+          "min_red_time": 1,
+          "min_green_time": 5,
+          "lane_num": 1,
+          "right_on_red": "No",
+          "yield_for": {
+            "secondary": 2,
+            "main": 6
+          }
+        },
+        "2": {
+          "min_yellow_time": 3,
+          "min_red_time": 1,
+          "min_green_time": 5,
+          "lane_num": 2,
+          "right_on_red": "No",
+          "yield_for": "None"
+        },
+        "3": {
+          "min_yellow_time": 3,
+          "min_red_time": 1,
+          "min_green_time": 5,
+          "lane_num": 1,
+          "right_on_red": "No",
+          "yield_for": {
+            "secondary": 4,
+            "main": 8
+          }
+        },
+        "4": {
+          "min_yellow_time": 3,
+          "min_red_time": 1,
+          "min_green_time": 5,
+          "lane_num": 1,
+          "right_on_red": "Yes",
+          "yield_for": "None"
+        },
+        "5": {
+          "min_yellow_time": 3,
+          "min_red_time": 1,
+          "min_green_time": 5,
+          "lane_num": 1,
+          "right_on_red": "No",
+          "yield_for": {
+            "secondary": 6,
+            "main": 2
+          }
+        },
+        "6": {
+          "min_yellow_time": 3,
+          "min_red_time": 1,
+          "min_green_time": 5,
+          "lane_num": 2,
+          "right_on_red": "No",
+          "yield_for": "None"
+        },
+        "7": {
+          "min_yellow_time": 3,
+          "min_red_time": 1,
+          "min_green_time": 5,
+          "lane_num": 1,
+          "right_on_red": "No",
+          "yield_for": {
+            "secondary": 8,
+            "main": 4
+          }
+        },
+        "8": {
+          "min_yellow_time": 3,
+          "min_red_time": 1,
+          "min_green_time": 5,
+          "lane_num": 1,
+          "right_on_red": "No",
+          "yield_for": "None"
+        }
+      },
+      "phase_order": [
+        "2",
+        "5",
+        "4",
+        "7",
+        "6",
+        "1",
+        "8",
+        "3"
+      ],
+      "detectors": {
+        "2": "advanced",
+        "5": "stop_bar",
+        "4": "stop_bar",
+        "7": "stop_bar",
+        "6": "advanced",
+        "1": "stop_bar",
+        "8": "stop_bar",
+        "3": "stop_bar"
+      },
+      "additional_detectors": {
+        "9": {
+          "lane_num": 0,
+          "type": "secondary",
+          "parent": "6"
+        },
+        "10": {
+          "lane_num": 1,
+          "type": "secondary",
+          "parent": "6"
+        },
+        "11": {
+          "lane_num": 0,
+          "type": "secondary",
+          "parent": "2"
+        },
+        "12": {
+          "lane_num": 1,
+          "type": "secondary",
+          "parent": "2"
+        }
+      }
+    },
+    "63082004": {
+      "ip": "10.160.5.145",
+      "phases": {
+        "1": {
+          "min_yellow_time": 3,
+          "min_red_time": 1,
+          "min_green_time": 5,
+          "lane_num": 1,
+          "right_on_red": "No",
+          "yield_for": {
+            "secondary": 2,
+            "main": 6
+          }
+        },
+        "2": {
+          "min_yellow_time": 3,
+          "min_red_time": 1,
+          "min_green_time": 5,
+          "lane_num": 2,
+          "right_on_red": "No",
+          "yield_for": "None"
+        },
+        "3": {
+          "min_yellow_time": 3,
+          "min_red_time": 1,
+          "min_green_time": 5,
+          "lane_num": 1,
+          "right_on_red": "No",
+          "yield_for": {
+            "secondary": 4,
+            "main": 8
+          }
+        },
+        "4": {
+          "min_yellow_time": 3,
+          "min_red_time": 1,
+          "min_green_time": 5,
+          "lane_num": 1,
+          "right_on_red": "No",
+          "yield_for": "None"
+        },
+        "5": {
+          "min_yellow_time": 3,
+          "min_red_time": 1,
+          "min_green_time": 5,
+          "lane_num": 1,
+          "right_on_red": "No",
+          "yield_for": {
+            "secondary": 6,
+            "main": 2
+          }
+        },
+        "6": {
+          "min_yellow_time": 3,
+          "min_red_time": 1,
+          "min_green_time": 5,
+          "lane_num": 2,
+          "right_on_red": "No",
+          "yield_for": "None"
+        },
+        "7": {
+          "min_yellow_time": 3,
+          "min_red_time": 1,
+          "min_green_time": 5,
+          "lane_num": 1,
+          "right_on_red": "No",
+          "yield_for": {
+            "secondary": 8,
+            "main": 4
+          }
+        },
+        "8": {
+          "min_yellow_time": 3,
+          "min_red_time": 1,
+          "min_green_time": 5,
+          "lane_num": 1,
+          "right_on_red": "Yes",
+          "yield_for": "None"
+        }
+      },
+      "phase_order": [
+        "2",
+        "5",
+        "4",
+        "7",
+        "6",
+        "1",
+        "8",
+        "3"
+      ],
+      "detectors": {
+        "2": "advanced",
+        "5": "stop_bar",
+        "4": "stop_bar",
+        "7": "stop_bar",
+        "6": "advanced",
+        "1": "stop_bar",
+        "8": "stop_bar",
+        "3": "stop_bar"
+      },
+      "additional_detectors": {
+        "9": {
+          "lane_num": 0,
+          "type": "secondary",
+          "parent": "6"
+        },
+        "10": {
+          "lane_num": 1,
+          "type": "secondary",
+          "parent": "6"
+        },
+        "11": {
+          "lane_num": 0,
+          "type": "secondary",
+          "parent": "2"
+        },
+        "12": {
+          "lane_num": 1,
+          "type": "secondary",
+          "parent": "2"
+        }
+      }
+    }
+  }
+}

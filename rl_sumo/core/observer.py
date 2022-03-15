@@ -1,3 +1,4 @@
+from typing import List, Tuple
 import sumolib
 from traci.constants import LAST_STEP_VEHICLE_ID_LIST, VAR_VEHICLE, VAR_LANES
 from copy import deepcopy
@@ -98,7 +99,7 @@ class Lane(_Base):
     It can be extended in the future
     """
 
-    def __init__(self, lane_list: [str], ):
+    def __init__(self, lane_list: List[str], ):
         """
         Initialising the base class
 
@@ -145,20 +146,20 @@ class Lane(_Base):
         # call traci to get the ids of vehicles in each of the lanes
         ids = []
         for lane in self._lane_list:
-            ids.extend(lane_ids[lane][18])
-
+            try:
+                ids.extend(lane_ids[lane][18])
+            except KeyError:
+                print(f"{lane} not found in lane_id dictionary")
         # loop through the ids, only checking the distance for those that are "new" to the network
         new_ids = []
         if len(ids):
             for _id in ids:
                 # if it was there last time, it will be there this timestep. Assuming that cars do not travel backwards
-                if _id not in self._last_ids:
-                    # check to see if inside the distance threshold (i.e. the "camera" can see them)
-                    if xy_to_m(*center, *vehicle_positions[_id][66]) <= DISTANCE_THRESHOLD:
-                        new_ids.append(_id)
-                else:
+                if _id in self._last_ids:
                     new_ids.append(_id)
 
+                elif xy_to_m(*center, *vehicle_positions[_id][66]) <= DISTANCE_THRESHOLD:
+                    new_ids.append(_id)
         # assign these new ids to the history
         self._last_ids = new_ids
         self.count = len(new_ids)
@@ -211,7 +212,7 @@ class Approach(_Base):
         """
         return [Lane(self._recursive_lane_getter([lane], camera_position), ) for lane in edge_obj.getLanes()]
 
-    def _recursive_lane_getter(self, lanes: [sumolib.net.lane], camera_position: tuple):
+    def _recursive_lane_getter(self, lanes: List[object], camera_position: tuple):
         """
 
         @param lanes: a list of lanes that can be extended
@@ -299,7 +300,7 @@ class TLObservations(_Base):
         """
         return net_obj.getCoord()
 
-    def update_counts(self, **kwargs) -> [[], ]:
+    def update_counts(self, **kwargs) -> List[List, ]:
         """
         This function calls update_counts on the children and passes the center coordinates
 
@@ -362,13 +363,14 @@ class GlobalObservations(_Base):
 
         # pass the lane_ids and vehicle_positions to the distance calculation
         counts = []
+        # print("sim_counts", sim_dict[VAR_LANES])
         for child in self:
             counts.extend(child.update_counts(lane_ids=sim_dict[VAR_LANES], vehicle_positions=sim_dict[VAR_VEHICLE]))
 
         # return the pre-constructed count dictionary
         return counts
 
-    def register_traci(self, traci_c: object) -> [[object, tuple, int], ]:
+    def register_traci(self, traci_c: object) -> List[List[Tuple[object, tuple, int]], ]:
         """
         pass traci to the children and return the functions that the core traci module should execute.
 

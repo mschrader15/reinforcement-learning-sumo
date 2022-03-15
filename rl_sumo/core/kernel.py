@@ -140,11 +140,11 @@ class Kernel(object):
 
         return traci_c
 
-    @staticmethod
-    def _subscribe_to_vehicles(traci_c):
+    # @staticmethod
+    def _subscribe_to_vehicles(self, ):
         # subscribe to all new vehicle positions and fuel consumption
-        for veh_id in traci_c.simulation.getDepartedIDList():
-            traci_c.vehicle.subscribe(veh_id, VEHICLE_SUBSCRIPTIONS)
+        for veh_id in self.traci_c.simulation.getDepartedIDList():
+            self.traci_c.vehicle.subscribe(veh_id, VEHICLE_SUBSCRIPTIONS)
 
     def reset_simulation(self, ):
 
@@ -184,7 +184,7 @@ class Kernel(object):
 
         except Exception as e:
             print("Something in TRACI failed")
-            raise e
+            raise e from e
 
     def kill_simulation(self, ):
         for fn, args in [[self._kill_sumo_proc, ()], [self._os_pg_killer, ()], [self._close_traci, ()]]:
@@ -223,7 +223,7 @@ class Kernel(object):
             logging.error("sumo crashed on a step")
             return False
 
-        self._subscribe_to_vehicles(self.traci_c)
+        self._subscribe_to_vehicles()
 
         self.sim_time += self.sim_step_size
 

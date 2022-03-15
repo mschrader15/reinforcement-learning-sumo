@@ -3,6 +3,10 @@ from distutils import util
 from copy import deepcopy
 from datetime import datetime
 from typing import List
+import pathlib
+
+# Hacky
+ROOT = pathlib.Path(__file__).parent.parent.parent.resolve()
 
 
 def safe_getter(_dict: dict, param: str):
@@ -101,7 +105,7 @@ class SimParams(object):
             # one could pass the file root as an executable bit of python code
             root = exec(params['file_root'])
         except Exception:
-            root = params['file_root']
+            root = params['file_root'].format(ROOT=ROOT)
 
         self.sim_state_dir: str = os.path.join(root, 'reinforcement-learning-sumo', 'tmp', 'sim_state')
 
@@ -148,6 +152,6 @@ class SimParams(object):
         # add in the rest of the stuff in the configuration file
         for key, value in params.items():
             self.__dict__[key] = value
-
+        
     def __getitem__(self, item):
         return getattr(self, item, None)
