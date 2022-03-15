@@ -141,9 +141,7 @@ class SimParams(object):
         # using this for offline analysis of the reward
         self.no_actor = safe_getter(params, "no_actor") or False
 
-        emissions = safe_getter(params, 'emissions')
-
-        if emissions:
+        if emissions := safe_getter(params, 'emissions'):
             emissions_path = os.path.join(*os.path.split(emissions)[:-1], env_params.name,
                                           datetime.now().strftime('%Y_%m_%d_%H_%M_%S'))
             make_directory(emissions_path)
