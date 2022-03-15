@@ -1,3 +1,4 @@
+from typing import List
 import sumolib
 from traci.constants import LAST_STEP_VEHICLE_ID_LIST, VAR_VEHICLE, VAR_LANES
 from copy import deepcopy
@@ -98,7 +99,7 @@ class Lane(_Base):
     It can be extended in the future
     """
 
-    def __init__(self, lane_list: [str], ):
+    def __init__(self, lane_list: List[str], ):
         """
         Initialising the base class
 
@@ -211,7 +212,7 @@ class Approach(_Base):
         """
         return [Lane(self._recursive_lane_getter([lane], camera_position), ) for lane in edge_obj.getLanes()]
 
-    def _recursive_lane_getter(self, lanes: [sumolib.net.lane], camera_position: tuple):
+    def _recursive_lane_getter(self, lanes: List[sumolib.net.lane], camera_position: tuple):
         """
 
         @param lanes: a list of lanes that can be extended
@@ -299,7 +300,7 @@ class TLObservations(_Base):
         """
         return net_obj.getCoord()
 
-    def update_counts(self, **kwargs) -> [[], ]:
+    def update_counts(self, **kwargs) -> List[List, ]:
         """
         This function calls update_counts on the children and passes the center coordinates
 
@@ -368,7 +369,7 @@ class GlobalObservations(_Base):
         # return the pre-constructed count dictionary
         return counts
 
-    def register_traci(self, traci_c: object) -> [[object, tuple, int], ]:
+    def register_traci(self, traci_c: object) -> List[List[object, tuple, int], ]:
         """
         pass traci to the children and return the functions that the core traci module should execute.
 

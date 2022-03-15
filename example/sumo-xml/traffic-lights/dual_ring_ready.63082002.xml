@@ -1,0 +1,27 @@
+<add>
+    <tlLogic id="63082002" offset="0" programID="63082002-2" type="static">
+        
+        <phase duration="99" name="2+5" state="GGGrrr"/>
+        <phase duration="99" name="2+6" state="GGgrGG"/>
+        <phase duration="99" name="4" state="rrrGrr"/>
+
+        <phase duration="99" name="2+5-2+6-y" state="GGyrrr"/>
+        <phase duration="99" name="2+5-2+6-r" state="GGrrrr"/>
+        
+        <phase duration="99" name="2+5-4-y" state="yyyrrr"/>
+        <phase duration="99" name="2+5-4-r" state="rrrrrr"/>
+        
+        <phase duration="99" name="2+6-2+5-y" state="GGgryy"/>
+        <phase duration="99" name="2+6-2+5-r" state="GGgrrr"/>
+        
+        <phase duration="99" name="2+6-4-y" state="yyyryy"/>
+        <phase duration="99" name="2+6-4-r" state="rrrrrr"/>
+        
+        <phase duration="99" name="4-2+5-y" state="rrryrr"/>
+        <phase duration="99" name="4-2+5-r" state="rrrrrr"/>
+        
+        <phase duration="99" name="4-2+6-y" state="rrryrr"/>
+        <phase duration="99" name="4-2+6-r" state="rrrrrr"/>
+    
+    </tlLogic>
+</add>

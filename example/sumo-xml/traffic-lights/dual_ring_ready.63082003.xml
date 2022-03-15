@@ -1,0 +1,181 @@
+<add>
+    <tlLogic id="63082003" offset="0" programID="63082003-2" type="static">
+    
+        <phase duration="99" name="2+6" state="GGgsrrGGgrr"/>
+        <phase duration="99" name="1+5" state="rrGsrrrrGrr"/>
+        <phase duration="99" name="2+5" state="GGGsrrrrrrr"/>
+        <phase duration="99" name="1+6" state="rrrsrrGGGrr"/>
+        <phase duration="99" name="4+8" state="rrrGGgrrrGg"/>
+        <phase duration="99" name="3+7" state="rrrsrGrrrrG"/>
+        <phase duration="99" name="3+8" state="rrrsrrrrrGG"/>
+        <phase duration="99" name="4+7" state="rrrGGGrrrrr"/>
+
+        <phase duration="99" name="2+6-1+5-y" state="yyysrryyyrr"/>
+        <phase duration="99" name="2+6-1+5-r" state="rrrsrrrrrrr"/>
+
+        <phase duration="99" name="2+6-2+5-y" state="GGysrryyyrr"/>
+        <phase duration="99" name="2+6-2+5-r" state="GGrsrrrrrrr"/>
+        
+        <phase duration="99" name="2+6-1+6-y" state="yyysrrGGyrr"/>
+        <phase duration="99" name="2+6-1+6-r" state="rrrsrrGGrrr"/>
+
+        <phase duration="99" name="2+6-4+8-y" state="yyysrryyyrr"/>
+        <phase duration="99" name="2+6-4+8-r" state="rrrsrrrrrrr"/>
+
+        <phase duration="99" name="2+6-3+7-y" state="yyysrryyyrr"/>
+        <phase duration="99" name="2+6-3+7-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="2+6-3+8-y" state="yyysrryyyrr"/>
+        <phase duration="99" name="2+6-3+8-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="2+6-4+7-y" state="yyysrryyyrr"/>
+        <phase duration="99" name="2+6-4+7-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="1+5-2+6-y" state="rrysrrrryrr"/>
+        <phase duration="99" name="1+5-2+6-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="1+5-2+5-y" state="rrysrrrryrr"/>
+        <phase duration="99" name="1+5-2+5-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="1+5-1+6-y" state="rrGsrrrryrr"/>
+        <phase duration="99" name="1+5-1+6-r" state="rrGsrrrrrrr"/>
+        
+        <phase duration="99" name="1+5-4+8-y" state="rrysrrrryrr"/>
+        <phase duration="99" name="1+5-4+8-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="1+5-3+7-y" state="rrysrrrryrr"/>
+        <phase duration="99" name="1+5-3+7-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="1+5-3+8-y" state="rrysrrrryrr"/>
+        <phase duration="99" name="1+5-3+8-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="1+5-4+7-y" state="rrysrrrryrr"/>
+        <phase duration="99" name="1+5-4+7-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="2+5-2+6-y" state="GGysrrrrrrr"/>
+        <phase duration="99" name="2+5-2+6-r" state="GGrsrrrrrrr"/>
+        
+        <phase duration="99" name="2+5-1+5-y" state="yygsrrrrrrr"/>
+        <phase duration="99" name="2+5-1+5-r" state="rrgsrrrrrrr"/>
+        
+        <phase duration="99" name="2+5-1+6-y" state="yyysrrrrrrr"/>
+        <phase duration="99" name="2+5-1+6-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="2+5-4+8-y" state="yyysrrrrrrr"/>
+        <phase duration="99" name="2+5-4+8-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="2+5-3+7-y" state="yyysrrrrrrr"/>
+        <phase duration="99" name="2+5-3+7-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="2+5-3+8-y" state="yyysrrrrrrr"/>
+        <phase duration="99" name="2+5-3+8-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="2+5-4+7-y" state="yyysrrrrrrr"/>
+        <phase duration="99" name="2+5-4+7-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="1+6-2+6-y" state="rrrsrryGGrr"/>
+        <phase duration="99" name="1+6-2+6-r" state="rrrsrrrGGrr"/>
+        
+        <phase duration="99" name="1+6-1+5-y" state="rrrsrrGyyrr"/>
+        <phase duration="99" name="1+6-1+5-r" state="rrrsrrGrrrr"/>
+        
+        <phase duration="99" name="1+6-2+5-y" state="rrrsrryyyrr"/>
+        <phase duration="99" name="1+6-2+5-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="1+6-4+8-y" state="rrrsrryyyrr"/>
+        <phase duration="99" name="1+6-4+8-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="1+6-3+7-y" state="rrrsrryyyrr"/>
+        <phase duration="99" name="1+6-3+7-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="1+6-3+8-y" state="rrrsrryyyrr"/>
+        <phase duration="99" name="1+6-3+8-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="1+6-4+7-y" state="rrrsrryyyrr"/>
+        <phase duration="99" name="1+6-4+7-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="4+8-2+6-y" state="rrryyyrrryy"/>
+        <phase duration="99" name="4+8-2+6-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="4+8-1+5-y" state="rrryyyrrryy"/>
+        <phase duration="99" name="4+8-1+5-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="4+8-2+5-y" state="rrryyyrrryy"/>
+        <phase duration="99" name="4+8-2+5-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="4+8-1+6-y" state="rrryyyrrryy"/>
+        <phase duration="99" name="4+8-1+6-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="4+8-3+7-y" state="rrryygrrryg"/>
+        <phase duration="99" name="4+8-3+7-r" state="rrrsrgrrrrg"/>
+        
+        <phase duration="99" name="4+8-3+8-y" state="rrryyyrrrGg"/>
+        <phase duration="99" name="4+8-3+8-r" state="rrrsrrrrrGg"/>
+        
+        <phase duration="99" name="4+8-4+7-y" state="rrrGGgrrryy"/>
+        <phase duration="99" name="4+8-4+7-r" state="rrrGGgrrrrr"/>
+
+        <phase duration="99" name="3+7-2+6-y" state="rrrsryrrrry"/>
+        <phase duration="99" name="3+7-2+6-r" state="rrrsrrrrrrr"/>
+
+        <phase duration="99" name="3+7-1+5-y" state="rrrsryrrrry"/>
+        <phase duration="99" name="3+7-1+5-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="3+7-2+5-y" state="rrrsryrrrry"/>
+        <phase duration="99" name="3+7-2+5-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="3+7-1+6-y" state="rrrsryrrrry"/>
+        <phase duration="99" name="3+7-1+6-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="3+7-4+8-y" state="rrrsryrrrry"/>
+        <phase duration="99" name="3+7-4+8-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="3+7-3+8-y" state="rrrsryrrrrG"/>
+        <phase duration="99" name="3+7-3+8-r" state="rrrsrrrrrrG"/>
+        
+        <phase duration="99" name="3+7-4+7-y" state="rrrsrGrrrry"/>
+        <phase duration="99" name="3+7-4+7-r" state="rrrsrGrrrrr"/>
+        
+        <phase duration="99" name="3+8-2+6-y" state="rrrsrrrrryy"/>
+        <phase duration="99" name="3+8-2+6-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="3+8-1+5-y" state="rrrsrrrrryy"/>
+        <phase duration="99" name="3+8-1+5-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="3+8-2+5-y" state="rrrsrrrrryy"/>
+        <phase duration="99" name="3+8-2+5-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="3+8-1+6-y" state="rrrsrrrrryy"/>
+        <phase duration="99" name="3+8-1+6-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="3+8-4+8-y" state="rrrsrrrrrGy"/>
+        <phase duration="99" name="3+8-4+8-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="3+8-3+7-y" state="rrrsrrrrryG"/>
+        <phase duration="99" name="3+8-3+7-r" state="rrrsrrrrrrG"/>
+        
+        <phase duration="99" name="3+8-4+7-y" state="rrrsrrrrryy"/>
+        <phase duration="99" name="3+8-4+7-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="4+7-2+6-y" state="rrryyyrrrrr"/>
+        <phase duration="99" name="4+7-2+6-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="4+7-1+5-y" state="rrryyyrrrrr"/>
+        <phase duration="99" name="4+7-1+5-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="4+7-2+5-y" state="rrryyyrrrrr"/>
+        <phase duration="99" name="4+7-2+5-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="4+7-1+6-y" state="rrryyyrrrrr"/>
+        <phase duration="99" name="4+7-1+6-r" state="rrrsrrrrrrr"/>
+        
+        <phase duration="99" name="4+7-4+8-y" state="rrrGGyrrrrr"/>
+        <phase duration="99" name="4+7-4+8-r" state="rrrGGrrrrrr"/>
+        
+        <phase duration="99" name="4+7-3+7-y" state="rrryyGrrrrr"/>
+        <phase duration="99" name="4+7-3+7-r" state="rrrsrGrrrrr"/>
+        
+        <phase duration="99" name="4+7-3+8-y" state="rrryyyrrrrr"/>
+        <phase duration="99" name="4+7-3+8-r" state="rrrsrrrrrrr"/>
+    </tlLogic>
+</add>
