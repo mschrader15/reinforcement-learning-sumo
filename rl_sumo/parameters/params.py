@@ -152,6 +152,6 @@ class SimParams(object):
         # add in the rest of the stuff in the configuration file
         for key, value in params.items():
             self.__dict__[key] = value
-
+        
     def __getitem__(self, item):
         return getattr(self, item, None)
