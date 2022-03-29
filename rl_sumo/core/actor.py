@@ -1,5 +1,5 @@
 import enum
-import json
+import json5 as json
 import copy
 from distutils.util import strtobool
 from typing import List

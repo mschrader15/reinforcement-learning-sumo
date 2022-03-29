@@ -1,15 +1,15 @@
-import enum
-import json
 import copy
-from distutils.util import strtobool
-from typing import Any, Dict, List, OrderedDict, Set, Tuple, Union
-from xml.dom import minidom
-from attr import attr
-import traci
-import sumolib
-import xmltodict
+import enum
 import itertools
+from distutils.util import strtobool
+from typing import Any, Dict, Iterator, List, OrderedDict, Set, Tuple, Union
+from xml.dom import minidom
 
+import json5 as json
+import sumolib
+import traci
+import xmltodict
+from attr import attr
 
 COLOR_ENUMERATE = {"r": 0, "y": 1, "G": 2}
 
@@ -81,7 +81,7 @@ class DualRingActor(_Base):
         self._phase_2_detect: Dict[int, str] = {}
 
         # the current active phases
-        self._current_state: Set[int, int] = []
+        self._current_state: Set[int, int] = set([])
 
         # the action space of traffic light. A list of valid phase combinations
         self._action_space: List[List[int]] = []
@@ -112,8 +112,14 @@ class DualRingActor(_Base):
     ) -> int:
         return len(self._action_space)
 
-    @property.setter
-    def _current_state(self, l: Union[list, set]) -> None:
+    @property
+    def current_state(
+        self,
+    ) -> Set[int]:
+        return self._current_state
+
+    @current_state.setter
+    def current_state(self, l: Union[list, Set[int]]) -> None:
         self._current_state = set(l)
 
     def _build(self, nema_config_xml: str, net_file_xml: str) -> None:
@@ -128,11 +134,12 @@ class DualRingActor(_Base):
         # get the lanes that the traffic light controls
         with open(nema_config_xml, "r") as f:
             raw = xmltodict.parse(f.read())
-            tl_dict = raw[next(raw)]["tlLogic"]
+            # get passed the first element (either called "add" or "additional")
+            tl_dict = raw[next(iter(raw.keys()))]["tlLogic"]
 
         # open the network file to get the order of the lanes
         lane_order = {
-            i: l_list[0]
+            i: l_list[0][0]
             for i, l_list in sumolib.net.readNet(net_file_xml)
             .getTLS(tl_dict["@id"])
             .getLinks()
@@ -141,10 +148,11 @@ class DualRingActor(_Base):
 
         # loop through the traffic light phases, find the order that they control and then the "controllng" detectors
         for phase in tl_dict["phase"]:
+            phase_int = int(phase["@name"])
             light_str = phase["@state"]
             controlled_lane_index = [i for i, s in enumerate(light_str) if s == "G"]
             # save the index of the light head string
-            self._p_string_map[phase] = controlled_lane_index[0]
+            self._p_string_map[phase_int] = controlled_lane_index[0]
             # loop through the controlled lanes
             for lane_index in controlled_lane_index:
                 # try to find a matching parameter in the traffic light configuration file
@@ -169,8 +177,8 @@ class DualRingActor(_Base):
                 # add the detector as a controlled detector
                 self._all_detectors.append(detect_name)
                 # add the NEMA phase to detector mapping
-                if not int(phase) in self._phase_2_detect.keys():
-                    self._phase_2_detect[int(phase)] = detect_name
+                if not phase_int in self._phase_2_detect.keys():
+                    self._phase_2_detect[phase_int] = detect_name
 
         # find the barriers
         bs = []
@@ -187,30 +195,31 @@ class DualRingActor(_Base):
         )
         bs[-1] = (
             bs[-1]
-            if bs[-1] == ""
+            if bs[-1] != ""
             else find_matching_param(
                 tl_dict["param"], attr="@key", value=f"coordinatePhases"
             ).get("@value", "")
         )
 
+        # convert the barriers to a list of integers
+        bs = [list(map(int, b.split(","))) for b in bs]
+
         # Create the action space
         # using the rings and barrier phases parameter\
-        rings = [[[] * 2] * 2]
+        rings = [[[], []], [[], []]]
         for i, ring in enumerate(rings):
             p = find_matching_param(tl_dict["param"], attr="@key", value=f"ring{i+1}")
             # ring[0].extend(map(int, p.split(",")))
             b_num = 0
-            for _p in map(int, p.split(",")):
-                ring[b_num].append(_p)
-                if _p in bs[i]:
-                    b_num = 1
+            for _p in map(int, p["@value"].split(",")):
+                if _p > 0:
+                    ring[b_num].append(_p)
+                    if _p in bs[0] or _p in bs[1]:
+                        b_num = 1
 
         # compose the combinations
         for i, _ in enumerate(bs):
             self._action_space.extend(itertools.product(rings[0][i], rings[1][i]))
-
-        # set the current state to the barrier phase
-        # self._current_state = bs[-1]
 
     def re_initialize(self) -> None:
         """
@@ -222,13 +231,11 @@ class DualRingActor(_Base):
         """
         return self._re_initialize()
 
-    def set_traci(
-        self,
-    ) -> None:
+    def set_traci(self, traci_c) -> None:
         """
         pass the current traci instance to the class
         """
-        self._traci_c = traci
+        self._traci_c = traci_c
 
     def intialize_control(
         self,
@@ -263,15 +270,15 @@ class DualRingActor(_Base):
         """
         # turn off the diff detectors in the current state
         new_state = set(requested_state)
-        for s in self._current_state - new_state:
+        for s in self.current_state - new_state:
             self._traci_c.lanearea.overrideVehicleNumber(self._phase_2_detect[s], 0)
 
         # turn on the detectors for the new phase in requested state
-        for s in new_state - self._current_state:
-            self._traci_c.lanearea.overrideVehicleNumber(self._phase_2_detect[s], 0)
+        for s in new_state - self.current_state:
+            self._traci_c.lanearea.overrideVehicleNumber(self._phase_2_detect[s], 1)
 
         # pass the new state as the current state
-        self._current_state = new_state
+        self.current_state = new_state
 
     def get_current_state(
         self,
@@ -299,7 +306,7 @@ class DualRingActor(_Base):
             int(p)
             for p in self._traci_c.trafficlight.getPhaseName(self.tl_id).split("+")
         ]
-        return self._active_state
+        return self._active_state.copy()
 
     def get_actual_color(
         self,
@@ -308,7 +315,7 @@ class DualRingActor(_Base):
         Get a list of COLOR_ENUMERATE light head states ('r' -> 0, etc..)
 
         Returns:
-            List[int] 
+            List[int]
         """
         if not len(self._active_state):
             self.get_actual_state()
@@ -325,9 +332,9 @@ class DualRingActor(_Base):
 
 class GlobalDualRingActor:
     def __init__(self, nema_file_map: Dict[str, str], network_file: str):
-        self.tls = self.create_tl_managers(nema_file_map, network_file)
+        self.tls: DualRingActor = self.create_tl_managers(nema_file_map, network_file)
 
-    def __iter__(self) -> DualRingActor:
+    def __iter__(self) -> Iterator[DualRingActor]:
         yield from self.tls
 
     def __getitem__(self, item: str) -> DualRingActor:
@@ -346,7 +353,7 @@ class GlobalDualRingActor:
         @param traci_c: a traci connection object
         @return:
         """
-        for tl_manager in self:
+        for tl_manager in self.tls:
             tl_manager.set_traci(traci_c)
 
     def re_initialize(
@@ -390,7 +397,7 @@ class GlobalDualRingActor:
         GlobalDualRingActor(*args).update_lights(actions)
 
         Args:
-            action_list (list): a list of actions to take  
+            action_list (list): a list of actions to take
         """
         for action, tl_manager in zip(action_list, self.tls):
             tl_manager.try_switch(action)

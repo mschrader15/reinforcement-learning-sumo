@@ -4,7 +4,7 @@ This file contains various utilities for dealing with rllib files
 
 """
 import os
-import json
+import json5 as json
 
 
 def make_directory(path):
