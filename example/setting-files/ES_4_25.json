@@ -34,9 +34,9 @@
     "gui": "False",
     "central_junction": "63082003",
     "tl_file_dict": {
-      "63082002": "/home/max/remote/airport-harper-sumo/sumo-xml/traffic-lights/dual_ring_ready.63082002.xml",
-      "63082003": "/home/max/remote/airport-harper-sumo/sumo-xml/traffic-lights/dual_ring_ready.63082003.xml",
-      "63082004": "/home/max/remote/airport-harper-sumo/sumo-xml/traffic-lights/dual_ring_ready.63082004.xml"
+      "63082002": "sumo-xml/traffic-lights/dual_ring_ready.63082002.xml",
+      "63082003": "sumo-xml/traffic-lights/dual_ring_ready.63082003.xml",
+      "63082004": "sumo-xml/traffic-lights/dual_ring_ready.63082004.xml"
     }
   }
 }

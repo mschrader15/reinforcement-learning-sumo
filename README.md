@@ -1,6 +1,8 @@
 # Reinforcement Learning + SUMO
 Applying reinforcement learning to traffic microsimulation (SUMO)
 
+A minimal example is available in the [example folder](./example)
+
 **Very much a WIP**
 
 ## Structure

@@ -1,3 +1,6 @@
+# ignore .vscode
+.vscode/
+
 # project specific ignores
 tmp/
 *.out*
