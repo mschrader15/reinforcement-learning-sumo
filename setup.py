@@ -25,7 +25,7 @@ class BinaryDistribution(Distribution):
 
 setup(
     name='rl_sumo',
-    version="1.0.2",
+    version="1.0.3",
     distclass=BinaryDistribution,
     # cmdclass={"build_ext": build_ext},
     packages=find_packages(),

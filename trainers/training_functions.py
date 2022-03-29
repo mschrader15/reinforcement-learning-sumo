@@ -47,7 +47,9 @@ def run_no_rl(sim_params, env_params):
             # this is custom for recording video (taking SUMO gui pictures)
             if env_params['video_dir'] and not env.k.sim_time % 1 and env.k.sim_time < 300:
                 env.k.traci_c.gui.screenshot("View #0", os.path.join(env_params['video_dir'], "frame_%06d.png" % env.k.sim_time))
-        
+
+            env.reset()
+
         # save the rewards if emissions are also required
         if sim_params['emissions']:
             reward_file = os.path.join(*os.path.split(sim_params['emissions'])[:-1], f'rewards_run_{i}.csv')

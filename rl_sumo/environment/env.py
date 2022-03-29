@@ -168,17 +168,19 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
         # restart completely if we should restart
         if (self.step_counter > 1e6) or (self.master_reset_count < 1):
             self._hard_reset()
-
         # # else reset the simulation
         else:
             try:
                 self.k.reset_simulation()
                 self._reset_action_obs_rewarder()
+                self._subscribe_n_pass_traci()
             except Exception:
                 print("I am hard reseting b.c. of kernel exception")
                 self._hard_reset()
 
         subscription_data = self.k.simulation_step()
+        
+        # print("subscription", subscription_data)
 
         if not subscription_data:
             self.reset()
@@ -192,33 +194,38 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
 
         return self.get_state(subscription_data)
 
+    def _subscribe_n_pass_traci(self, ):
+        self.k.add_traci_call(self.observer.register_traci(self.k.traci_c))
+        self.observer.freeze()
+
+        # pass traci to the actor
+        self.actor.register_traci(self.k.traci_c)
+
+        if reward_calls := self.rewarder.register_traci(self.k.traci_c):
+            self.k.add_traci_call(reward_calls)
+
+
+
     def _hard_reset(self):
         """
         This function is called when SUMO needs to be tore down and rebuilt
 
         @return: None
         """
-
         self.step_counter = 0
         self.k.close_simulation()
         traci_c = self.k.start_simulation()
-        self.k.pass_traci_kernel(traci_c)
         self._reset_action_obs_rewarder()
+        self.k.pass_traci_kernel(traci_c)
 
-        # pass traci to the observer and the corresponding functions back to the
-        self.k.add_traci_call(self.observer.register_traci(traci_c))
-
-        # pass traci to the actor
-        self.actor.register_traci(traci_c)
-
-        # pass traci to the rewarder and then register the calls
-        reward_calls = self.rewarder.register_traci(traci_c)
-        if reward_calls:
-            self.k.add_traci_call(reward_calls)
+        # re-pass traci to the actor and the observer
+        self._subscribe_n_pass_traci()
 
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
-        self.k.set_seed(seed)
+        # TODO: The seeing function returns a # too large to convert to C long
+        # for now just taking first 8 integers
+        self.k.set_seed(int(str(seed)[:8]))
         return [
             seed,
         ]
@@ -290,6 +297,7 @@ class TLEnv(gym.Env, metaclass=ABCMeta):
         self.observer.re_initialize()
         self.actor.re_initialize()
         self.rewarder.re_initialize()
+
 
     def terminate(self, ):
         try:

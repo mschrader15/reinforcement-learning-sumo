@@ -1,10 +1,10 @@
 {
   "Name": "ES-updated",
   "Environment": {
-    "algorithm": "ES",
+    "algorithm": "no-rl",
     "warmup_time": 3600,
     "sims_per_step": 1,
-    "horizon": 900,
+    "horizon": 90,
     "reward_class": "FCIC",
     "environment_location": "rl_sumo.environment",
     "environment_name": "TLEnv",

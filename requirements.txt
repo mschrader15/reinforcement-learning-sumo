@@ -1,5 +1,5 @@
 ray
-gym
+gym==0.22.0
 numpy
 scipy
 sumolib
@@ -11,3 +11,6 @@ lz4
 tensorboardX
 lxml
 click
+pandas
+tensorflow
+

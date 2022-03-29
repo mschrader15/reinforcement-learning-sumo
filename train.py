@@ -11,16 +11,32 @@ from trainers import TRAINING_FUNCTIONS
 
 def preprocessing(sim_params, *args, **kwargs):
     """
-    Execute preprocessing tasks
-    
+    Execute preprocessing tasks. They should be passed to the configuration like
+    {
+        ...
+        "Simulation": {
+            "pre_processing_tasks": [
+                    {"python_path": "tools.preprocessing.my_custom_function",
+                        "module_path": "<absolute path to module root>"
+                    }, ...
+                ],
+            "file_root": ...
+    }
+
+    The entire simulation object is passed to the function.
+
     """
     # add the root location to the path
-    sys.path.insert(0, sim_params.root)
+    if sim_params["pre_processing_tasks"]:
+        for task in sim_params.pre_processing_tasks:
+            sys.path.insert(0, task["module_path"])
+            execute_preprocessing_tasks([[task["module_path"], (sim_params,)]])
 
-    execute_preprocessing_tasks([['tools.preprocessing.generate_input_files', (sim_params, )]])
 
-
-@click.option('--config_path', help="Path to the JSON configuration file", )
+@click.option(
+    "--config_path",
+    help="Path to the JSON configuration file",
+)
 def _main(config_path):
     """
     This script runs the desired RL training.
@@ -46,11 +62,3 @@ main = click.command()(_main)
 if __name__ == "__main__":
 
     main()
-
-
-
-
-
-
-
-
