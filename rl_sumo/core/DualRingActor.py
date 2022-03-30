@@ -11,7 +11,7 @@ import traci
 import xmltodict
 from attr import attr
 
-COLOR_ENUMERATE = {"r": 0, "y": 1, "G": 2}
+COLOR_ENUMERATE = {"s": 0, "r": 0, "y": 1, "G": 2}
 
 
 def first(s):
