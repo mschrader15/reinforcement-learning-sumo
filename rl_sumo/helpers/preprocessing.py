@@ -1,5 +1,5 @@
 import os
-import json
+import json5 as json
 from typing import Tuple, List
 from rl_sumo.parameters import SimParams
 from rl_sumo.parameters import EnvParams
