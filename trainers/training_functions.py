@@ -48,7 +48,7 @@ def run_no_rl(sim_params, env_params):
             if env_params['video_dir'] and not env.k.sim_time % 1 and env.k.sim_time < 300:
                 env.k.traci_c.gui.screenshot("View #0", os.path.join(env_params['video_dir'], "frame_%06d.png" % env.k.sim_time))
 
-            env.reset()
+        # env.reset()
 
         # save the rewards if emissions are also required
         if sim_params['emissions']:
