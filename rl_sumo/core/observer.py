@@ -1,6 +1,6 @@
-from typing import List, Tuple
+from typing import Iterable, List, Tuple
 import sumolib
-from traci.constants import LAST_STEP_VEHICLE_ID_LIST, VAR_VEHICLE, VAR_LANES
+from traci.constants import LAST_STEP_VEHICLE_ID_LIST, VAR_VEHICLE, VAR_LANES, VAR_POSITION
 from copy import deepcopy
 
 DISTANCE_THRESHOLD = 100  # in meters
@@ -146,10 +146,7 @@ class Lane(_Base):
         # call traci to get the ids of vehicles in each of the lanes
         ids = []
         for lane in self._lane_list:
-            try:
-                ids.extend(lane_ids[lane][18])
-            except KeyError:
-                print(f"{lane} not found in lane_id dictionary")
+            ids.extend(lane_ids[lane][18])
         # loop through the ids, only checking the distance for those that are "new" to the network
         new_ids = []
         if len(ids):
@@ -158,7 +155,7 @@ class Lane(_Base):
                 if _id in self._last_ids:
                     new_ids.append(_id)
 
-                elif xy_to_m(*center, *vehicle_positions[_id][66]) <= DISTANCE_THRESHOLD:
+                elif xy_to_m(*center, *vehicle_positions[_id][VAR_POSITION]) <= DISTANCE_THRESHOLD:
                     new_ids.append(_id)
         # assign these new ids to the history
         self._last_ids = new_ids
@@ -283,9 +280,9 @@ class TLObservations(_Base):
         """
         return_list = []
         edge_list = []
-        for lane0, _, _ in net_obj.getConnections():
+        for lane0, _, _ in sorted((v[0] for v in net_obj.getLinks().values()), key=lambda x: x[-1]):
             edge = lane0.getEdge()
-            if (edge not in edge_list) and (edge.getToNode().getID() in self._tl_id):
+            if edge not in edge_list:
                 edge_list.append(edge)
                 return_list.append(Approach(approach_obj=edge, camera_position=self._center))
         return return_list
@@ -310,7 +307,7 @@ class TLObservations(_Base):
         self.count_list.clear()
         for child in self:
             self.count_list.extend(child.update_counts(center=self._center, **kwargs))
-        return self.count_list
+        return self.count_list.copy()
 
 
 class GlobalObservations(_Base):
@@ -333,6 +330,13 @@ class GlobalObservations(_Base):
         super().__init__(name, children=self._compose_tls(read_net(net_file)))
         # freeze all the initial values
         self.freeze()
+
+    def __iter__(self) -> Iterable[TLObservations]:
+        yield from super().__iter__()
+
+    @property
+    def tls(self, ) -> Iterable[TLObservations]:
+        yield from self._children
 
     @property
     def size(self):
@@ -370,7 +374,7 @@ class GlobalObservations(_Base):
         # return the pre-constructed count dictionary
         return counts
 
-    def register_traci(self, traci_c: object) -> List[List[Tuple[object, tuple, int]], ]:
+    def register_traci(self, traci_c: object) -> List[Tuple[object, tuple, int]]:
         """
         pass traci to the children and return the functions that the core traci module should execute.
 
@@ -384,4 +388,9 @@ class GlobalObservations(_Base):
         return [[traci_c.lane.getAllSubscriptionResults, (), VAR_LANES],
                 [traci_c.vehicle.getAllSubscriptionResults, (), VAR_VEHICLE]]
 
+    @property
+    def vehicle_subscriptions(self, ) -> List[int]:
+        return [
+            VAR_POSITION
+        ]
 
