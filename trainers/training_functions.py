@@ -5,7 +5,7 @@ This function contains the main training functions ran by train.py
 
 import os
 from copy import deepcopy
-from rl_sumo.helpers import make_create_env
+from rl_sumo.helpers.register_environment import make_create_env
 
 # The frequency with which rllib checkpoints are saved 
 CHECKPOINT_FREQEUNCY = 10
@@ -22,7 +22,7 @@ def run_no_rl(sim_params, env_params):
         env_params
     """
     import csv
-    from rl_sumo.helpers import xml2csv
+    from rl_sumo.helpers.post_processing import xml2csv
     import time
 
     # pylint: disable=unused-variable

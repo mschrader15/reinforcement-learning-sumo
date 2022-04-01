@@ -19,11 +19,11 @@ except ImportError:
 
 from ray.tune.registry import register_env
 
-from rl_sumo.helpers import make_create_env
-from rl_sumo.helpers import get_rllib_config
-from rl_sumo.helpers import get_rllib_pkl
-from rl_sumo.helpers import xml2csv
-from rl_sumo.helpers import get_parameters
+from rl_sumo.helpers.register_environment import make_create_env
+from rl_sumo.helpers.utils import get_rllib_config
+from rl_sumo.helpers.utils import get_rllib_pkl
+from rl_sumo.helpers.post_processing import xml2csv
+from rl_sumo.helpers.utils import get_parameters
 
 
 def get_config(result_dir, emissions_output, gui_config_file, tls_record_file):

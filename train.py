@@ -3,9 +3,9 @@ import argparse
 import sys
 import click
 from copy import deepcopy
-from rl_sumo.helpers import make_create_env
-from rl_sumo.helpers import execute_preprocessing_tasks
-from rl_sumo.helpers import get_parameters
+from rl_sumo.helpers.register_environment import make_create_env
+from rl_sumo.helpers.preprocessing import execute_preprocessing_tasks
+from rl_sumo.helpers.utils import get_parameters
 from trainers import TRAINING_FUNCTIONS
 
 

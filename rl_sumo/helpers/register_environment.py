@@ -1,8 +1,9 @@
+from typing import Union
 import gym
 from gym.envs.registration import register
 
 
-def make_create_env(env_params, sim_params, version=0) -> (str, object):
+def make_create_env(env_params, sim_params, version=0) -> Union(str, object):
     """
     This function makes the create_env() function that is used by ray.tune.registry.register_env
 

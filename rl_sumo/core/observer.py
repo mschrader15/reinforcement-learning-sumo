@@ -1,4 +1,5 @@
-from typing import Iterable, List, Tuple
+from bdb import Breakpoint
+from typing import Dict, Iterable, List, Tuple, Union
 import sumolib
 from traci.constants import LAST_STEP_VEHICLE_ID_LIST, VAR_VEHICLE, VAR_LANES, VAR_POSITION
 from copy import deepcopy
@@ -41,7 +42,7 @@ class _Base:
         @param name: a unique name for each class. This is what will be written in the output
         """
         self.name = name
-        self._children: _Base = children
+        self._children: List[_Base] = children
         self.count_list = [child.count_list for child in self]
         self.init_state = None
 
@@ -105,9 +106,9 @@ class Lane(_Base):
 
         @param lane_list: a list of lanes
         """
-        super(Lane, self).__init__(name=lane_list[0], children=[])
+        super(Lane, self).__init__(name=lane_list[0].getID(), children=[])
         # a "lane" can actually be composed of multiple lanes in the SUMO network
-        self._lane_list = lane_list
+        self._lane_list = [l.getID() for l in lane_list]
 
         # the count of cars in each lane (list to emulate a pointer)
         self.count = 0
@@ -115,6 +116,14 @@ class Lane(_Base):
         self._last_ids = []
         # subscribe to all of the lanes
         # self._subscribe_2_lanes()
+
+    @property
+    def lanes(self, ) -> List[str]:
+        return self._lane_list
+    
+    @lanes.setter
+    def lanes(self, val: List[str]) -> None:
+        self._lane_list = val
 
     def get_lane_count(self, ):
         """
@@ -157,6 +166,7 @@ class Lane(_Base):
 
                 elif xy_to_m(*center, *vehicle_positions[_id][VAR_POSITION]) <= DISTANCE_THRESHOLD:
                     new_ids.append(_id)
+                    
         # assign these new ids to the history
         self._last_ids = new_ids
         self.count = len(new_ids)
@@ -180,6 +190,10 @@ class Lane(_Base):
         # subscribe to the lane that I am in charge of
         self._subscribe_2_lanes(traci_c)
 
+    def contain_lane(self, lane_id: str):
+        return lane_id in self._lane_list
+         
+
 
 class Approach(_Base):
     """
@@ -199,6 +213,10 @@ class Approach(_Base):
         self._last_vehicle_num = 0
         # self.count_dict = {child.name: child.count for child in self}
 
+    @property
+    def lane_objs(self, ) -> List[Lane]:
+        return self._children
+
     def compose_lanes(self, edge_obj: sumolib.net.edge, camera_position: tuple) -> tuple:
         """
         This function is called once to compose a list of Lanes
@@ -209,7 +227,7 @@ class Approach(_Base):
         """
         return [Lane(self._recursive_lane_getter([lane], camera_position), ) for lane in edge_obj.getLanes()]
 
-    def _recursive_lane_getter(self, lanes: List[object], camera_position: tuple):
+    def _recursive_lane_getter(self, lanes: List[object], camera_position: tuple, *args, **kwargs):
         """
 
         @param lanes: a list of lanes that can be extended
@@ -218,28 +236,27 @@ class Approach(_Base):
         """
         # calculate the distance to the "from" node
         try:
+            # if the distance to that node is less than the threshold distance, then we need to look at the next
             distance = xy_to_m(*camera_position, *lanes[-1].getEdge().getFromNode().getCoord())
+
+            # lane for vehicles too
+            while distance < DISTANCE_THRESHOLD:
+                # continue calling the function until the distance is greater than the threshold distance
+                try:
+                    return self._recursive_lane_getter(lanes=self._get_straight_connection(lanes, *args, **kwargs),
+                                                    camera_position=camera_position)
+                except TypeError:
+                    # break the while loop and return where we are at.
+                    # This happens from the error raised in _get_straight_connection
+                    break
+
+
         except TypeError:
             # this exception occurs when we have reached the end of the network. No need to look back anymore
-            return [lane.getID() for lane in lanes]
-        # if the distance to that node is less than the threshold distance, then we need to look at the next
-        # lane for vehicles too
-        while distance < DISTANCE_THRESHOLD:
-            # continue calling the function until the distance is greater than the threshold distance
-            try:
-                return self._recursive_lane_getter(lanes=self._get_straight_connection(lanes),
-                                                   camera_position=camera_position)
-            except TypeError:
-                # break the while loop and return where we are at.
-                # This happens from the error raised in _get_straight_connection
-                break
-        # slow_edges = []
-        # for lane in lanes:
-        #     if lane.getSpeed() < 20:
-        #         slow_edges.append(lane.getEdge().getID())
-        # print("Slow Edges", list(set(slow_edges)))
-        # the normal return. the function found enough lanes to satisfy the distance requirement
-        return [lane.getID() for lane in lanes]
+            pass
+            
+        # check to make sure that none of the other phases contain this lane yet. AKA the lane can only be counted once    
+        return lanes
 
     @staticmethod
     def _get_straight_connection(lanes, ):
@@ -260,7 +277,7 @@ class TLObservations(_Base):
     This class handles individual traffic lights
     """
 
-    def __init__(self, net_obj: sumolib.net, tl_id: list, ):
+    def __init__(self, net_obj: sumolib.net, tl_id: list, *args, **kwargs):
         """
         Instantiating this class
 
@@ -269,7 +286,23 @@ class TLObservations(_Base):
         """
         self._tl_id = tl_id
         self._center = self.calc_center(net_obj.getNode(tl_id))
-        super().__init__(name=tl_id, children=self.compose_approaches(net_obj.getTLS(tl_id)))
+        super().__init__(name=tl_id, children=self.compose_approaches(net_obj.getTLS(tl_id), *args, **kwargs))
+
+        # loop through the children and try to remove duplicate lanes from children
+        self._clear_duplicate_lanes()
+    
+    def _clear_duplicate_lanes(self, ) -> None:
+        running_list = []
+        for approach in self:
+            for lane in approach:
+                # check if any of the sequentially prior lanes have the same lane id 
+                new_lanes = []
+                for l in lane.lanes:
+                    if l not in running_list:
+                        new_lanes.append(l)
+                lane.lanes = new_lanes
+                running_list.extend(lane.lanes)
+
 
     def compose_approaches(self, net_obj: sumolib.net.TLS) -> list:
         """
@@ -308,6 +341,14 @@ class TLObservations(_Base):
         for child in self:
             self.count_list.extend(child.update_counts(center=self._center, **kwargs))
         return self.count_list.copy()
+
+    def get_counts(self, mapped_method: bool = False) -> Union[List[int], Dict[str, int]]:
+        if mapped_method:
+            return {
+                t.name: t.count_list for t in self._children
+            }
+        else:
+            return self.count_list
 
 
 class GlobalObservations(_Base):

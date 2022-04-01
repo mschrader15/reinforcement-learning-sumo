@@ -4,40 +4,14 @@ import enum
 import itertools
 from typing import Any, Dict, Iterator, List, OrderedDict, Set, Tuple, Union, Callable
 
+from ..helpers.utils import read_nema_config
+
 import sumolib
 import traci
 from traci.constants import TL_RED_YELLOW_GREEN_STATE, VAR_NAME, TL_PROGRAM
 import xmltodict
 
 COLOR_ENUMERATE = {"s": 0, "r": 0, "y": 1, "G": 2, 'g': 2}
-
-
-def first(s):
-    """Return the first element from an ordered collection
-    or an arbitrary element from an unordered collection.
-    Raise StopIteration if the collection is empty.
-    """
-    return next(iter(s))
-
-
-def find_matching_param(
-    params: List[OrderedDict], attr: str, value: str
-) -> OrderedDict:
-    """
-    Helper function to find a xmltodict parameter that contains the given key and value
-
-    Args:
-        params (List[OrderedDict]): a list of xmltodict ordered dictionaries that all have the same tag
-        attr (str): the attribute to look for
-        value (str): the attribute value to look for
-
-    Returns:
-        OrderedDict: xmltodict object
-    """
-    for p in params:
-        if p.get(attr, "") == value:
-            return p
-    return OrderedDict()
 
 
 class _Base:
@@ -87,10 +61,13 @@ class DualRingActor(_Base):
         self._action_space: List[Tuple[int, int]] = []
 
         # the actual active phases
-        self._sumo_active_state: Tuple[int, int] = []
+        self._sumo_active_state: Tuple[int, int] = ()
 
         # a map of phase name to light string index
         self._p_string_map: Dict[int, int] = {}
+
+        # sorted phases in the order that SUMO renders them
+        self._phases_sumo_order: List[int] = ()
 
         # the programID
         self._programID: str = ""
@@ -147,11 +124,7 @@ class DualRingActor(_Base):
             net_file_xml (str): the
         """
 
-        # get the lanes that the traffic light controls
-        with open(nema_config_xml, "r") as f:
-            raw = xmltodict.parse(f.read())
-            # get passed the first element (either called "add" or "additional")
-            tl_dict = raw[next(iter(raw.keys()))]["tlLogic"]
+        tl_dict = read_nema_config(nema_config_xml)
 
         # set the program id
         self._programID = tl_dict["@programID"]
@@ -166,21 +139,17 @@ class DualRingActor(_Base):
         }
 
         # loop through the traffic light phases, find the order that they control and then the "controllng" detectors
-        for phase in tl_dict["phase"]:
-            phase_int = int(phase["@name"])
-            light_str = phase["@state"]
-            controlled_lane_index = [i for i, s in enumerate(light_str) if s == "G"]
+        for phase_name, phase in tl_dict["phase"].items():
+            phase_int = int(phase_name)
             # save the index of the light head string
-            self._p_string_map[phase_int] = controlled_lane_index
+            self._p_string_map[phase_int] = phase['controlling_index']
             # loop through the controlled lanes
-            for lane_index in controlled_lane_index:
+            for lane_index in phase['controlling_index']:
                 # try to find a matching parameter in the traffic light configuration file
-                param = find_matching_param(
-                    tl_dict["param"], attr="@key", value=lane_order[lane_index].getID()
-                )
-                if param.get("@key", "") == lane_order[lane_index].getID():
+                detect_id = tl_dict["param"].get(lane_order[lane_index].getID(), "")
+                if detect_id:
                     # the phase is controlled by a custom detector
-                    detect_name = param.get("@value")
+                    detect_name = detect_id
                 else:
                     # the phase is controlled by a generated detector. They are generated according to https://github.com/eclipse/sumo/issues/10045#issuecomment-1022207944
                     detect_name = (
@@ -199,25 +168,19 @@ class DualRingActor(_Base):
                 if not phase_int in self._phase_2_detect.keys():
                     self._phase_2_detect[phase_int] = detect_name
 
+        # create a list of the sumo order of phases
+        temp_list = sorted(((p, indexes) for p, indexes in self._p_string_map.items()), key=lambda x: x[1][0])
+        self._phases_sumo_order = [int(t[0]) for t in temp_list]
+
         # find the barriers
         bs = []
-        bs.append(
-            find_matching_param(
-                tl_dict["param"], attr="@key", value=f"barrierPhases"
-            ).get("@value", "")
-        )
+        bs.append(tl_dict["param"]['barrierPhases'])
         # b2 can either be called barrier2Phases or coordinatePhases
-        bs.append(
-            find_matching_param(
-                tl_dict["param"], attr="@key", value=f"barrier2Phases"
-            ).get("@value", "")
-        )
+        bs.append(tl_dict["param"].get('barrier2Phases', ""))
         bs[-1] = (
             bs[-1]
             if bs[-1] != ""
-            else find_matching_param(
-                tl_dict["param"], attr="@key", value=f"coordinatePhases"
-            ).get("@value", "")
+            else tl_dict["param"]['coordinatePhases']
         )
     
         # convert the barriers to a list of integers
@@ -230,10 +193,10 @@ class DualRingActor(_Base):
         # using the rings and barrier phases parameter\
         rings = [[[], []], [[], []]]
         for i, ring in enumerate(rings):
-            p = find_matching_param(tl_dict["param"], attr="@key", value=f"ring{i+1}")
+            r = tl_dict["param"][f"ring{i+1}"]
             # ring[0].extend(map(int, p.split(",")))
             b_num = 0
-            for _p in map(int, p["@value"].split(",")):
+            for _p in map(int, r.split(",")):
                 if _p > 0:
                     ring[b_num].append(_p)
                     if _p in bs[0] or _p in bs[1]:
@@ -361,15 +324,15 @@ class DualRingActor(_Base):
         Returns:
             Tuple[int]: the active phases as integers
         """
-        self._active_state = tuple(
+        self._sumo_active_state = tuple(
             int(p)
             for p in (
-                sub_res[self.tl_id][VAR_NAME]
+                sub_res[TL_PROGRAM][self.tl_id][VAR_NAME]
                 if self._subscriptions
                 else self._traci_c.trafficlight.getPhaseName(self.tl_id)
             ).split("+")
         )
-        return self._active_state
+        return self._sumo_active_state
 
     def get_actual_color(self, sub_res: Dict[int, Dict] = {}) -> Tuple[int]:
         """
@@ -378,24 +341,25 @@ class DualRingActor(_Base):
         Returns:
             List[int]
         """
-        if not len(self._active_state):
-            self.get_actual_state()
+        if not len(self._sumo_active_state):
+            self.get_actual_state(sub_res)
 
         light_str = (
-            sub_res[self.tl_id][TL_RED_YELLOW_GREEN_STATE]
+            sub_res[TL_PROGRAM][self.tl_id][TL_RED_YELLOW_GREEN_STATE]
             if self._subscriptions
             else self.self._traci_c.trafficlight.getRedYellowGreenState(self.tl_id)
         )
         light_states = tuple(
             COLOR_ENUMERATE[light_str[self._p_string_map[s][0]]]
-            for s in self._active_state
+            for s in self._sumo_active_state
         )
         # clear the active state so that it is freshly read
-        self._active_state = ()
+        self._sumo_active_state = ()
         return light_states
 
-    def list_2_phase(self, 
-        count_list: List[int]
+    def list_2_phase(self,
+        count_list: List[int],
+        per_phase: bool = False
     ) -> Dict[int, int]:
         """
         helper function to turn a list of lane counts (# of vehicles in each lane) to a per-phase count
@@ -403,10 +367,16 @@ class DualRingActor(_Base):
         Returns:
             List[Tuple(phase (int), count (int))]: 
         """
-        res = {}
-        for p, p_inds in self._p_string_map.items():
-            res[p] = sum(count_list[p_inds[0]:p_inds[-1] + 1])
-        return res
+        if per_phase:
+
+            return {
+                p: val for p, val in zip(self._phases_sumo_order, count_list)
+            }    
+        else:
+            res = {}
+            for p, p_inds in self._p_string_map.items():
+                res[p] = sum(count_list[p_inds[0]:p_inds[-1] + 1])
+            return res
 
 
 
@@ -520,9 +490,9 @@ class GlobalDualRingActor:
         light_head_colors = []
 
         for tl in self.tls:
-            states.append(tl.get_actual_state(subscription_results[TL_PROGRAM]))
+            states.append(tl.get_actual_state(subscription_results))
             light_head_colors.append(
-                tl.get_actual_color(subscription_results[TL_PROGRAM])
+                tl.get_actual_color(subscription_results)
             )
         return states, light_head_colors
 
