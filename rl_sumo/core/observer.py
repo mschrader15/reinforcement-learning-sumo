@@ -415,7 +415,7 @@ class GlobalObservations(_Base):
         # return the pre-constructed count dictionary
         return counts
 
-    def register_traci(self, traci_c: object) -> List[Tuple[object, tuple, int]]:
+    def register_traci(self, traci_c: object) -> Tuple[Tuple[object, tuple, int]]:
         """
         pass traci to the children and return the functions that the core traci module should execute.
 
@@ -426,8 +426,8 @@ class GlobalObservations(_Base):
         for child in self:
             child.register_traci(traci_c)
 
-        return [[traci_c.lane.getAllSubscriptionResults, (), VAR_LANES],
-                [traci_c.vehicle.getAllSubscriptionResults, (), VAR_VEHICLE]]
+        return ((traci_c.lane.getAllSubscriptionResults, (), VAR_LANES),
+                (traci_c.vehicle.getAllSubscriptionResults, (), VAR_VEHICLE))
 
     @property
     def vehicle_subscriptions(self, ) -> List[int]:

@@ -88,8 +88,10 @@ class MaxPressureLane(Lane):
         # TODO: Consider juction dimensions as well
         self._max_permissible_vehicles: int = max(
             math.floor(
-                min(sum([l.getLength() for l in lane_list]), DISTANCE_THRESHOLD)
-                / VEHICLE_LENGTH
+                (
+                    min(sum(l.getLength() for l in lane_list), DISTANCE_THRESHOLD)
+                    / VEHICLE_LENGTH
+                )
             ),
             1,
         )
@@ -304,17 +306,12 @@ class MaxPressureTLObservations(TLObservations):
         @param net_obj: net object
         @return: a list of Approaches
         """
-        return_list = []
-        for phase_name, phase_info in nema_config_dict["phase"].items():
-            return_list.append(
-                MaxPressurePhase(
+        return [MaxPressurePhase(
                     phase_name=phase_name,
                     tls_object=tls_obj,
                     phase_2_lane=phase_info["controlling_index"],
                     camera_position=self._center,
-                )
-            )
-        return return_list
+                ) for phase_name, phase_info in nema_config_dict["phase"].items()]
 
     def update_pressure(self, *args, **kwargs):
         return self.update_counts(*args, **kwargs)

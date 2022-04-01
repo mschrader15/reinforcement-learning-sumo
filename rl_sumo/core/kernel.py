@@ -1,3 +1,4 @@
+import contextlib
 import os
 import signal
 import traci
@@ -7,6 +8,10 @@ import time
 from copy import deepcopy
 from sumolib import checkBinary
 import subprocess
+
+# should I try and use libsumo?
+# Most of the libsumo code is take directly from https://github.com/LucasAlegre/sumo-rl/blob/master/sumo_rl/environment/env.py  
+LIBSUMO = 'LIBSUMO_AS_TRACI' in os.environ
 
 
 def sumo_cmd_line(params, kernel):
@@ -53,6 +58,8 @@ class Kernel(object):
     """
     This class is the core for interfacing with the simulation
     """
+    CONNECTION_NUMBER = 0
+
     def __init__(self, sim_params):
 
         self.traci_c = None
@@ -68,6 +75,11 @@ class Kernel(object):
 
         self._initial_tl_colors = {}
 
+        self._sumo_conn_label = str(Kernel.CONNECTION_NUMBER)
+        # increment the connection
+        Kernel.CONNECTION_NUMBER += 1
+
+
     def set_seed(self, seed):
         self.seed = seed
 
@@ -80,26 +92,28 @@ class Kernel(object):
         self.traci_c = traci_c
 
     def start_simulation(self, ):
-        # pylint: disable=maybe-no-member
-
         # find SUMO
         sumo_binary = checkBinary('sumo-gui') if self.sim_params.gui else checkBinary('sumo')
 
         # create the command line call
         sumo_call = [sumo_binary] + sumo_cmd_line(self.sim_params, self)
 
-        # start the process
-        self.sumo_proc = subprocess.Popen(
-            sumo_call,
-            stdout=subprocess.DEVNULL,
-        )  # stderr=subprocess.STDOUT)
+        # # start the process
+        # self.sumo_proc = subprocess.Popen(
+        #     sumo_call,
+        #     stdout=subprocess.DEVNULL,
+        # )  # stderr=subprocess.STDOUT)
 
-        # sleep before trying to connect with TRACI
-        time.sleep(1)
+        # # sleep before trying to connect with TRACI
+        # time.sleep(1)
+        if LIBSUMO:
+            traci.start(sumo_call, )
+            traci_c = traci
+        else:
+            traci.start(sumo_call, label=self._sumo_conn_label)
+            traci_c = traci.getConnection(self._sumo_conn_label)
 
         # connect to traci
-        traci_c = traci.connect(port=self.sim_params.port, numRetries=100)
-        traci_c.setOrder(0)
         traci_c.simulationStep()
 
         # set the traffic lights to the default behaviour and run for warm up period
@@ -153,11 +167,8 @@ class Kernel(object):
             # self.traci_c.close()
 
             # self.traci_c.load(sumo_cmd_line(self.sim_params))
-            try:
+            with contextlib.suppress(AttributeError):
                 self.traci_c.simulation.clearPending()
-            except AttributeError:
-                pass
-
             # unsubscribe from all the vehicles at the end state
             for veh_id in self.traci_c.vehicle.getIDList():
                 self.traci_c.vehicle.unsubscribe(veh_id)
@@ -188,10 +199,8 @@ class Kernel(object):
 
     def kill_simulation(self, ):
         for fn, args in [[self._kill_sumo_proc, ()], [self._os_pg_killer, ()], [self._close_traci, ()]]:
-            try:
+            with contextlib.suppress(Exception):
                 fn(*args)
-            except Exception:
-                pass
 
     def _kill_sumo_proc(self, ):
         if self.sumo_proc:
