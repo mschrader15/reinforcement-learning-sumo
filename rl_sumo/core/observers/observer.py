@@ -69,7 +69,7 @@ class _Base:
 
     def re_initialize(self):
 
-        for name, value in self.init_state.items():
+        for name, value in deepcopy(self.init_state).items():
             self.__dict__[name] = value
 
         self.freeze()

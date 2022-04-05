@@ -23,16 +23,18 @@ class _Base:
         self,
     ):
         # self.parent = parent
-        self.init_state = copy.deepcopy(self.__dict__)
+        self.init_state = copy.deepcopy(self)
 
     def _re_initialize(
         self,
     ):
         """
         This function "unfreeezes" the initial values that were saved in the call to freeze
+
+        Always update with a copy, otherwise the core will be ovewritten
         """
-        for name, value in self.init_state.items():
-            self.__dict__[name] = value
+        self.__dict__.update(copy.deepcopy(self.init_state.__dict__))
+            # self.__dict__[name] = value
 
     def freeze(
         self,
@@ -40,7 +42,7 @@ class _Base:
         """
         This is gets called later than the init state. and freezes all the values in self
         """
-        self.init_state = copy.deepcopy(self.__dict__)
+        self.init_state = copy.deepcopy(self)
 
 
 class DualRingActor(_Base):
@@ -88,11 +90,12 @@ class DualRingActor(_Base):
 
         # build the control based on the traffic light settings file
         self._build(nema_config_xml, net_file_xml)
+        
+        # traci         
+        self._traci_c: traci = None
 
         # freeze the initial settings
         super().__init__()
-
-        self._traci_c: traci = None
 
     @property
     def default_state(
@@ -262,11 +265,13 @@ class DualRingActor(_Base):
             current_str = self._traci_c.trafficlight.getRedYellowGreenState(self.tl_id)
             if any(l in current_str for l in ["G", "g", "y"]):
                 return False
-
         # set the traffic light program id to the desired one
         self._traci_c.trafficlight.setProgram(self.tl_id, self._programID)
         self.controlled = True
-        return self._take_control()
+        # overwrite all of the detectors to 0
+        self._take_control()
+        # force the traffic light to move initially by writing detector calls on the default state
+        return self.try_switch(self.default_state)
 
     def _take_control(
         self,
