@@ -11,7 +11,7 @@ from copy import deepcopy
 from math import floor
 from rl_sumo.core import Kernel
 from rl_sumo.core import GlobalObservations
-from rl_sumo.core import GlobalActor
+from rl_sumo.core.actors import GlobalActor
 from rl_sumo.core import rewarder
 from abc import ABCMeta, abstractmethod
 

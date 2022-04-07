@@ -4,7 +4,7 @@ import enum
 import itertools
 from typing import Any, Dict, Iterator, List, OrderedDict, Set, Tuple, Union, Callable
 
-from ..helpers.utils import read_nema_config
+from rl_sumo.helpers.utils import read_nema_config
 
 import sumolib
 import traci
