@@ -25,7 +25,7 @@ def read_net(path: str) -> sumolib.net:
     Returns:
         sumolib.net: sumolib net object
     """
-    return sumolib.net.readNet(path)
+    return sumolib.net.readNet(path, withInternal=True)
 
 
 def xy_to_m(x0, y0, x1, y1):
@@ -300,8 +300,10 @@ class Approach(_Base):
                 # continue calling the function until the distance is greater than the threshold distance
                 try:
                     return self._recursive_lane_getter(
-                        lanes=self._get_straight_connection(lanes, *args, **kwargs),
-                        camera_position=camera_position,
+                        self._get_straight_connection(lanes, *args, **kwargs),
+                        camera_position,
+                        *args,
+                        **kwargs
                     )
                 except TypeError:
                     # break the while loop and return where we are at.
@@ -502,6 +504,15 @@ class GlobalObservations(_Base):
 
         # return the pre-constructed count dictionary
         return counts
+
+    def update(self, sim_dict) -> List:
+        # This just renames get_counts to strictly update count, not get values
+        
+        # print("sim_counts", sim_dict[VAR_LANES])
+        for child in self:
+            child.update_counts(
+                lane_info=sim_dict[VAR_LANES], vehicle_info=sim_dict[VAR_VEHICLE]
+            )
 
     def register_traci(self, traci_c: object) -> Tuple[Tuple[object, tuple, int]]:
         """

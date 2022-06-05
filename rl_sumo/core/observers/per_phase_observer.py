@@ -87,7 +87,7 @@ class Phase(Approach):
         @return: the previous lane that connects to our lane of interest with a "straight" connection, end flag
         """
         for connect in (
-            lanes[-1].getIncoming()
+            lanes[-1].getIncoming(onlyDirect=True)
             if direction == LaneType.INCOMING
             else lanes[-1].getOutgoing()
         ):

@@ -71,15 +71,19 @@ class WaitingTimeLane(Lane):
                     new_ids.append(_id)
 
         # assign the waiting time
-        # TODO make this have a distance horizon
-        self.waiting_time = sum(
-            lane_info[_lane][VAR_WAITING_TIME] for _lane in self._lane_list
-        )
+        # TODO make this have a distance horizon. Could use the vehicles waiting time for that.
+        # Commenting out for now
+        # self.waiting_time = sum(
+        #     lane_info[_lane][VAR_WAITING_TIME] for _lane in self._lane_list
+        # )
 
         # assign these new ids to the history
         self._last_ids = new_ids
         self.count = len(new_ids)
         return (self.count, self.waiting_time)
+
+    def get_vehicle_ids(self, ) -> List[str]:
+        return self._last_ids
 
     def get_counts(
         self,
@@ -137,6 +141,10 @@ class WaitingTimePhase(Phase):
     def get_value(self, param: str, mapped: bool = False):
         return sum(getattr(c, param) for c in self._children)
 
+    def get_vehicle_ids(self, ) -> List[List[str]]:
+        # return a list of vehicls in the lanes.
+        return [_id for c in self._children for _id in c.get_vehicle_ids()]
+
 
 class WaitingTimeTLObservations(PhaseTLObservations):
     """
@@ -176,6 +184,14 @@ class WaitingTimeTLObservations(PhaseTLObservations):
             return {t.name: t.get_waiting_time() for t in self._children}
         else:
             return (l[1] for a in self.count_list for l in a.count_list)
+
+    def get_vehicle_ids(
+        self, mapped_method: bool = False
+    ) -> Union[List[List[str]], Dict[str, List[str]]]:
+        if mapped_method:
+            return {t.name: t.get_vehicle_ids() for t in self._children}
+        else:
+            return (a.get_vehicle_ids() for a in self._children)
 
 
 class GlobalWaitingTimeObserver(GlobalPhaseObservations):
@@ -228,3 +244,13 @@ class GlobalWaitingTimeObserver(GlobalPhaseObservations):
             return {t.name: t.get_waiting_time(mapped_method) for t in self._children}
         else:
             return (l[1] for a in self.count_list for l in a.count_list)
+
+
+    def get_vehicle_ids(
+        self, mapped_method: bool = False
+    ) -> Union[List[List[str]], Dict[str, List[str]]]:
+        if mapped_method:
+            return {t.name: t.get_vehicle_ids() for t in self._children}
+        else:
+            return (a.get_vehicle_ids() for a in self._children)
+    
