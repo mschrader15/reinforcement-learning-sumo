@@ -16,11 +16,11 @@
     "net_file": "sumo-xml/net.net.xml",
     "route_file": "sumo-xml/routes/rou.route.xml",
     "additional_files": [
-      "sumo-xml/traffic-lights/dual_ring_ready.63082002.xml",
-      "sumo-xml/traffic-lights/dual_ring_ready.63082003.xml",
-      "sumo-xml/traffic-lights/dual_ring_ready.63082004.xml",
-      "sumo-xml/traffic-lights/tls.rl.add.xml",
-      "sumo-xml/vehType/vTypeDistributions.add.xml"
+      "{ROOT}/example/sumo-xml/traffic-lights/dual_ring_ready.63082002.xml",
+      "{ROOT}/example/sumo-xml/traffic-lights/dual_ring_ready.63082003.xml",
+      "{ROOT}/example/sumo-xml/traffic-lights/dual_ring_ready.63082004.xml",
+      "{ROOT}/example/sumo-xml/traffic-lights/tls.rl.add.xml",
+      "{ROOT}/example/sumo-xml/vehType/vTypeDistributions.add.xml"
     ],
     "tl_ids": [
       "63082002",
@@ -31,12 +31,12 @@
     "tl_file": "sumo-xml/traffic-lights/tls.rl.add.xml",
     "sim_step": 0.5,
     "start_time": "2020-02-24 06:30:00.000",
-    "gui": "True",
+    "gui": "False",
     "central_junction": "63082003",
     "tl_file_dict": {
-      "63082002": "sumo-xml/traffic-lights/dual_ring_ready.63082002.xml",
-      "63082003": "sumo-xml/traffic-lights/dual_ring_ready.63082003.xml",
-      "63082004": "sumo-xml/traffic-lights/dual_ring_ready.63082004.xml"
+      "63082002": "{ROOT}/example/sumo-xml/traffic-lights/dual_ring_ready.63082002.xml",
+      "63082003": "{ROOT}/example/sumo-xml/traffic-lights/dual_ring_ready.63082003.xml",
+      "63082004": "{ROOT}/example/sumo-xml/traffic-lights/dual_ring_ready.63082004.xml"
     }
   }
 }

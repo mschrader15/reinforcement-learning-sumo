@@ -10,7 +10,7 @@ from setuptools import find_packages, setup, Distribution
 
 def _read_requirements_file():
     """Return the elements in requirements.txt."""
-    req_file_path = '%s/requirements.txt' % dirname(realpath(__file__))
+    req_file_path = f'{dirname(realpath(__file__))}/requirements.txt'
     with open(req_file_path) as f:
         return [line.strip() for line in f]
 

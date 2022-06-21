@@ -5,6 +5,8 @@ from datetime import datetime
 from typing import List
 import pathlib
 
+import json5
+
 # Hacky
 ROOT = pathlib.Path(__file__).parent.parent.parent.resolve()
 
@@ -25,6 +27,7 @@ def safe_getter(_dict: dict, param: str):
         return _dict.pop(param)
     except KeyError:
         return None
+
 
 
 def make_directory(path):
@@ -106,6 +109,11 @@ class SimParams(object):
             root = exec(params['file_root'])
         except Exception:
             root = params['file_root'].format(ROOT=ROOT)
+
+        
+        # Add in the ROOT to the params. Ineffecient but it works.
+        # I should switch to OmegaConf
+        params = json5.loads(json5.dumps(params).replace("{ROOT}", str(ROOT)))
 
         self.sim_state_dir: str = os.path.join(root, 'reinforcement-learning-sumo', 'tmp', 'sim_state')
 
