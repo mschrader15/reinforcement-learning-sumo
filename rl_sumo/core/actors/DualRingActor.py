@@ -225,7 +225,10 @@ class DualRingActor(_Base):
         # add the barrier pairs as the first items in the action space, to give preference
         self._action_space.extend(bs[::-1])
         for i, _ in enumerate(bs):
-            self._action_space.extend(itertools.product(rings[0][i], rings[1][i]))
+            for pair in itertools.product(rings[0][i], rings[1][i]):
+                if pair not in self._action_space:
+                    self._action_space.append(pair)
+            
 
     def re_initialize(self) -> None:
         """
@@ -371,15 +374,15 @@ class DualRingActor(_Base):
 
         return self.sumo_active_state
 
-    def get_actual_color(
-        self, sim_time: float, sub_res: Dict[int, Dict] = {}
-    ) -> Tuple[int]:
+    def get_actual_color(self, sim_time: float, sub_res: Dict[int, Dict] = None) -> Tuple[int]:
         """
         Get a list of COLOR_ENUMERATE light head states ('r' -> 0, etc..)
 
         Returns:
             List[int]
         """
+        if sub_res is None:
+            sub_res = {}
         if not self._sumo_active_state or self._sumo_active_state[0] != sim_time:
             self.get_sumo_state(sim_time, sub_res)
 
@@ -388,13 +391,10 @@ class DualRingActor(_Base):
             if self._subscriptions
             else self.self._traci_c.trafficlight.getRedYellowGreenState(self.tl_id)
         )
-        light_states = tuple(
-            COLOR_ENUMERATE[light_str[self._p_string_map[s][0]]]
-            for s in self.sumo_active_state
-        )
-        return light_states
+        return tuple(COLOR_ENUMERATE[light_str[self._p_string_map[s][0]]] for s in self.sumo_active_state)
 
     def okay_2_switch(self, sim_time: float) -> bool:
+        # sourcery skip: raise-specific-error
         if not self._sumo_active_state:
             raise Exception(
                 "You first need to pass the simulation dict before checking if it is okay to try and switch the traffic lights"
