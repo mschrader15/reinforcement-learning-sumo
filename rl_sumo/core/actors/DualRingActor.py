@@ -73,6 +73,9 @@ class DualRingActor(_Base):
         # sorted phases in the order that SUMO renders them
         self._phases_sumo_order: List[int] = ()
 
+        # sorted phases in ascending order
+        self._phases: List[int] = ()
+
         # the programID
         self._programID: str = ""
 
@@ -108,6 +111,10 @@ class DualRingActor(_Base):
         self,
     ) -> Tuple[int, int]:
         return self._sumo_active_state[1]
+
+    @property
+    def phases(self, ) -> List[int]:
+        return self._phases
 
     @property
     def action_space(
@@ -229,6 +236,8 @@ class DualRingActor(_Base):
             for pair in itertools.product(rings[0][i], rings[1][i]):
                 if pair not in self._action_space:
                     self._action_space.append(pair)
+
+        self._phases = sorted({p for action in self._action_space for p in action})
             
 
     def re_initialize(self) -> None:
