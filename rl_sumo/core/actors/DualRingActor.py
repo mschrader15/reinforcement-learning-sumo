@@ -132,6 +132,7 @@ class DualRingActor(_Base):
         self._requested_state = set(l)
 
     def _build(self, nema_config_xml: str, net_file_xml: str) -> None:
+        # sourcery skip: low-code-quality
         """
         builds a mapping of NEMA phase # to the actuating detectors
 
@@ -343,15 +344,15 @@ class DualRingActor(_Base):
         """
         return list(self._requested_state)
 
-    def get_sumo_state(
-        self, sim_time: float, sub_res: Dict[int, Dict] = {}
-    ) -> Tuple[int, int]:
+    def get_sumo_state(self, sim_time: float, sub_res: Dict[int, Dict] = None) -> Tuple[int, int]:
         """
         Get the actual NEMA state in integer list format
 
         Returns:
             Tuple[int]: the active phases as integers
         """
+        if sub_res is None:
+            sub_res = {}
         self._last_sumo_phase = self.sumo_active_state
 
         self._sumo_active_state = (
