@@ -1,11 +1,14 @@
-from typing import Union
-import gym
-from gym.envs.registration import register
+from typing import Callable, Union
+import gymnasium as gym
+from gymnasium.envs.registration import register
+from rl_sumo.environment.env import TLEnv
 
 
-def make_create_env(env_params, sim_params, version=0) -> Union[str, object]:
-    """
-    This function makes the create_env() function that is used by ray.tune.registry.register_env
+def make_create_env(
+    env_params, sim_params, version=0
+) -> Union[str, Callable[[], TLEnv]]:
+    """This function makes the create_env() function that is used by
+    ray.tune.registry.register_env.
 
     Args:
         env_params: EnvParams class
@@ -17,16 +20,16 @@ def make_create_env(env_params, sim_params, version=0) -> Union[str, object]:
     """
 
     # deal with multiple environments being created under the same name
-    all_envs = gym.envs.registry.all()
-    env_ids = [env_spec.id for env_spec in all_envs]
+    env_ids = list(gym.envs.registry)
     while "{}-v{}".format(env_params.environment_name, version) in env_ids:
         version += 1
     env_name = "{}-v{}".format(env_params.environment_name, version)
 
-    def create_env(*_):
-
+    def create_env(*_) -> TLEnv:
         try:
-            entry_point = f"{env_params.environment_location}:{env_params.environment_name}"
+            entry_point = (
+                f"{env_params.environment_location}:{env_params.environment_name}"
+            )
 
             register(
                 id=env_name,
@@ -34,13 +37,12 @@ def make_create_env(env_params, sim_params, version=0) -> Union[str, object]:
                 kwargs={
                     "env_params": env_params,
                     "sim_params": sim_params,
-                }
+                },
             )
 
             _env = gym.envs.make(env_name)
 
         except ModuleNotFoundError:
-
             entry_point = f"rl_sumo.environment:{env_params.environment_name}"
 
             register(
@@ -49,11 +51,11 @@ def make_create_env(env_params, sim_params, version=0) -> Union[str, object]:
                 kwargs={
                     "env_params": env_params,
                     "sim_params": sim_params,
-                }
+                },
             )
 
             _env = gym.envs.make(env_name)
-        
+
         return _env
 
     return env_name, create_env

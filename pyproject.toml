@@ -1,0 +1,27 @@
+[project]
+name = "reinforcement-learning-sumo"
+version = "0.0.1"
+description = "Applying reinforcement learning to traffic control in SUMO."
+authors = [
+    {name = "Max", email = "mcschrader@crimson.ua.edu"},
+]
+dependencies = [
+    "scipy>=1.7.1",
+    "torch>=2.1.1",
+    "ray[rllib]>=2.8.0",
+    "omegaconf>=2.3.0",
+    "click>=8.1.7",
+    "sumolib>=1.19.0",
+    "traci>=1.19.0",
+    "python-xml2dict>=0.1.1",
+    "libsumo>=1.19.0",
+    "pfrl>=0.4.0",
+]
+requires-python = ">=3.9"
+readme = "README.md"
+license = {text = "MIT"}
+
+[tool.pdm.dev-dependencies]
+dev = [
+    "pre-commit>=3.5.0",
+]

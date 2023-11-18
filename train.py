@@ -1,30 +1,17 @@
-import importlib
-import argparse
 import sys
 import click
-from copy import deepcopy
-from rl_sumo.helpers.register_environment import make_create_env
 from rl_sumo.helpers.preprocessing import execute_preprocessing_tasks
-from rl_sumo.helpers.preprocessing import get_parameters
+from rl_sumo.parameters.params import get_parameters
 from trainers import TRAINING_FUNCTIONS
 
 
 def preprocessing(sim_params, *args, **kwargs):
-    """
-    Execute preprocessing tasks. They should be passed to the configuration like
-    {
-        ...
-        "Simulation": {
-            "pre_processing_tasks": [
-                    {"python_path": "tools.preprocessing.my_custom_function",
-                        "module_path": "<absolute path to module root>"
-                    }, ...
-                ],
-            "file_root": ...
-    }
+    """Execute preprocessing tasks. They should be passed to the configuration
+    like { ... "Simulation": { "pre_processing_tasks": [ {"python_path":
+    "tools.preprocessing.my_custom_function", "module_path": "<absolute path to
+    module root>" }, ... ], "file_root": ... }
 
     The entire simulation object is passed to the function.
-
     """
     # add the root location to the path
     if sim_params["pre_processing_tasks"]:
@@ -38,13 +25,14 @@ def preprocessing(sim_params, *args, **kwargs):
     help="Path to the JSON configuration file",
 )
 def _main(config_path):
-    """
-    This script runs the desired RL training.
+    """This script runs the desired RL training.
 
-    Before it does the training, it will create environment and simulation parameter classes based on the configuration file input and run desired preprocessing tasks
+    Before it does the training, it will create environment and
+    simulation parameter classes based on the configuration file input
+    and run desired preprocessing tasks
 
-    The actual RL training functions should live in ./trainers/training_functions.py
-
+    The actual RL training functions should live in
+    ./trainers/training_functions.py
     """
 
     # get the sim and environment parameters
@@ -60,5 +48,4 @@ def _main(config_path):
 main = click.command()(_main)
 
 if __name__ == "__main__":
-
     main()

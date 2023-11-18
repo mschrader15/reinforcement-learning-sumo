@@ -1,14 +1,18 @@
+from pathlib import Path
+from typing import Dict
+import numpy as np
+from rl_sumo.parameters.params import SimParams
 import traci.constants as tc
 from copy import deepcopy
 from scipy.ndimage.filters import uniform_filter1d
+import sumolib
 
 
 def minimize_fuel(subscription_values):
-    """
-    this is a very simple function that minimizes the fuel consumption of the network
+    """This is a very simple function that minimizes the fuel consumption of
+    the network.
 
-    @param subscription_values:
-    @return:
+    @param subscription_values: @return:
     """
     vehicle_list = list(subscription_values[tc.VAR_VEHICLE].values())
     fc = sum(vehicle_data[tc.VAR_FUELCONSUMPTION] for vehicle_data in vehicle_list)
@@ -16,7 +20,9 @@ def minimize_fuel(subscription_values):
 
 
 class Rewarder:
-    def __init__(self, ):
+    def __init__(
+        self,
+    ):
         pass
 
     def register_traci(self, traci_c):
@@ -25,7 +31,9 @@ class Rewarder:
     def get_reward(self, *args, **kwargs):
         pass
 
-    def re_initialize(self, ):
+    def re_initialize(
+        self,
+    ):
         pass
 
 
@@ -33,28 +41,17 @@ class PureFuelMin(Rewarder):
     def __init__(self, sim_params, *args, **kwargs):
         super(PureFuelMin, self).__init__()
         self.sim_step = deepcopy(sim_params.sim_step)
-        # self.min_reward = 50  # this corresponds to 50 mpg. But we want to penalize 0 mpg
-        # self.ml_2_l = 0.001
-        # self.m_2_km = 0.001
-
-        # # from PHEMLight
-        # self.m = 1235  # kg
-        # self.C_d = 0.3113
-        # self.rho = 1.204  # kg/m^3
         self.normailizer = 10  # ml_s
 
     def get_reward(self, subscription_dict):
-
         vehicle_list = list(subscription_dict[tc.VAR_VEHICLE].values())
-        # l_100km = sum((vehicle_data[tc.VAR_SPEED] * self.sim_step / self.m_2_km) /
-        #            (vehicle_data[tc.VAR_FUELCONSUMPTION] * self.ml_2_l) * 100 for vehicle_data in vehicle_list)
-
-        fc = sum(vehicle_data[tc.VAR_FUELCONSUMPTION] * self.sim_step
-                 for vehicle_data in vehicle_list) / len(vehicle_list)
+        fc = sum(
+            vehicle_data[tc.VAR_FUELCONSUMPTION] * self.sim_step
+            for vehicle_data in vehicle_list
+        ) / len(vehicle_list)
 
         return (-1 * fc) / self.normailizer
 
-    # def _calc_eff(self, veh_data):
 
 
 class FCIC(Rewarder):
@@ -63,44 +60,96 @@ class FCIC(Rewarder):
 
     @return:
     """
-    def __init__(self, sim_params, *args, **kwargs):
+
+    def __init__(self, sim_params: SimParams, *args, **kwargs):
         super(FCIC, self).__init__()
-        self.junction_id = deepcopy(sim_params.central_junction)
+        # self.junction_id = deepcopy(sim_params.central_junction)
+        self._junctions = list(sim_params.nema_file_map.keys())
         self.sim_step = deepcopy(sim_params.sim_step)
-        self.k_array = [[[
-            'gneE0.12', 'gneE17', '-638636924#1.9', '660891910#1.19', '660891910#1', 'gneE18', 'gneE13', 'gneE20',
-            '-8867312#6', 'gneE22', 'gneE22.27'
-        ], 100], [[], 190]]
+        self._k_mapping = self._build_k_mapping(sim_params.net_file)
         # normailize by the worst case scenario
-        self.min_reward = -200
+        # self.min_reward = -200
         self.window_size = int(10 / self.sim_step)
         self._reward_array = []
+
+    @staticmethod
+    def k_func(speed_mps: float) -> float:
+        # convert mps to mph
+        speed = speed_mps * 2.23694
+        # this is the k function from the paper
+        return 17 * np.exp(0.0531 * speed)
+
+    def _build_k_mapping(self, net_file: Path) -> Dict[str, float]:
+        """This function builds a mapping between the road id and the k value
+        for that road.
+
+        @param net_file:
+        @return:
+        """
+        net = sumolib.net.readNet(str(net_file), withInternal=True)
+        return {edge.getID(): self.k_func(edge.getSpeed()) for edge in net.getEdges()}
 
     def re_initialize(self):
         self._reward_array.clear()
 
-    def _running_mean(self, ):
+    def _running_mean(
+        self,
+    ):
         """
         From https://stackoverflow.com/a/43200476/13186064
         """
-        return uniform_filter1d(self._reward_array, self.window_size, mode='constant',
-                                origin=-(self.window_size // 2))[:-(self.window_size - 1)]
+        return uniform_filter1d(
+            self._reward_array,
+            self.window_size,
+            mode="constant",
+            origin=-(self.window_size // 2),
+        )[: -(self.window_size - 1)]
 
     def register_traci(self, traci_c):
         self._reward_array.clear()
-        traci_c.junction.subscribeContext(self.junction_id, tc.CMD_GET_VEHICLE_VARIABLE, 1000000,
-                                          [tc.VAR_SPEED, tc.VAR_ALLOWED_SPEED, tc.VAR_ROAD_ID])
-        return [[traci_c.junction.getContextSubscriptionResults, (self.junction_id, ), self.junction_id]]
+        traci_calls = []
+        for junction_id in self._junctions:
+            traci_c.junction.subscribeContext(
+                junction_id,
+                tc.CMD_GET_VEHICLE_VARIABLE,
+                200,
+                [
+                    tc.VAR_SPEED,
+                    tc.VAR_ALLOWED_SPEED,
+                    tc.VAR_WAITING_TIME,
+                    tc.VAR_ROAD_ID,
+                ],
+            )
+            traci_calls.append(
+                [
+                    traci_c.junction.getContextSubscriptionResults,
+                    (junction_id,),
+                    junction_id,
+                ]
+            )
+        return traci_calls
+
+    def _get_junction_reward(self, subscription_dict, junction_id):
+        # D_i + K_i * S_i
+        # we are summing over all the edges within 300m of the junction
+        total_delay = self._get_delay(subscription_dict[junction_id])
+        # get the sum of stop time
+        k_s = sum(
+            (subscription_dict[junction_id][d][tc.VAR_WAITING_TIME] > 0)
+            * self._k_mapping[subscription_dict[junction_id][d][tc.VAR_ROAD_ID]]
+            for d in subscription_dict[junction_id]
+        )
+        return total_delay + k_s
 
     def get_reward(self, subscription_dict):
-        relevant_data = subscription_dict[self.junction_id]
-        delay = self._get_delay(relevant_data)
-        k_s = self._get_sorted_stopped(relevant_data)
-        r = -1 * (delay + k_s / 3600)
-        self._reward_array.append(r)
+        reward = [
+            self._get_junction_reward(subscription_dict, junction_id)
+            for junction_id in self._junctions
+        ]
+        self._reward_array.append(sum(reward))
         r_array = self._running_mean()
-        r_r = r_array[-1] if len(r_array) else r
-        return -1 * (r_r / self.min_reward)
+        r_r = r_array[-1] if len(r_array) else self._reward_array[-1]
+        return -1 * r_r
 
     def get_stops(self):
         pass
@@ -112,22 +161,12 @@ class FCIC(Rewarder):
         @return:
         """
         if sc_results:
-            rel_speeds = [d[tc.VAR_SPEED] / d[tc.VAR_ALLOWED_SPEED] for d in sc_results.values()]
+            rel_speeds = [
+                d[tc.VAR_SPEED] / d[tc.VAR_ALLOWED_SPEED] for d in sc_results.values()
+            ]
             # compute values corresponding to summary-output
             running = len(rel_speeds)
             # stopped = len([1 for d in sc_results.values() if d[tc.VAR_SPEED] < 0.1])
             mean_speed_relative = sum(rel_speeds) / running
             return (1 - mean_speed_relative) * running * self.sim_step
         return 0
-
-    def _get_sorted_stopped(self, sc_results):
-        k_s = [0] * len(self.k_array)
-        if sc_results:
-            for d in sc_results.values():
-                if d[tc.VAR_SPEED] < 0.1:
-                    if d[tc.VAR_ROAD_ID] in self.k_array[0][0]:
-                        k_s[0] += self.k_array[0][1]
-                    else:
-                        k_s[1] += self.k_array[1][1]
-            return sum(k_s) * self.sim_step
-        return sum(k_s)

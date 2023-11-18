@@ -1,74 +1,67 @@
 import contextlib
 import os
+from pathlib import Path
 import signal
-import traci
+from typing import Any, Dict, List
+from rl_sumo.parameters.params import SimParams
 import traci.constants as tc
 import logging
 from copy import deepcopy
 from sumolib import checkBinary
 
-# should I try and use libsumo?
-# Most of the libsumo code is take directly from https://github.com/LucasAlegre/sumo-rl/blob/master/sumo_rl/environment/env.py
-LIBSUMO = "LIBSUMO_AS_TRACI" in os.environ
+import libsumo as traci  # noqa: E402
 
 
-def sumo_cmd_line(params, kernel):
+def sumo_cmd_line(params: SimParams, kernel):
+    cmd = [
+        "-n",
+        params.net_file,
+        "-e",
+        str(params.sim_length),
+        "--step-length",
+        str(params.sim_step),
+        "--seed",
+        str(kernel.seed),
+        "--time-to-teleport",
+        "-1",
+        "--collision.action",
+        "remove",
+        *["-a", ", ".join(params.additional_files + [params.route_file])],
+    ]
 
-    cmd = ["-c", params["gui_config_file"]] if params["gui_config_file"] else []
-
-    cmd.extend(
-        [
-            "-n",
-            params.net_file,
-            "-e",
-            str(params.sim_length),
-            "--step-length",
-            str(params.sim_step),
-            "--seed",
-            str(kernel.seed),
-            "--time-to-teleport",
-            "-1",
-            "--collision.action",
-            "remove",
-        ]
-    )
-
-    additional_files = ", ".join(params.additional_files + [params.route_file])
-
-    if params["tls_record_file"]:
-        additional_files = ", ".join([additional_files] + [params["tls_record_file"]])
-
-    cmd.extend(["-a", additional_files])
+    cmd.extend(params.additional_args)
 
     if params.gui:
         cmd.extend(["--start"])
 
-    if params["emissions"]:
-        cmd.extend(["--emission-output", params["emissions"]])
-
     return cmd
 
 
-VEHICLE_SUBSCRIPTIONS = [tc.VAR_POSITION, tc.VAR_FUELCONSUMPTION, tc.VAR_SPEED]
+VEHICLE_SUBSCRIPTIONS = [
+    tc.VAR_POSITION,
+    tc.VAR_FUELCONSUMPTION,
+    tc.VAR_SPEED,
+    tc.VAR_VEHICLECLASS,
+]
 
 
 class Kernel(object):
-    """
-    This class is the core for interfacing with the simulation
-    """
+    """This class is the core for interfacing with the simulation."""
 
-    CONNECTION_NUMBER = 0
-
+    # fuck it we only support libsumo
     def __init__(self, sim_params):
-
         self.traci_c = None
         self.sumo_proc = None
         self.parent_fns = []
         self.sim_params = deepcopy(sim_params)
         self.sim_step_size = self.sim_params.sim_step
-        self.state_file = os.path.join(
-            sim_params.sim_state_dir, f"start_state_{sim_params.port}.xml"
+        self.state_file = (
+            Path(sim_params.sim_state_dir) / f"start_state_{sim_params.port}.xml"
         )
+
+        if not self.state_file.parent.exists():
+            self.state_file.parent.mkdir(parents=True, exist_ok=True)
+
         self.sim_time = 0
         self.seed = 5
         self.traci_calls = []
@@ -76,18 +69,18 @@ class Kernel(object):
 
         self._initial_tl_colors = {}
 
-        self._sumo_conn_label = str(Kernel.CONNECTION_NUMBER)
-        # increment the connection
-        Kernel.CONNECTION_NUMBER += 1
+        self._loaded_tl_programs: Dict[str, List[Any]] = {}
+
+        self._controlled_signals: List[str] = list(self.sim_params.nema_file_map.keys())
 
     def set_seed(self, seed):
         self.seed = seed
 
     def pass_traci_kernel(self, traci_c):
-        """
-        This is the method that FLOW uses. Causes traci to "live" at the parent level
-        @param traci_c:
-        @return:
+        """This is the method that FLOW uses. Causes traci to "live" at the
+        parent level.
+
+        @param traci_c: @return:
         """
         self.traci_c = traci_c
 
@@ -98,55 +91,45 @@ class Kernel(object):
         sumo_binary = (
             checkBinary("sumo-gui") if self.sim_params.gui else checkBinary("sumo")
         )
-
         # create the command line call
         sumo_call = [sumo_binary] + sumo_cmd_line(self.sim_params, self)
+        traci.start(
+            sumo_call,
+        )
 
-        if LIBSUMO:
-            sumo_call.extend(
-                [
-                    "--remote-port",
-                    str(self.sim_params.port),
-                ]
-            )
-            traci.start(
-                sumo_call,
-            )
-            traci_c = traci
-        else:
-            traci.start(sumo_call, label=self._sumo_conn_label)
-            traci_c = traci.getConnection(self._sumo_conn_label)
+        traci_c = traci
 
         # connect to traci
         traci_c.simulationStep()
 
         # set the traffic lights to the default behaviour and run for warm up period
-        for tl_id in self.sim_params.tl_ids:
-            traci_c.trafficlight.setProgram(tl_id, f"{tl_id}-1")
+        for tl_id in self._controlled_signals:
+            # get all the programs
+            self._loaded_tl_programs[tl_id] = traci_c.trafficlight.getAllProgramLogics(
+                tl_id
+            )
+            if len(self._loaded_tl_programs[tl_id]) != 3:
+                raise ValueError("I don't know how to handle > 3 programs")
+            # set the default program to the second one, as this is 
+            # the default NEMA program
+            traci_c.trafficlight.setProgram(
+                tl_id, self._loaded_tl_programs[tl_id][1].programID
+            )
 
         # run for an hour to warm up the simulation
-        for _ in range(int(self.sim_params.warmup_time * 1 / self.sim_step_size)):
-            traci_c.simulationStep()
+        # for _ in range(int(self.sim_params.warmup_time * 1 / self.sim_step_size)):
+        traci_c.simulationStep(self.sim_params.warmup_time)
 
         # subscribe to all the vehicles in the network at this state
         for veh_id in traci_c.vehicle.getIDList():
             traci_c.vehicle.subscribe(veh_id, VEHICLE_SUBSCRIPTIONS)
 
-        # get the light states
-        # for tl_id in self.sim_params.tl_ids:
-        #     self._initial_tl_colors[tl_id] = traci_c.trafficlight.getRedYellowGreenState(tl_id)
-
         # set the traffic lights to the all green program
         if not self.sim_params.no_actor:
-            for tl_id in self.sim_params.tl_ids:
-                traci_c.trafficlight.setProgram(tl_id, f"{tl_id}-2")
-
-            # overwrite the default traffic light states to what they where
-            for tl_id in self.sim_params.tl_ids:
-                traci_c.trafficlight.setPhase(tl_id, 0)
+            self._prep_signals_4_control(traci_c)
 
         # saving the beginning state of the simulation
-        traci_c.simulation.saveState(self.state_file)
+        traci_c.simulation.saveState(str(self.state_file))
 
         traci_c.simulation.subscribe([tc.VAR_COLLIDING_VEHICLES_NUMBER])
 
@@ -172,10 +155,18 @@ class Kernel(object):
         for veh_id in self.traci_c.simulation.getDepartedIDList():
             self.traci_c.vehicle.subscribe(veh_id, VEHICLE_SUBSCRIPTIONS)
 
+    def _prep_signals_4_control(self, traci_c: traci.connection.Connection = None):
+        if traci_c is None:
+            traci_c = self.traci_c
+        for tl_id in self._controlled_signals:
+            traci_c.trafficlight.setProgram(
+                tl_id, self._loaded_tl_programs[tl_id][-1].programID
+            )
+            traci_c.trafficlight.setPhase(tl_id, 0)
+
     def reset_simulation(
         self,
     ):
-
         try:
             self.sim_time = 0
             # self.traci_c.close()
@@ -188,15 +179,12 @@ class Kernel(object):
                 self.traci_c.vehicle.unsubscribe(veh_id)
 
             logging.info("resetting the simulation")
-            self.traci_c.simulation.loadState(self.state_file)
+            self.traci_c.simulation.loadState(str(self.state_file))
 
             # set the traffic lights to the correct program
             # set the traffic lights to the all green program
             if not self.sim_params.no_actor:
-
-                for tl_id in self.sim_params.tl_ids:
-                    self.traci_c.trafficlight.setProgram(tl_id, f"{tl_id}-2")
-                    self.traci_c.trafficlight.setPhase(tl_id, 0)
+                self._prep_signals_4_control()
 
             # subscribe to all vehicles in the simulation at this point
             # subscribe to all new vehicle positions and fuel consumption

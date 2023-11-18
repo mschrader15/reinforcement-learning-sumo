@@ -1,23 +1,18 @@
-from ast import Call
 import copy
-import enum
 import itertools
-from typing import Any, Dict, Iterator, List, OrderedDict, Set, Tuple, Union, Callable
+from typing import Any, Dict, Iterator, List, Set, Tuple, Union, Callable
 
 from rl_sumo.helpers.utils import read_nema_config
 
 import sumolib
 import traci
 from traci.constants import TL_RED_YELLOW_GREEN_STATE, VAR_NAME, TL_PROGRAM
-import xmltodict
 
 COLOR_ENUMERATE = {"s": 0, "r": 0, "y": 1, "G": 2, "g": 2}
 
 
 class _Base:
-    """
-    This base class freezes and unfreezes the data
-    """
+    """This base class freezes and unfreezes the data."""
 
     def __init__(
         self,
@@ -28,19 +23,20 @@ class _Base:
     def _re_initialize(
         self,
     ):
-        """
-        This function "unfreeezes" the initial values that were saved in the call to freeze
+        """This function "unfreeezes" the initial values that were saved in the
+        call to freeze.
 
         Always update with a copy, otherwise the core will be ovewritten
         """
         self.__dict__.update(copy.deepcopy(self.init_state.__dict__))
-            # self.__dict__[name] = value
+        # self.__dict__[name] = value
 
     def freeze(
         self,
     ):
-        """
-        This is gets called later than the init state. and freezes all the values in self
+        """This is gets called later than the init state.
+
+        and freezes all the values in self
         """
         self.init_state = copy.deepcopy(self)
 
@@ -53,7 +49,8 @@ class DualRingActor(_Base):
         # A list of all detectors controlling the traffic light
         self._all_detectors: List[str] = []
         # A list of unique detectors to phase maps
-        # (different than above as one phase can have multiple detectors, but we only need one for controll)
+        # (different than above as one phase can have multiple detectors,
+        #  but we only need one for controll)
         self._phase_2_detect: Dict[int, str] = {}
 
         # the current active phases
@@ -85,16 +82,18 @@ class DualRingActor(_Base):
         # Whether or not to use subscriptions for getting SUMO data
         self._subscriptions: bool = subscription_method
 
-        # The default state that the traffic light should rest in. Assumed to be the coordinated phases
+        # The default state that the traffic light should rest in.
+        # Assumed to be the coordinated phases
         self._default_state: Tuple[int, int] = ()
 
-        # store the (minimum phase durations, last switch time), so that we can know if its okay to switch or not
+        # store the (minimum phase durations, last switch time),
+        # so that we can know if its okay to switch or not
         self._time_tracker: Dict[int, List[float, float]] = {}
 
         # build the control based on the traffic light settings file
         self._build(nema_config_xml, net_file_xml)
-        
-        # traci         
+
+        # traci
         self._traci_c: traci = None
 
         # freeze the initial settings
@@ -113,7 +112,9 @@ class DualRingActor(_Base):
         return self._sumo_active_state[1]
 
     @property
-    def phases(self, ) -> List[int]:
+    def phases(
+        self,
+    ) -> List[int]:
         return self._phases
 
     @property
@@ -135,13 +136,12 @@ class DualRingActor(_Base):
         return self._requested_state
 
     @requested_state.setter
-    def requested_state(self, l: Union[list, Set[int]]) -> None:
-        self._requested_state = set(l)
+    def requested_state(self, state: Union[list, Set[int]]) -> None:
+        self._requested_state = set(state)
 
     def _build(self, nema_config_xml: str, net_file_xml: str) -> None:
         # sourcery skip: low-code-quality
-        """
-        builds a mapping of NEMA phase # to the actuating detectors
+        """Builds a mapping of NEMA phase # to the actuating detectors.
 
         Args:
             nema_config_xml (str): the SUMO additional file describing the NEMA behavior
@@ -162,7 +162,8 @@ class DualRingActor(_Base):
             .items()
         }
 
-        # loop through the traffic light phases, find the order that they control and then the "controllng" detectors
+        # loop through the traffic light phases, find the order that they control
+        # and then the "controllng" detectors
         for phase_name, phase in tl_dict["phase"].items():
             phase_int = int(phase_name)
             # set the minimum green time
@@ -178,7 +179,9 @@ class DualRingActor(_Base):
                     # the phase is controlled by a custom detector
                     detect_name = detect_id
                 else:
-                    # the phase is controlled by a generated detector. They are generated according to https://github.com/eclipse/sumo/issues/10045#issuecomment-1022207944
+                    # the phase is controlled by a generated detector.
+                    # They are generated according to
+                    # https://github.com/eclipse/sumo/issues/10045#issuecomment-1022207944
                     detect_name = (
                         tl_dict["@id"]
                         + "_"
@@ -230,7 +233,8 @@ class DualRingActor(_Base):
                         b_num = 1
 
         # compose the combinations
-        # add the barrier pairs as the first items in the action space, to give preference
+        # add the barrier pairs as the first items in the action space, 
+        # to give preference
         self._action_space.extend(bs[::-1])
         for i, _ in enumerate(bs):
             for pair in itertools.product(rings[0][i], rings[1][i]):
@@ -238,12 +242,10 @@ class DualRingActor(_Base):
                     self._action_space.append(pair)
 
         self._phases = sorted({p for action in self._action_space for p in action})
-            
 
     def re_initialize(self) -> None:
-        """
-        Re-loads the default settings from the frozen instance.
-        Can be used for quick re-initialization in maching learning applications
+        """Re-loads the default settings from the frozen instance. Can be used
+        for quick re-initialization in maching learning applications.
 
         Returns:
             None
@@ -251,13 +253,12 @@ class DualRingActor(_Base):
         return self._re_initialize()
 
     def set_traci(self, traci_c: traci) -> Tuple[Callable, Tuple, int]:
-        """
-        pass the current traci instance to the class
-        """
+        """Pass the current traci instance to the class."""
         self._traci_c = traci_c
 
         if self._subscriptions:
-            # subscribe to the red yellow green state and subscribe to the current phase name
+            # subscribe to the red yellow green state
+            # and subscribe to the current phase name
             traci_c.trafficlight.subscribe(
                 self.tl_id, [TL_RED_YELLOW_GREEN_STATE, VAR_NAME]
             )
@@ -267,8 +268,7 @@ class DualRingActor(_Base):
         return ()
 
     def initialize_control(self, gracefully: bool) -> None:
-        """
-        This function initializes control of the traffic light. After
+        """This function initializes control of the traffic light. After.
 
         Args:
             gracefully (bool):
@@ -276,22 +276,23 @@ class DualRingActor(_Base):
         if gracefully:
             # wait for a barrier cross event (all light heads will be 'r' or 's')
             current_str = self._traci_c.trafficlight.getRedYellowGreenState(self.tl_id)
-            if any(l in current_str for l in ["G", "g", "y"]):
+            if any(state in current_str for state in ["G", "g", "y"]):
                 return False
         # set the traffic light program id to the desired one
         self._traci_c.trafficlight.setProgram(self.tl_id, self._programID)
         self.controlled = True
         # overwrite all of the detectors to 0
         self._take_control()
-        # force the traffic light to move initially by writing detector calls on the default state
+        # force the traffic light to move initially by writing 
+        # detector calls on the default state
         return self.try_switch(self.default_state)
 
     def _take_control(
         self,
     ) -> None:
-        """
-        Take control of all of the NEMA lights by first switching control to the controlled logic id and then
-        overriding the detection to 0, meaning that the light will not be actuated by simulation traffic
+        """Take control of all of the NEMA lights by first switching control to
+        the controlled logic id and then overriding the detection to 0, meaning
+        that the light will not be actuated by simulation traffic.
 
         Returns:
             bool: True
@@ -304,9 +305,8 @@ class DualRingActor(_Base):
     def release_control(
         self,
     ) -> None:
-        """
-        Release control of the traffic light's actuating detectors.
-        The SUMO traffic light will then behave according to the setting file
+        """Release control of the traffic light's actuating detectors. The SUMO
+        traffic light will then behave according to the setting file.
 
         Returns:
             None:
@@ -314,15 +314,13 @@ class DualRingActor(_Base):
         for detect in self._all_detectors:
             self._traci_c.lanearea.overrideVehicleNumber(detect, -1)
 
-    def try_switch(
-        self, requested_state: Tuple[int]
-    ) -> None:
-        """
-        This function is called to change the light state
+    def try_switch(self, requested_state: Tuple[int]) -> None:
+        """This function is called to change the light state.
 
         Args:
             requested_state (List[int, int]): a list of requested states.
-                Should likely have length 2 but there could be longer or shorter scenarios
+                Should likely have length 2 but there could be longer
+                or shorter scenarios
         """
         if not self.controlled:
             # Don't take any action if I am not controlled
@@ -343,19 +341,19 @@ class DualRingActor(_Base):
     def get_requested_state(
         self,
     ) -> List[int]:
-        """
-        Returns the current state that the actor thinks the traffic light is in.
-        This is not the same thing as the actual light state,
-        as the light might be transitioning from the last state
+        """Returns the current state that the actor thinks the traffic light is
+        in. This is not the same thing as the actual light state, as the light
+        might be transitioning from the last state.
 
         Returns:
             List[int]: _description_
         """
         return list(self._requested_state)
 
-    def get_sumo_state(self, sim_time: float, sub_res: Dict[int, Dict] = None) -> Tuple[int, int]:
-        """
-        Get the actual NEMA state in integer list format
+    def get_sumo_state(
+        self, sim_time: float, sub_res: Dict[int, Dict] = None
+    ) -> Tuple[int, int]:
+        """Get the actual NEMA state in integer list format.
 
         Returns:
             Tuple[int]: the active phases as integers
@@ -379,14 +377,16 @@ class DualRingActor(_Base):
         if len(self._last_sumo_phase) == len(self.sumo_active_state):
             for p, p_old in zip(self.sumo_active_state, self._last_sumo_phase):
                 if p != p_old:
-                    # this means that the light changed and we should record this as it's start time
+                    # this means that the light changed and we 
+                    # should record this as it's start time
                     self._time_tracker[p][1] = sim_time
 
         return self.sumo_active_state
 
-    def get_actual_color(self, sim_time: float, sub_res: Dict[int, Dict] = None) -> Tuple[int]:
-        """
-        Get a list of COLOR_ENUMERATE light head states ('r' -> 0, etc..)
+    def get_actual_color(
+        self, sim_time: float, sub_res: Dict[int, Dict] = None
+    ) -> Tuple[int]:
+        """Get a list of COLOR_ENUMERATE light head states ('r' -> 0, etc..)
 
         Returns:
             List[int]
@@ -401,16 +401,20 @@ class DualRingActor(_Base):
             if self._subscriptions
             else self.self._traci_c.trafficlight.getRedYellowGreenState(self.tl_id)
         )
-        return tuple(COLOR_ENUMERATE[light_str[self._p_string_map[s][0]]] for s in self.sumo_active_state)
+        return tuple(
+            COLOR_ENUMERATE[light_str[self._p_string_map[s][0]]]
+            for s in self.sumo_active_state
+        )
 
     def okay_2_switch(self, sim_time: float) -> bool:
         # sourcery skip: raise-specific-error
         if not self._sumo_active_state:
             raise Exception(
-                "You first need to pass the simulation dict before checking if it is okay to try and switch the traffic lights"
-            )
-
-        # both phases are passed their minimum timer aka (current_time - start_time) > min_time
+                "You first need to pass the simulation dict before checking"
+                + "if it is okay to try and switch the traffic lights"
+            )  # noqa
+        # both phases are passed their minimum timer
+        # aka (current_time - start_time) > min_time
         return all(
             (sim_time - self._time_tracker[p][1]) > self._time_tracker[p][0]
             for p in self.sumo_active_state
@@ -422,8 +426,8 @@ class DualRingActor(_Base):
     def list_2_phase(
         self, count_list: List[int], per_phase: bool = False
     ) -> Dict[int, int]:
-        """
-        helper function to turn a list of lane counts (# of vehicles in each lane) to a per-phase count
+        """Helper function to turn a list of lane counts (# of vehicles in each
+        lane) to a per-phase count.
 
         Returns:
             List[Tuple(phase (int), count (int))]:
@@ -438,9 +442,8 @@ class DualRingActor(_Base):
 
 
 class GlobalDualRingActor:
-    """
-    A global actor for controlling all network traffic lights through a standard API
-    """
+    """A global actor for controlling all network traffic lights through a
+    standard API."""
 
     def __init__(
         self,
@@ -448,13 +451,14 @@ class GlobalDualRingActor:
         network_file: str,
         subscription_method=False,
     ):
-        """
-        Initializes the GlobalDualRingActor class.
+        """Initializes the GlobalDualRingActor class.
 
         Args:
-            nema_file_map (Dict[str, str]): a dictionary like: {<traffic-light-id>: <path to sumo additional file describing traffic light>, ...}. Can contain an arbitrary # of traffic lights
+            nema_file_map (Dict[str, str]): a dictionary like:
+                {<traffic-light-id>: <path to sumo additional file describing traffic light>, ...}.
+                Can contain an arbitrary # of traffic lights
             network_file (str): the path to SUMO .net.xml file
-        """
+        """ # noqa
         self.tls: List[DualRingActor] = self.create_tl_managers(
             nema_file_map, network_file, subscription_method
         )
@@ -463,22 +467,19 @@ class GlobalDualRingActor:
         yield from self.tls
 
     def __getitem__(self, item: str) -> DualRingActor:
-        """
-        Emulates a dictionary
+        """Emulates a dictionary.
 
-        @param item:
-        @return: an instance of the TrafficLightManager class
+        @param item: @return: an instance of the TrafficLightManager
+        class
         """
         return [tl for tl in self.tls if tl.tl_id == item][0]
 
     def register_traci(
         self, traci_c: object
     ) -> Union[List, Tuple[Tuple[Callable, Tuple, int]]]:
-        """
-        pass traci to all the children
+        """Pass traci to all the children.
 
-        @param traci_c: a traci connection object
-        @return:
+        @param traci_c: a traci connection object @return:
         """
         for tl_manager in self.tls:
             tl_manager.set_traci(traci_c)
@@ -487,10 +488,8 @@ class GlobalDualRingActor:
     def re_initialize(
         self,
     ) -> None:
-        """
-        This functions reinitializes everything to its default values
-        @return:
-        """
+        """This functions reinitializes everything to its default values
+        @return:"""
         for tl_manager in self:
             tl_manager.re_initialize()
 
@@ -520,8 +519,7 @@ class GlobalDualRingActor:
         self,
         action_list: list,
     ) -> None:
-        """
-        Update the state of all the lights
+        """Update the state of all the lights.
 
         Example:
         actions = [[2, 6], [1, 5]]
@@ -540,8 +538,7 @@ class GlobalDualRingActor:
         sim_time: float,
         subscription_results: Dict[int, Dict] = None,
     ) -> List[int,]:
-        """
-        get the states of all the traffic lights in the network
+        """Get the states of all the traffic lights in the network.
 
         @return: list of int
         """
