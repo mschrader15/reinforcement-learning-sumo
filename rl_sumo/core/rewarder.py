@@ -149,7 +149,8 @@ class FCIC(Rewarder):
         self._reward_array.append(sum(reward))
         r_array = self._running_mean()
         r_r = r_array[-1] if len(r_array) else self._reward_array[-1]
-        return -1 * r_r
+        # print(r_r)
+        return -1 * r_r / 1e3
 
     def get_stops(self):
         pass

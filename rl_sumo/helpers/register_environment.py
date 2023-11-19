@@ -1,7 +1,7 @@
 from typing import Callable, Union
 import gymnasium as gym
 from gymnasium.envs.registration import register
-from rl_sumo.environment.env import TLEnv
+from rl_sumo.environment.env import TLEnv, TLEnvFlat
 
 
 def make_create_env(

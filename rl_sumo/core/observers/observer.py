@@ -371,14 +371,14 @@ class TLObservations(_Base):
     ) -> None:
         running_list = []
         for approach in self:
-            for lane in approach:
+            for lanes in approach:
                 # check if any of the sequentially prior lanes have the same lane id
                 new_lanes = []
-                for lane in lane.lanes:
+                for lane in lanes.lanes:
                     if lane not in running_list:
                         new_lanes.append(lane)
-                lane.lanes = new_lanes
-                running_list.extend(lane.lanes)
+                lanes.lanes = new_lanes
+                running_list.extend(lanes.lanes)
 
     def _child_factory(self, edge, *args, **kwargs) -> Approach:
         return Approach(

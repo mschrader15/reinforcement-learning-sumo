@@ -156,7 +156,7 @@ class TLEnv(gymnasium.Env, metaclass=ABCMeta):
             [
                 np.stack(
                     [
-                        np.pad(r[k], (self.max_vector_length - len(r[k] ) - 1, 1))
+                        np.pad(r[k], (self.max_vector_length - len(r[k]) - 1, 1))
                         for r in radar_measures
                     ],
                 )
@@ -168,7 +168,12 @@ class TLEnv(gymnasium.Env, metaclass=ABCMeta):
         # get the current traffic light states, a tuple of lists is returned
         tl_states = self.actor.get_current_state()
         tl_array = np.zeros(
-            self.observation_space["traffic_light_colors"].shape, dtype=np.float32
+            (
+                len(self.actor.tls),
+                max(self.actor.discrete_space_shape),
+                2,
+            ),
+            dtype=np.float32,
         )
         for i, tl in enumerate(tl_states[0]):
             for j, p in enumerate(tl):
@@ -234,13 +239,13 @@ class TLEnv(gymnasium.Env, metaclass=ABCMeta):
             self._hard_reset()
         # # else reset the simulation
         else:
-            try:
-                self.k.reset_simulation()
-                self._reset_action_obs_rewarder()
-                self._subscribe_n_pass_traci()
-            except Exception:
-                print("I am hard reseting b.c. of kernel exception")
-                self._hard_reset()
+            # try:
+            #     self.k.reset_simulation()
+            #     self._reset_action_obs_rewarder()
+            #     self._subscribe_n_pass_traci()
+            # except Exception:
+            #     print("I am hard reseting b.c. of kernel exception")
+            self._hard_reset()
 
         subscription_data = self.k.simulation_step()
 
@@ -348,9 +353,13 @@ class TLEnv(gymnasium.Env, metaclass=ABCMeta):
             reward = 1
             truncate = True
 
-        done = ((self.step_counter * self.k.sim_step_size) >= self.horizon)
+        done = (self.step_counter * self.k.sim_step_size) >= self.horizon
 
-        info = {"sim_time": self.k.sim_time, "broken": sim_broke}
+        info = {
+            "sim_time": self.k.sim_time,
+            "broken": sim_broke,
+            "reward": reward,
+        }
 
         return observation, reward, done, truncate or crash, info
 
@@ -377,3 +386,32 @@ class TLEnv(gymnasium.Env, metaclass=ABCMeta):
     def close(self):
         """Terminate the simulation."""
         self.terminate()
+
+
+class TLEnvFlat(TLEnv):
+    def __init__(self, *args, **kwargs):
+        super(TLEnvFlat, self).__init__(*args, **kwargs)
+
+    @property
+    def observation_space(self) -> Dict:
+        # max_shape = self.max_vector_length
+        # flatten everything
+        shape = (len(self.actor.tls) * max(self.actor.discrete_space_shape) * 2) + (
+            self.observer.get_phase_count() * self.max_vector_length * 3
+        )
+
+        return Box(
+            low=0,
+            high=max(MAX_SPEED, self.observer.distance_threshold, 2),
+            shape=(shape,),
+            dtype=np.float32,
+        )
+
+    def get_state(self, subscription_data) -> Dict:
+        state_dict = super().get_state(subscription_data)
+
+        # flatten everything
+        tl_array = state_dict["traffic_light_colors"].flatten()
+        radar_array = state_dict["radar_states"].flatten()
+
+        return np.concatenate((tl_array, radar_array))

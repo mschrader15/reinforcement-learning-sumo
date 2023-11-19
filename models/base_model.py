@@ -36,7 +36,7 @@ class IPPO(TorchRNN, nn.Module):
         num_outputs: int,
         model_config: ModelConfigDict,
         name: str,
-        lstm_state_size=256,
+        lstm_state_size=64,
         **kwargs,
     ):
         super().__init__(obs_space, action_space, num_outputs, model_config, name)

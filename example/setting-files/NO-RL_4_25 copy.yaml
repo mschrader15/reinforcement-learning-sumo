@@ -6,14 +6,14 @@ Environment:
   horizon: 900
   reward_class: FCIC
   environment_location: rl_sumo.environment
-  environment_name: TLEnvFlat
+  environment_name: TLEnv
   num_rollouts: 1
   cpu_num: 64
 
 Simulation:
   gui: False
   net_file: ${oc.env:SIMULATION_ROOT}/network/net.net.xml
-  route_file: /home/max/Development/airport-harper-simulation/tmp/Calibration_3-13-2023/11.18.2023_16.12.33/1/routesampler.rou.xml
+  route_file: ${oc.env:SIMULATION_ROOT}/routes/3_13_23.rou.xml
   additional_files:
     - ${oc.env:SIMULATION_ROOT}/additional/signals/63082002.NEMA.Coordinated.xml
     - ${oc.env:SIMULATION_ROOT}/additional/signals/63082003.NEMA.Coordinated.xml
@@ -29,10 +29,10 @@ Simulation:
     - "--no-warnings"
     - "--no-duration-log"
 
-  sim_step: 1
+  sim_step: 0.1
   warmup_time: ${Environment.warmup_time}
   start_time: 0
-  sim_length: 3600
+  sim_length: 3000
   sim_state_dir : ${oc.env:ROOT}/example/tmp/sim-states
   nema_file_map:
     "63082002": "${oc.env:SIMULATION_ROOT}/additional/signals/controlled/63082002.NEMA.xml"

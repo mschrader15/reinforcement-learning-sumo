@@ -154,15 +154,19 @@ def run_rllib_ppo(sim_params, env_params):
         sim_params
         env_params
     """
-
     import ray
+    import ray.air as air
+    from ray import tune, train
     from ray.tune.registry import register_env
-    from ray.rllib.algorithms import ppo
+    from ray.rllib.algorithms import ppo, es
+    from ray.rllib.algorithms.impala import ImpalaConfig
     from models.base_model import IPPO
     from ray.rllib.models import ModelCatalog
+    from ray.tune.logger import DEFAULT_LOGGERS
+    from ray.air.integrations.wandb import WandbLoggerCallback
 
     ModelCatalog.register_custom_model("ippo", IPPO)
-
+    # ray.init(local_mode=True)
     ray.init()
     # # force no gui, crashes computer if so many instances spawn
     # sim_params.gui = False
@@ -173,38 +177,94 @@ def run_rllib_ppo(sim_params, env_params):
     # register the environment
     register_env(gym_name, create_env)
 
+    # config = (
+    #     ppo.PPOConfig()
+    #     .resources(num_gpus=1, num_gpus_per_learner_worker=1)
+    #     .environment(
+    #         gym_name,
+    #         disable_env_checking=True,
+    #     )
+    #     .rollouts(
+    #         num_rollout_workers=env_params.cpu_num - 1,
+    #         # num_rollout_workers=1,
+    #         enable_connectors=True,
+    #         # batch_mode="truncate_episodes",
+    #         # batch_mode="truncate_episodes",
+    #     )
+    #     .framework("torch")
+    #     .training(_enable_learner_api=False)
+    #     .rl_module(_enable_rl_module_api=False)
+    #     .training(
+    #         train_batch_size=128,
+    #         # sgd_minibatch_size=10,
+    #         # gamma=0.99,
+    #         # lr=5e-5,
+    #         model={
+    #             "custom_model": "ippo",
+    #             # Extra kwargs to be passed to your model's c'tor.
+    #             "custom_model_config": {},
+    #         },
+    #     )
+    # )
     config = (
-        ppo.PPOConfig()
+        # ppo.PPOConfig()
+        ImpalaConfig()
+        .resources(num_gpus=1, num_gpus_per_learner_worker=1)
         .environment(
             gym_name,
             disable_env_checking=True,
         )
-        .resources(
-            # num_workers=env_params.cpu_num - 1,
-            # num_gpus=z1,
-            # num_gpus_per_learner_worker=1,
-        )
         .rollouts(
+            num_envs_per_worker=1,
             num_rollout_workers=env_params.cpu_num - 1,
             enable_connectors=True,
-            batch_mode="truncate_episodes",
+            # batch_mode="truncate_episodes",
+            # rollout_fragment_length="auto",
+            # rollout_fragment_length=2
+            rollout_fragment_length=50
         )
         .framework("torch")
         .training(_enable_learner_api=False)
         .rl_module(_enable_rl_module_api=False)
         .training(
-            gamma=0.99,
-            lr=5e-5,
+            # lr=0.00001, 
+            # train_batch_size=512,
+            # train_batch_size=256,
             model={
-                "custom_model": "ippo",
+                # "custom_model": "ippo",
+                "fcnet_hiddens": [512, 256, 128],
+                "use_lstm ": True,
+                # "clip_rewards": True,
                 # Extra kwargs to be passed to your model's c'tor.
-                "custom_model_config": {},
             },
+            **{
+                # "sample_batch_size": 50,
+                "train_batch_size": 1000
+            },
+            # gamma=0.9,
+            lr=0.00001,
+            # kl_coeff=0.0,
+            # num_sgd_iter=20,
         )
     )
 
-    algo = config.build()
-    algo.train()
+    tuner = tune.Tuner(
+        "IMPALA",
+        param_space=config,
+        run_config=air.RunConfig(
+            name="IMPALA",
+            stop={"training_iteration": 10000},
+            checkpoint_config=air.CheckpointConfig(
+                checkpoint_frequency=50, checkpoint_at_end=True
+            ),
+
+            # callbacks=[WandbLoggerCallback(project="sumo-rl")]
+        ),
+    )
+
+    tuner.fit()
+
+    # che
 
 
 # a helper dictionary to make selecting the desired algorithm easier
