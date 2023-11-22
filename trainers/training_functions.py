@@ -156,18 +156,14 @@ def run_rllib_ppo(sim_params, env_params):
     """
     import ray
     import ray.air as air
-    from ray import tune, train
+    from ray import tune
     from ray.tune.registry import register_env
-    from ray.rllib.algorithms import ppo, es
-    from ray.rllib.algorithms.impala import ImpalaConfig
     from models.base_model import IPPO
     from ray.rllib.models import ModelCatalog
-    from ray.tune.logger import DEFAULT_LOGGERS
-    from ray.air.integrations.wandb import WandbLoggerCallback
 
     ModelCatalog.register_custom_model("ippo", IPPO)
-    # ray.init(local_mode=True)
-    ray.init()
+    ray.init(local_mode=True)
+    # ray.init()
     # # force no gui, crashes computer if so many instances spawn
     # sim_params.gui = False
 
@@ -187,7 +183,6 @@ def run_rllib_ppo(sim_params, env_params):
         "model": {
             "fcnet_hiddens": [32, 16],
             "use_lstm": True,
-            
         },
         # "entropy_coeff": 0.001,
         "num_workers": env_params.cpu_num,
@@ -196,7 +191,6 @@ def run_rllib_ppo(sim_params, env_params):
         "framework": "torch",
         "rollout_fragment_length": "auto",
         # "timesteps_per_iter": env_params.horizon,
-
     }
 
     # results = tune.run("PPO", config=config)
@@ -218,11 +212,10 @@ def run_rllib_ppo(sim_params, env_params):
 
     # che
 
-def run_pfrl(sim_params, env_params):
 
+def run_pfrl(sim_params, env_params):
     from models.pfrl_ppo import PFRLPPOAgent
     from rl_sumo.helpers.register_environment import make_create_env
-    
 
     gym_name, create_env = make_create_env(env_params, sim_params)
 
@@ -243,9 +236,10 @@ def run_pfrl(sim_params, env_params):
     env.close()
 
 
-
 # a helper dictionary to make selecting the desired algorithm easier
-TRAINING_FUNCTIONS = {"no-rl": run_no_rl, "es": run_rllib_es, "ppo": run_rllib_ppo, 'pfrl': run_pfrl}
-
-
-    
+TRAINING_FUNCTIONS = {
+    "no-rl": run_no_rl,
+    "es": run_rllib_es,
+    "ppo": run_rllib_ppo,
+    "pfrl": run_pfrl,
+}

@@ -59,10 +59,10 @@ class DelayMin(Rewarder):
 
         self._action_penalty = ActionPenalty()
 
-        self._running_mean = np.zeros(30)  # 50 seconds
+        self._running_mean = np.zeros(1)  # 50 seconds
 
     def get_reward(
-        self, subscription_dict, observation_space, action, okay_2_switch
+        self, subscription_dict, observation_space, action,  # okay_2_switch
     ) -> None:
         # use the observation space to get the lanes that we are interested in
         # vehicle_list = list(subscription_dict[tc.VAR_VEHICLE].values())
@@ -78,10 +78,7 @@ class DelayMin(Rewarder):
         self._running_mean = np.roll(self._running_mean, -1)
         self._running_mean[-1] = wait_penalty
 
-        return self._running_mean.mean() + (
-            self._action_penalty.get_reward(subscription_dict, action, okay_2_switch)
-            * 0.05
-        )
+        return self._running_mean.mean()
 
 
 class ActionPenalty(Rewarder):

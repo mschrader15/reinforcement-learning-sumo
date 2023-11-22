@@ -127,11 +127,14 @@ class TLEnv(gymnasium.Env, metaclass=ABCMeta):
 
         # update the lights
         if not self.sim_params.no_actor:
-            self.actor.update_lights(
+            return self.actor.update_lights(
                 action_list=actions,
+                sim_time=self.k.sim_time,
             )
+        else:
+            return 0
 
-    def get_state(self, raw_obs) -> Dict:
+    def get_state(self, raw_obs, *args, **kwargs) -> Dict:
         """Return the state of the simulation as perceived by the RL agent.
 
         Returns
@@ -253,7 +256,10 @@ class TLEnv(gymnasium.Env, metaclass=ABCMeta):
         # pass traci to the actor
         self.k.add_traci_call(self.actor.register_traci(self.k.traci_c))
         # take control of the traffic lights
-        self.actor.initialize_control()
+        self.actor.initialize_control(
+            self.k.sim_time,
+
+        )
 
         if reward_calls := self.rewarder.register_traci(self.k.traci_c):
             self.k.add_traci_call(reward_calls)
@@ -268,6 +274,7 @@ class TLEnv(gymnasium.Env, metaclass=ABCMeta):
         traci_c = self.k.start_simulation()
         self._reset_action_obs_rewarder()
         self.k.pass_traci_kernel(traci_c)
+
 
         # re-pass traci to the actor and the observer
         self._subscribe_n_pass_traci()
@@ -317,11 +324,17 @@ class TLEnv(gymnasium.Env, metaclass=ABCMeta):
         # when the action is applied
         # okay_2_switch = self.actor.get_okay_2_switch(self.k.sim_time,)
         # apply the rl agent actions
-        self.apply_rl_actions(rl_actions=action, sim_time=self.k.sim_time)
-
+        # action_penalty = [-1]
+        # while (not sim_broke and not crash and not truncate) and (
+        #     all([p < 0 for p in action_penalty])
+        # ):
         for _ in range(self.env_params.sims_per_step):
             # increment the step counter
             self.step_counter += 1
+
+            action_penalty = self.apply_rl_actions(
+                rl_actions=action,
+            )
 
             # step the simulation
             subscription_data = self.k.simulation_step()
@@ -338,27 +351,29 @@ class TLEnv(gymnasium.Env, metaclass=ABCMeta):
                 print("There was a crash")
                 break
 
-        if not sim_broke:
-            raw_obs = self._get_raw_obs(subscription_data)
-            observation = self.get_state(
-                subscription_data=subscription_data,
-                raw_obs=raw_obs,
-                okay_2_switch=okay_2_switch,
-            )
-            reward = self.calculate_reward(
-                subscription_data=subscription_data,
-                obs_data=raw_obs,
-                actions=action,
-                okay_2_switch=okay_2_switch,
-            )
-        else:
-            observation = []
-            reward = 1
-            truncate = True
+            # get the current state of the simulation
+            if not sim_broke:
+                raw_obs = self._get_raw_obs(subscription_data)
+                observation = self.get_state(
+                    subscription_data=subscription_data,
+                    raw_obs=raw_obs,
+                    phase_timers=self.actor.get_phase_timers(self.k.sim_time),
+                )
+                reward = self.calculate_reward(
+                    subscription_data=subscription_data,
+                    obs_data=raw_obs,
+                    actions=action,
+                )
+            else:
+                observation = []
+                reward = -1
+                truncate = True
 
-        # check long delays
-        if self.k.check_long_delay(subscription_data):
-            truncate = True
+            reward += sum(action_penalty) / len(action_penalty)
+
+            # check long delays
+            if self.k.check_long_delay(subscription_data):
+                truncate = True
 
         done = (self.step_counter * self.k.sim_step_size) >= self.horizon
 
@@ -446,12 +461,12 @@ class RescoEnv(TLEnv):
 
         return Box(
             low=0,
-            high=1,
+            high=300,
             shape=(*shape,),
             dtype=np.float32,
         )
 
-    def get_state(self, subscription_data, okay_2_switch, *args, **kwargs) -> Dict:
+    def get_state(self, subscription_data, phase_timers, *args, **kwargs) -> Dict:
         states, colors = self.actor.get_current_state(
             subscription_results=subscription_data, sim_time=self.k.sim_time
         )
@@ -476,7 +491,7 @@ class RescoEnv(TLEnv):
                 vehicle_info=subscription_data[VAR_VEHICLE],
             )
             current_state_pos = [tl_to_pos_dict[i][s] for s in states[i]]
-            empty_state[i, current_state_pos, 1] = okay_2_switch[i] * 1
+            empty_state[i, current_state_pos, 1] = phase_timers[i]
             empty_state[i, current_state_pos, 0] = 1
             # set the okay to switch info
             for j, phase in enumerate(res):

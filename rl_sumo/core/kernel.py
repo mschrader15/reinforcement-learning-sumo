@@ -42,7 +42,7 @@ VEHICLE_SUBSCRIPTIONS = [
     tc.VAR_FUELCONSUMPTION,
     tc.VAR_SPEED,
     tc.VAR_VEHICLECLASS,
-    tc.VAR_WAITING_TIME
+    tc.VAR_WAITING_TIME,
 ]
 
 
@@ -64,10 +64,10 @@ class Kernel(object):
             self.state_file.parent.mkdir(parents=True, exist_ok=True)
 
         self.sim_time = 0
-        
+
         self.seed: int = None
         self.set_seed(5)
-        
+
         self.traci_calls = []
         self.sim_data = {}
 
@@ -117,7 +117,7 @@ class Kernel(object):
             )
             if len(self._loaded_tl_programs[tl_id]) != 3:
                 raise ValueError("I don't know how to handle > 3 programs")
-            # set the default program to the second one, as this is 
+            # set the default program to the second one, as this is
             # the default NEMA program
             traci_c.trafficlight.setProgram(
                 tl_id, self._loaded_tl_programs[tl_id][1].programID
