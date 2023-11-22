@@ -24,8 +24,8 @@ def sumo_cmd_line(params: SimParams, kernel):
         str(kernel.seed),
         "--time-to-teleport",
         "-1",
-        "--collision.action",
-        "remove",
+        # "--collision.action",
+        # "remove",
         *["-a", ", ".join(params.additional_files + [params.route_file])],
     ]
 
@@ -42,6 +42,7 @@ VEHICLE_SUBSCRIPTIONS = [
     tc.VAR_FUELCONSUMPTION,
     tc.VAR_SPEED,
     tc.VAR_VEHICLECLASS,
+    tc.VAR_WAITING_TIME
 ]
 
 
@@ -63,7 +64,10 @@ class Kernel(object):
             self.state_file.parent.mkdir(parents=True, exist_ok=True)
 
         self.sim_time = 0
-        self.seed = 5
+        
+        self.seed: int = None
+        self.set_seed(5)
+        
         self.traci_calls = []
         self.sim_data = {}
 
@@ -75,6 +79,9 @@ class Kernel(object):
 
     def set_seed(self, seed):
         self.seed = seed
+        self.state_file = (
+            Path(self.sim_params.sim_state_dir) / f"start_state_{self.seed}.xml"
+        )
 
     def pass_traci_kernel(self, traci_c):
         """This is the method that FLOW uses. Causes traci to "live" at the
@@ -129,7 +136,8 @@ class Kernel(object):
             self._prep_signals_4_control(traci_c)
 
         # saving the beginning state of the simulation
-        traci_c.simulation.saveState(str(self.state_file))
+        if not self.state_file.exists():
+            traci_c.simulation.saveState(str(self.state_file))
 
         traci_c.simulation.subscribe([tc.VAR_COLLIDING_VEHICLES_NUMBER])
 
@@ -268,4 +276,11 @@ class Kernel(object):
 
     def check_collision(self):
         """See parent class."""
-        return False  # self.sim_data[tc.VAR_COLLIDING_VEHICLES_NUMBER] != 0
+        return self.traci_c.simulation.getCollidingVehiclesNumber() > 0
+
+    def check_long_delay(self, sim_data, threshold=300):
+        """See parent class."""
+        return any(
+            veh[tc.VAR_WAITING_TIME] > threshold
+            for veh in sim_data[tc.VAR_VEHICLE].values()
+        )

@@ -1,5 +1,5 @@
 import gymnasium
-from rl_sumo.core.DualRingActor import GlobalDualRingActor
+from rl_sumo.core.actors.DualRingActor import GlobalDualRingActor
 from rl_sumo.core.observers.per_phase_observer import GlobalPhaseObservations
 from rl_sumo.parameters.params import EnvParams, SimParams
 import sumolib
@@ -13,9 +13,12 @@ from rl_sumo.core import Kernel
 from rl_sumo.core import rewarder
 from abc import ABCMeta
 
+from traci.constants import VAR_LANES, VAR_VEHICLE
+
 
 MAX_SPEED = 30
 AVG_VEHICLE_LENGTH = 4.5  # meters
+MIN_GAP = 2
 
 
 class TLEnv(gymnasium.Env, metaclass=ABCMeta):
@@ -62,6 +65,7 @@ class TLEnv(gymnasium.Env, metaclass=ABCMeta):
         self.actor = GlobalDualRingActor(
             nema_file_map=self.sim_params.nema_file_map,
             network_file=self.sim_params.net_file,
+            subscription_method=True,
         )
 
         # create the reward function
@@ -71,7 +75,7 @@ class TLEnv(gymnasium.Env, metaclass=ABCMeta):
 
         # MAX VECTOR LENGTH
         self.max_vector_length = int(
-            (self.observer.distance_threshold / AVG_VEHICLE_LENGTH)
+            (self.observer.distance_threshold / (AVG_VEHICLE_LENGTH + MIN_GAP))
         )
 
         # terminate sumo on exit
@@ -86,9 +90,6 @@ class TLEnv(gymnasium.Env, metaclass=ABCMeta):
         # max_shape = self.max_vector_length
         return Dict(
             {
-                # "traffic_light_states": MultiDiscrete(
-                #     self.actor.discrete_space_shape
-                # ),
                 "traffic_light_colors": Box(
                     low=0,
                     high=2,
@@ -98,21 +99,12 @@ class TLEnv(gymnasium.Env, metaclass=ABCMeta):
                         2,
                     ),
                 ),
-                # "radar_distances": Box(
-                #     low=0,
-                #     high=self.observer.distance_threshold,
-                #     shape=(max_shape, ),
-                #     dtype=np.float32,
-                # ),
                 "radar_states": Box(
                     low=0,
                     high=max(MAX_SPEED, self.observer.distance_threshold, 2),
                     shape=(self.observer.get_phase_count(), self.max_vector_length, 3),
                     dtype=np.float32,
                 ),
-                # "radar_types": MultiDiscrete(
-                #     [max(VTYPE_MAP.values()) for _ in range(max_shape)]
-                # ),
             }
         )
 
@@ -133,16 +125,13 @@ class TLEnv(gymnasium.Env, metaclass=ABCMeta):
             else rl_actions
         )
 
-        # convert the actions to integers
-        # actions = list(map(floor, rl_actions))
-
         # update the lights
         if not self.sim_params.no_actor:
             self.actor.update_lights(
                 action_list=actions,
             )
 
-    def get_state(self, subscription_data) -> Dict:
+    def get_state(self, raw_obs) -> Dict:
         """Return the state of the simulation as perceived by the RL agent.
 
         Returns
@@ -150,7 +139,7 @@ class TLEnv(gymnasium.Env, metaclass=ABCMeta):
         state : array_like, in the shape of self.action_space
         """
         # prompt the observer class to find all counts
-        radar_measures = self.observer.get_counts(subscription_data)
+        radar_measures = raw_obs
         # the radar measures need to be padded to the max length
         radar_data = np.stack(
             [
@@ -202,14 +191,6 @@ class TLEnv(gymnasium.Env, metaclass=ABCMeta):
             The rl_actions clipped according to the box or boxes
         """
         return rl_actions
-        # ignore if no actions are issued
-        # if rl_actions is None:
-        #     return
-
-        # return np.clip(rl_actions,
-        #                a_min=self.action_space.low,
-        #                a_max=self.action_space.high
-        #                )
 
     def reset(
         self,
@@ -239,17 +220,17 @@ class TLEnv(gymnasium.Env, metaclass=ABCMeta):
             self._hard_reset()
         # # else reset the simulation
         else:
-            # try:
-            #     self.k.reset_simulation()
-            #     self._reset_action_obs_rewarder()
-            #     self._subscribe_n_pass_traci()
-            # except Exception:
-            #     print("I am hard reseting b.c. of kernel exception")
-            self._hard_reset()
+            try:
+                self.k.reset_simulation()
+                self._reset_action_obs_rewarder()
+                self._subscribe_n_pass_traci()
+            except Exception:
+                print("I am hard reseting b.c. of kernel exception")
+                self._hard_reset()
 
         subscription_data = self.k.simulation_step()
-
-        # print("subscription", subscription_data)
+        self.actor.get_current_state(self.k.sim_time, subscription_data)
+        ok_2_switch = self.actor.get_okay_2_switch(self.k.sim_time)
 
         if not subscription_data:
             self.reset()
@@ -261,7 +242,7 @@ class TLEnv(gymnasium.Env, metaclass=ABCMeta):
         # reset the reward class
         self.rewarder.re_initialize()
 
-        return self.get_state(subscription_data), {}
+        return self.get_state(subscription_data, ok_2_switch), {}
 
     def _subscribe_n_pass_traci(
         self,
@@ -270,7 +251,9 @@ class TLEnv(gymnasium.Env, metaclass=ABCMeta):
         self.observer.freeze()
 
         # pass traci to the actor
-        self.actor.register_traci(self.k.traci_c)
+        self.k.add_traci_call(self.actor.register_traci(self.k.traci_c))
+        # take control of the traffic lights
+        self.actor.initialize_control()
 
         if reward_calls := self.rewarder.register_traci(self.k.traci_c):
             self.k.add_traci_call(reward_calls)
@@ -298,6 +281,16 @@ class TLEnv(gymnasium.Env, metaclass=ABCMeta):
             seed,
         ]
 
+    def _get_raw_obs(self, subscription_data):
+        """Return the raw observation space.
+
+        Returns
+        -------
+        array_like
+            The raw observation space
+        """
+        return self.observer.get_counts(subscription_data)
+
     def step(self, action):
         """Run one timestep of the environment's dynamics.
 
@@ -318,15 +311,17 @@ class TLEnv(gymnasium.Env, metaclass=ABCMeta):
         """
         sim_broke = False
         crash = False
+        truncate = False
+
+        # this happens before step so that we can get the okay 2 switch
+        # when the action is applied
+        # okay_2_switch = self.actor.get_okay_2_switch(self.k.sim_time,)
+        # apply the rl agent actions
+        self.apply_rl_actions(rl_actions=action, sim_time=self.k.sim_time)
 
         for _ in range(self.env_params.sims_per_step):
             # increment the step counter
             self.step_counter += 1
-
-            # self.time_counter += self.sim_params.sim_step
-
-            # apply the rl agent actions
-            self.apply_rl_actions(rl_actions=action)
 
             # step the simulation
             subscription_data = self.k.simulation_step()
@@ -337,7 +332,6 @@ class TLEnv(gymnasium.Env, metaclass=ABCMeta):
                 break
 
             # check for collisions and kill the simulation if so.
-            # TODO: Actually implement this
             crash = self.k.check_collision()
 
             if crash:
@@ -345,12 +339,25 @@ class TLEnv(gymnasium.Env, metaclass=ABCMeta):
                 break
 
         if not sim_broke:
-            observation = self.get_state(subscription_data)
-            reward = self.calculate_reward(subscription_data)
-            truncate = False
+            raw_obs = self._get_raw_obs(subscription_data)
+            observation = self.get_state(
+                subscription_data=subscription_data,
+                raw_obs=raw_obs,
+                okay_2_switch=okay_2_switch,
+            )
+            reward = self.calculate_reward(
+                subscription_data=subscription_data,
+                obs_data=raw_obs,
+                actions=action,
+                okay_2_switch=okay_2_switch,
+            )
         else:
             observation = []
             reward = 1
+            truncate = True
+
+        # check long delays
+        if self.k.check_long_delay(subscription_data):
             truncate = True
 
         done = (self.step_counter * self.k.sim_step_size) >= self.horizon
@@ -359,12 +366,21 @@ class TLEnv(gymnasium.Env, metaclass=ABCMeta):
             "sim_time": self.k.sim_time,
             "broken": sim_broke,
             "reward": reward,
+            # "all_de"
         }
 
         return observation, reward, done, truncate or crash, info
 
-    def calculate_reward(self, subscription_data) -> float:
-        return self.rewarder.get_reward(subscription_data)
+    def calculate_reward(
+        self, subscription_data, obs_data, actions, *args, **kwargs
+    ) -> float:
+        return self.rewarder.get_reward(
+            subscription_data,
+            obs_data,
+            [tl.action_space[act] for act, tl in zip(actions, self.actor.tls)],
+            *args,
+            **kwargs,
+        )
 
     def _reset_action_obs_rewarder(
         self,
@@ -407,11 +423,91 @@ class TLEnvFlat(TLEnv):
             dtype=np.float32,
         )
 
-    def get_state(self, subscription_data) -> Dict:
-        state_dict = super().get_state(subscription_data)
+    def get_state(self, subscription_data, raw_obs) -> Dict:
+        state_dict = super().get_state(subscription_data, raw_obs)
 
         # flatten everything
         tl_array = state_dict["traffic_light_colors"].flatten()
         radar_array = state_dict["radar_states"].flatten()
 
         return np.concatenate((tl_array, radar_array))
+
+
+class RescoEnv(TLEnv):
+    def __init__(self, *args, **kwargs):
+        super(RescoEnv, self).__init__(*args, **kwargs)
+
+    @property
+    def observation_space(self) -> Dict:
+        # max_shape = self.max_vector_length
+        # flatten everything
+        # shape = (len(self.actor.tls), max(self.actor.discrete_space_shape), 5)
+        shape = (len(self.actor.tls) * max(self.actor.discrete_space_shape) * 6,)
+
+        return Box(
+            low=0,
+            high=1,
+            shape=(*shape,),
+            dtype=np.float32,
+        )
+
+    def get_state(self, subscription_data, okay_2_switch, *args, **kwargs) -> Dict:
+        states, colors = self.actor.get_current_state(
+            subscription_results=subscription_data, sim_time=self.k.sim_time
+        )
+
+        empty_state = np.zeros(
+            (
+                len(self.actor.tls),
+                max(self.actor.discrete_space_shape),
+                6,
+            ),
+            dtype=np.float32,
+        )
+
+        tl_to_pos_dict = [
+            {p.name: i for i, p in enumerate(tls._children)}
+            for tls in self.observer.tls
+        ]
+
+        for i, tls in enumerate(self.observer.tls):
+            res = tls.update_counts(
+                lane_info=subscription_data[VAR_LANES],
+                vehicle_info=subscription_data[VAR_VEHICLE],
+            )
+            current_state_pos = [tl_to_pos_dict[i][s] for s in states[i]]
+            empty_state[i, current_state_pos, 1] = okay_2_switch[i] * 1
+            empty_state[i, current_state_pos, 0] = 1
+            # set the okay to switch info
+            for j, phase in enumerate(res):
+                waiting_time_array = np.array(phase["waiting_time"])
+                num_lanes = len(tls._children[j]._children)
+
+                if len(waiting_time_array):
+                    empty_state[i, j, 2] = (
+                        waiting_time_array < self.k.sim_step_size
+                    ).sum() / (
+                        self.max_vector_length * num_lanes
+                    )  # the number of cars moving
+                    empty_state[i, j, 3] = waiting_time_array.sum() / (
+                        self.max_vector_length * num_lanes * self.env_params.horizon
+                    )  # the total waiting time
+                    empty_state[i, j, 4] = (
+                        waiting_time_array >= self.k.sim_step_size
+                    ).sum() / (
+                        self.max_vector_length * num_lanes
+                    )  # the number of cars stopped
+                    empty_state[i, j, 5] = (
+                        sum(phase["speeds"])
+                        / max(len(phase["speeds"]), 1)
+                        / (self.max_vector_length * num_lanes)
+                    )  # the average speed)
+
+        # normalize
+
+        empty_state[:, :, 5] /= MAX_SPEED
+
+        # return np.expand_dims(empty_state, axis=0)
+        return empty_state.flatten()
+
+        # dims are tl, lanes,

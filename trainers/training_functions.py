@@ -177,87 +177,39 @@ def run_rllib_ppo(sim_params, env_params):
     # register the environment
     register_env(gym_name, create_env)
 
-    # config = (
-    #     ppo.PPOConfig()
-    #     .resources(num_gpus=1, num_gpus_per_learner_worker=1)
-    #     .environment(
-    #         gym_name,
-    #         disable_env_checking=True,
-    #     )
-    #     .rollouts(
-    #         num_rollout_workers=env_params.cpu_num - 1,
-    #         # num_rollout_workers=1,
-    #         enable_connectors=True,
-    #         # batch_mode="truncate_episodes",
-    #         # batch_mode="truncate_episodes",
-    #     )
-    #     .framework("torch")
-    #     .training(_enable_learner_api=False)
-    #     .rl_module(_enable_rl_module_api=False)
-    #     .training(
-    #         train_batch_size=128,
-    #         # sgd_minibatch_size=10,
-    #         # gamma=0.99,
-    #         # lr=5e-5,
-    #         model={
-    #             "custom_model": "ippo",
-    #             # Extra kwargs to be passed to your model's c'tor.
-    #             "custom_model_config": {},
-    #         },
-    #     )
-    # )
-    config = (
-        # ppo.PPOConfig()
-        ImpalaConfig()
-        .resources(num_gpus=1, num_gpus_per_learner_worker=1)
-        .environment(
-            gym_name,
-            disable_env_checking=True,
-        )
-        .rollouts(
-            num_envs_per_worker=1,
-            num_rollout_workers=env_params.cpu_num - 1,
-            enable_connectors=True,
-            # batch_mode="truncate_episodes",
-            # rollout_fragment_length="auto",
-            # rollout_fragment_length=2
-            rollout_fragment_length=50
-        )
-        .framework("torch")
-        .training(_enable_learner_api=False)
-        .rl_module(_enable_rl_module_api=False)
-        .training(
-            # lr=0.00001, 
-            # train_batch_size=512,
-            # train_batch_size=256,
-            model={
-                # "custom_model": "ippo",
-                "fcnet_hiddens": [512, 256, 128],
-                "use_lstm ": True,
-                # "clip_rewards": True,
-                # Extra kwargs to be passed to your model's c'tor.
-            },
-            **{
-                # "sample_batch_size": 50,
-                "train_batch_size": 1000
-            },
-            # gamma=0.9,
-            lr=0.00001,
-            # kl_coeff=0.0,
-            # num_sgd_iter=20,
-        )
-    )
+    config = {
+        # this comes from RESCO
+        "env": gym_name,
+        "num_gpus": 1,
+        # "lr": 2.5e-4,
+        # "sgd_minibatch_size": 256,
+        # "grad_clip": 0.5,
+        "model": {
+            "fcnet_hiddens": [32, 16],
+            "use_lstm": True,
+            
+        },
+        # "entropy_coeff": 0.001,
+        "num_workers": env_params.cpu_num,
+        "num_rollouts": env_params.num_rollouts,
+        "shuffle_sequences": True,
+        "framework": "torch",
+        "rollout_fragment_length": "auto",
+        # "timesteps_per_iter": env_params.horizon,
+
+    }
+
+    # results = tune.run("PPO", config=config)
 
     tuner = tune.Tuner(
-        "IMPALA",
+        "PPO",
         param_space=config,
         run_config=air.RunConfig(
-            name="IMPALA",
-            stop={"training_iteration": 10000},
+            name="PPO",
+            # stop={"training_iteration": 10000},
             checkpoint_config=air.CheckpointConfig(
                 checkpoint_frequency=50, checkpoint_at_end=True
             ),
-
             # callbacks=[WandbLoggerCallback(project="sumo-rl")]
         ),
     )
@@ -266,6 +218,34 @@ def run_rllib_ppo(sim_params, env_params):
 
     # che
 
+def run_pfrl(sim_params, env_params):
+
+    from models.pfrl_ppo import PFRLPPOAgent
+    from rl_sumo.helpers.register_environment import make_create_env
+    
+
+    gym_name, create_env = make_create_env(env_params, sim_params)
+
+    env = create_env()
+
+    env.reset()
+
+    agent = PFRLPPOAgent(env.observation_space, env.action_space)
+
+    for _ in range(100):
+        obs, _ = env.reset()
+        done = False
+        while not done:
+            act = agent.act(obs)
+            obs, rew, done, truncate, info = env.step(act)
+            agent.observe(obs, rew, done, info)
+            print(rew, act)
+    env.close()
+
+
 
 # a helper dictionary to make selecting the desired algorithm easier
-TRAINING_FUNCTIONS = {"no-rl": run_no_rl, "es": run_rllib_es, "ppo": run_rllib_ppo}
+TRAINING_FUNCTIONS = {"no-rl": run_no_rl, "es": run_rllib_es, "ppo": run_rllib_ppo, 'pfrl': run_pfrl}
+
+
+    

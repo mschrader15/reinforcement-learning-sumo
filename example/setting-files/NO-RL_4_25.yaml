@@ -2,25 +2,25 @@ Name: PPO-test
 Environment:
   algorithm: ppo
   warmup_time: 1800
-  sims_per_step: 1
-  horizon: 900
-  reward_class: FCIC
+  sims_per_step: 2
+  horizon: 3600
+  reward_class: DelayMin
   environment_location: rl_sumo.environment
-  environment_name: TLEnvFlat
-  num_rollouts: 1
-  cpu_num: 64
+  environment_name: RescoEnv
+  num_rollouts: 63
+  cpu_num: 63
 
 Simulation:
   gui: False
   net_file: ${oc.env:SIMULATION_ROOT}/network/net.net.xml
-  route_file: /home/max/Development/airport-harper-simulation/tmp/Calibration_3-13-2023/11.18.2023_16.12.33/1/routesampler.rou.xml
+  route_file: ${oc.env:SIMULATION_ROOT}/routes/3_12_23_deterministic.rou.xml
   additional_files:
     - ${oc.env:SIMULATION_ROOT}/additional/signals/63082002.NEMA.Coordinated.xml
     - ${oc.env:SIMULATION_ROOT}/additional/signals/63082003.NEMA.Coordinated.xml
     - ${oc.env:SIMULATION_ROOT}/additional/signals/63082004.NEMA.Coordinated.xml
-    - ${Simulation.nema_file_map.63082002}
+    # - ${Simulation.nema_file_map.63082002}
     - ${Simulation.nema_file_map.63082003}
-    - ${Simulation.nema_file_map.63082004}
+    # - ${Simulation.nema_file_map.63082004}
     - ${oc.env:SIMULATION_ROOT}/additional/veh_distributions/vehDist.xml
     - ${oc.env:SIMULATION_ROOT}/additional/detectors/e2.detectors.add.xml
   
@@ -32,9 +32,9 @@ Simulation:
   sim_step: 1
   warmup_time: ${Environment.warmup_time}
   start_time: 0
-  sim_length: 3600
+  sim_length: 10800
   sim_state_dir : ${oc.env:ROOT}/example/tmp/sim-states
   nema_file_map:
-    "63082002": "${oc.env:SIMULATION_ROOT}/additional/signals/controlled/63082002.NEMA.xml"
+    # "63082002": "${oc.env:SIMULATION_ROOT}/additional/signals/controlled/63082002.NEMA.xml"
     "63082003": "${oc.env:SIMULATION_ROOT}/additional/signals/controlled/63082003.NEMA.xml"
-    "63082004": "${oc.env:SIMULATION_ROOT}/additional/signals/controlled/63082004.NEMA.xml"
+    # "63082004": "${oc.env:SIMULATION_ROOT}/additional/signals/controlled/63082004.NEMA.xml"

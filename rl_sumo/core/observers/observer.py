@@ -8,6 +8,7 @@ from traci.constants import (
     VAR_LANES,
     VAR_POSITION,
     VAR_VEHICLECLASS,
+    VAR_WAITING_TIME,
 )
 from copy import deepcopy
 
@@ -146,7 +147,7 @@ class Lane(_Base):
         # a storage of the direction (either incoming or outgoing)
         self._direction: LaneType = direction
 
-        self._val_map = {"speeds": [], "distance": [], "type": []}
+        self._val_map = {"speeds": [], "distance": [], "type": [], "waiting_time": []}
 
     @property
     def lanes(
@@ -217,6 +218,10 @@ class Lane(_Base):
         self._val_map["type"] = [
             VTYPE_MAP[vehicle_info[_id][VAR_VEHICLECLASS]].value
             for _id in self._last_ids
+        ]
+
+        self._val_map["waiting_time"] = [
+            vehicle_info[_id][VAR_WAITING_TIME] for _id in self._last_ids
         ]
 
         return self._val_map.copy()

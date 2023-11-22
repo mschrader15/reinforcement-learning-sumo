@@ -53,6 +53,69 @@ class PureFuelMin(Rewarder):
         return (-1 * fc) / self.normailizer
 
 
+class DelayMin(Rewarder):
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+
+        self._action_penalty = ActionPenalty()
+
+        self._running_mean = np.zeros(30)  # 50 seconds
+
+    def get_reward(
+        self, subscription_dict, observation_space, action, okay_2_switch
+    ) -> None:
+        # use the observation space to get the lanes that we are interested in
+        # vehicle_list = list(subscription_dict[tc.VAR_VEHICLE].values())
+        total_wait = sum(
+            sum(approach["waiting_time"]) for approach in observation_space
+        )
+        total_veh = sum(len(approach["waiting_time"]) for approach in observation_space)
+
+        wait_penalty = -1 * (
+            total_wait / max(total_veh, 1) / 600
+        )  # divide by 300 to normalize by the worst case scenario
+
+        self._running_mean = np.roll(self._running_mean, -1)
+        self._running_mean[-1] = wait_penalty
+
+        return self._running_mean.mean() + (
+            self._action_penalty.get_reward(subscription_dict, action, okay_2_switch)
+            * 0.05
+        )
+
+
+class ActionPenalty(Rewarder):
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+        self._action_last = None
+
+    def get_reward(self, subscription_dict, action, okay_2_switch) -> None:
+        # use the observation space to get the lanes that we are interested in
+        # vehicle_list = list(subscription_dict[tc.VAR_VEHICLE].values())
+        if self._action_last is None:
+            self._action_last = action
+            return 0
+        else:
+            penalty = 0
+            for i, tl_act in enumerate(zip(action, self._action_last)):
+                for j, act in enumerate(tl_act):
+                    if act != self._action_last[i][j] and not okay_2_switch[i][j]:
+                        penalty -= 0.5
+            self._action_last = action
+            return penalty
+
+
+class SpeedMax(Rewarder):
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+
+    def get_reward(self, subscription_dict, observation_space) -> None:
+        # use the observation space to get the lanes that we are interested in
+        total_speed = sum(sum(approach["speed"]) for approach in observation_space)
+        total_veh = sum(len(approach["speed"]) for approach in observation_space)
+
+        return total_speed / max(total_veh, 1) / 30
+
 
 class FCIC(Rewarder):
     """
@@ -68,8 +131,7 @@ class FCIC(Rewarder):
         self.sim_step = deepcopy(sim_params.sim_step)
         self._k_mapping = self._build_k_mapping(sim_params.net_file)
         # normailize by the worst case scenario
-        # self.min_reward = -200
-        self.window_size = int(10 / self.sim_step)
+        self.window_size = int(100 / self.sim_step)
         self._reward_array = []
 
     @staticmethod
@@ -150,7 +212,7 @@ class FCIC(Rewarder):
         r_array = self._running_mean()
         r_r = r_array[-1] if len(r_array) else self._reward_array[-1]
         # print(r_r)
-        return -1 * r_r / 1e3
+        return -1 * r_r / 1e6
 
     def get_stops(self):
         pass
