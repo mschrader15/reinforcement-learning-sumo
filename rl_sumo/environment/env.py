@@ -68,6 +68,12 @@ class TLEnv(gymnasium.Env, metaclass=ABCMeta):
             subscription_method=True,
         )
 
+        # helper
+        self._tl_to_pos_dict = [
+            {p.name: i for i, p in enumerate(tls._children)}
+            for tls in self.observer.tls
+        ]
+
         # create the reward function
         self.rewarder = getattr(rewarder, self.env_params.reward_class)(
             sim_params, env_params
@@ -258,7 +264,6 @@ class TLEnv(gymnasium.Env, metaclass=ABCMeta):
         # take control of the traffic lights
         self.actor.initialize_control(
             self.k.sim_time,
-
         )
 
         if reward_calls := self.rewarder.register_traci(self.k.traci_c):
@@ -274,7 +279,6 @@ class TLEnv(gymnasium.Env, metaclass=ABCMeta):
         traci_c = self.k.start_simulation()
         self._reset_action_obs_rewarder()
         self.k.pass_traci_kernel(traci_c)
-
 
         # re-pass traci to the actor and the observer
         self._subscribe_n_pass_traci()
@@ -359,17 +363,28 @@ class TLEnv(gymnasium.Env, metaclass=ABCMeta):
                     raw_obs=raw_obs,
                     phase_timers=self.actor.get_phase_timers(self.k.sim_time),
                 )
+
+                # check for long queues
+                if self.check_long_queue(raw_obs):
+                    truncate = True
+                    reward = -1
+                    break
+
                 reward = self.calculate_reward(
                     subscription_data=subscription_data,
                     obs_data=raw_obs,
                     actions=action,
                 )
+
             else:
                 observation = []
                 reward = -1
                 truncate = True
+                break
 
-            reward += sum(action_penalty) / len(action_penalty)
+            # reward += sum(action_penalty) / len(action_penalty)
+            if sum(action_penalty) < 0:
+                reward = min(action_penalty)
 
             # check long delays
             if self.k.check_long_delay(subscription_data):
@@ -385,6 +400,13 @@ class TLEnv(gymnasium.Env, metaclass=ABCMeta):
         }
 
         return observation, reward, done, truncate or crash, info
+    
+    def check_long_queue(self, raw_obs):
+        for tl, obs, pos_dict in zip(self.actor.tls, raw_obs, self._tl_to_pos_dict):
+            for p in tl.default_state:
+                if sum(wt > 0 for wt in obs[pos_dict[p]]['waiting_time']) > 20:
+                    return True
+        return False
 
     def calculate_reward(
         self, subscription_data, obs_data, actions, *args, **kwargs
@@ -461,7 +483,7 @@ class RescoEnv(TLEnv):
 
         return Box(
             low=0,
-            high=300,
+            high=1,
             shape=(*shape,),
             dtype=np.float32,
         )
@@ -521,6 +543,12 @@ class RescoEnv(TLEnv):
         # normalize
 
         empty_state[:, :, 5] /= MAX_SPEED
+        empty_state[
+            :, :, 1
+        ] /= (
+            self.env_params.horizon
+        )  # can only be green up to the horizon. This is a dumb assumption
+        empty_state[:, :, 1] = np.clip(empty_state[:, :, 1], 0, 1)
 
         # return np.expand_dims(empty_state, axis=0)
         return empty_state.flatten()

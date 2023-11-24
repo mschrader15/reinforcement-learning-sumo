@@ -502,7 +502,7 @@ class GlobalObservations(_Base):
         counts = []
         # print("sim_counts", sim_dict[VAR_LANES])
         for child in self:
-            counts.extend(
+            counts.append(
                 child.update_counts(
                     lane_info=sim_dict[VAR_LANES], vehicle_info=sim_dict[VAR_VEHICLE]
                 )

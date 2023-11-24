@@ -62,14 +62,23 @@ class DelayMin(Rewarder):
         self._running_mean = np.zeros(1)  # 50 seconds
 
     def get_reward(
-        self, subscription_dict, observation_space, action,  # okay_2_switch
+        self,
+        subscription_dict,
+        observation_space,
+        action,  # okay_2_switch
     ) -> None:
         # use the observation space to get the lanes that we are interested in
         # vehicle_list = list(subscription_dict[tc.VAR_VEHICLE].values())
         total_wait = sum(
-            sum(approach["waiting_time"]) for approach in observation_space
+            sum(approach["waiting_time"])
+            for tl_obs in observation_space
+            for approach in tl_obs
         )
-        total_veh = sum(len(approach["waiting_time"]) for approach in observation_space)
+        total_veh = sum(
+            len(approach["waiting_time"])
+            for tl_obs in observation_space
+            for approach in tl_obs
+        )
 
         wait_penalty = -1 * (
             total_wait / max(total_veh, 1) / 600

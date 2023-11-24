@@ -335,11 +335,11 @@ class DualRingActor(_Base):
         if isinstance(requested_state, int):
             requested_state = self.action_space[requested_state]
 
-        print(f"Sim time: {sim_time}")
-        print(f"Requested state: {requested_state}"
-              f"\nCurrent state: {self.sumo_active_state}")
+        # print(f"Sim time: {sim_time}")
+        # print(f"Requested state: {requested_state}"
+        #       f"\nCurrent state: {self.sumo_active_state}")
         
-
+        penalty = 0
         # check if the requested state is okay to switch to
         okay_2_switch = self.okay_2_switch(sim_time)
         if len(okay_2_switch) and not all(
@@ -350,7 +350,7 @@ class DualRingActor(_Base):
             ]
         ):
             # if not, then return a penalty
-            return -1
+            penalty -= 1
 
         # turn off the diff detectors in the current state
         new_state = set(requested_state)
@@ -364,7 +364,7 @@ class DualRingActor(_Base):
         # pass the new state as the current state
         self.requested_state = new_state
 
-        return 0
+        return penalty
 
     def get_requested_state(
         self,
@@ -455,7 +455,7 @@ class DualRingActor(_Base):
                 > self._time_tracker[p][0]
             )
             # & (p not in requested_state)
-            & (self.get_phase_color(p) == COLOR_ENUMERATE["G"])
+            & (self.get_phase_color(p) > COLOR_ENUMERATE["r"])
             for p in self.sumo_active_state
         ]
 
