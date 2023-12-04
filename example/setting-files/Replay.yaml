@@ -1,6 +1,6 @@
 Name: PPO-test
 Environment:
-  algorithm: PPO
+  algorithm: replay
   warmup_time: 1800
   sims_per_step: 1
   horizon: 1800
@@ -8,11 +8,12 @@ Environment:
   environment_location: rl_sumo.environment
   environment_name: RescoEnv
   num_rollouts: 120
-  cpu_num: 120
-  # checkpoint_path: ${oc.env:HOME}/ray_results/PPO/PPO_RescoEnv-v0_d455b_00000_0_2023-12-01_15-51-49/checkpoint_000000 
+  # cpu_num: 120
+  checkpoint_path: ${oc.env:HOME}/ray_results/PPO/PPO_RescoEnv-v0_52545_00000_0_2023-12-04_09-39-33/checkpoint_000027
+  video_dir: ${oc.env:HOME}/tmp/PPO_RescoEnv-v0_52545_00000_0_2023-12-04_09-39-33
 
 Simulation:
-  gui: False
+  gui: True
   net_file: ${oc.env:SIMULATION_ROOT}/network/net.net.xml
   route_file: ${oc.env:SIMULATION_ROOT}/routes/3_12_23_deterministic.rou.xml
   additional_files:
@@ -39,3 +40,5 @@ Simulation:
     # "63082002": "${oc.env:SIMULATION_ROOT}/additional/signals/controlled/63082002.NEMA.xml"
     "63082003": "${oc.env:SIMULATION_ROOT}/additional/signals/controlled/63082003.NEMA.xml"
     # "63082004": "${oc.env:SIMULATION_ROOT}/additional/signals/controlled/63082004.NEMA.xml"
+
+    ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDd3xrmrgms1ns1t4wOkY63gDRDnpepkWvgQo8oSVufKT7iz3k8pw4s6r6/sEtjIkIewcsCIQI9tjnqU+Hmryjz2ntzDoU3jEBKo27CjJGklOQDUqjHFhMyqIALDAXl7gLx5znA27MmWB4EbZD2KtBQwE2Jm6cJGKxLNeHrZXQpkZqHKL7wKDNAtjVq5HPSsnVnktUpvUvtzDzobvHOCWDoaU6u6iRfzAGpZMQQSGTV7YWD0LiRB6ouw8RmuqlLan/Obrsh3bcGyQKtyT+twnDaZyhkA/tC5w7n9UUkAX8lsQtTfL/EjjdY+tRsaL5RF25dyumWWF+14TGpXuMxlObPqFkPV/x4voB4jcFSF7dgqdZJnhjM+l+W2KtjEbR/2Ik9xf6P9xad8qLo7U3VQnppXs2BtUs8XHZdmYZhBFv/pxwAE9t1DhZifu88Ip5fR1Gmg3tQVB0y9FQBHZC4Cyrrc0HP2r5pjxfiqymxWYShRAqJY0I7mdVTw1Pha9Msosc= max@Maxs-MacBook-Pro-2.local

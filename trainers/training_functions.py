@@ -238,7 +238,6 @@ def run_pfrl(sim_params, env_params):
 
 
 def replay_model(sim_params, env_params):
-
     # read in a trained model and replay it
     from ray.tune.registry import register_env
     from rl_sumo.helpers.register_environment import make_create_env
@@ -251,27 +250,37 @@ def replay_model(sim_params, env_params):
     register_env(gym_name, create_env)
 
     checkpoint_path = Path(env_params.checkpoint_path)
-    
+
     algo = Algorithm.from_checkpoint(checkpoint_path)
 
-    
     env = create_env()
     obs, info = env.reset()
 
     episode_reward = 0
     terminated = truncated = False
 
+    if not Path(env_params.video_dir).exists():
+        Path(env_params.video_dir).mkdir(parents=True)
+
     while not terminated and not truncated:
         action = algo.compute_single_action(obs)
-        
+
         obs, reward, terminated, truncated, info = env.step(action)
-        
+
+        env.k.traci_c.gui.screenshot(
+            "View #0",
+            os.path.join(env_params.video_dir, "frame_%06d.png" % env.k.sim_time),
+        )
+
         episode_reward += reward
 
+    print(f"Episode reward: {episode_reward}")
 
-
-
-
+    # generate the video
+    if env_params.video_dir:
+        os.system(
+            f"ffmpeg -r {sim_params.sim_step} -i {env_params.video_dir}/frame_%06d.png -vcodec mpeg4 -y {env_params.video_dir}/video.mp4"
+        )
 
 
 # a helper dictionary to make selecting the desired algorithm easier
@@ -280,5 +289,5 @@ TRAINING_FUNCTIONS = {
     "es": run_rllib_es,
     "ppo": run_rllib_ppo,
     "pfrl": run_pfrl,
-    'replay': replay_model
+    "replay": replay_model,
 }
