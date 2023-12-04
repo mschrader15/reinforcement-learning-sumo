@@ -1,14 +1,15 @@
 Name: PPO-test
 Environment:
-  algorithm: ppo
+  algorithm: replay
   warmup_time: 1800
-  sims_per_step: 2
-  horizon: 3600
+  sims_per_step: 1
+  horizon: 1800
   reward_class: DelayMin
   environment_location: rl_sumo.environment
   environment_name: RescoEnv
   num_rollouts: 63
   cpu_num: 63
+  checkpoint_path: ${oc.env:HOME}/ray_results/PPO/PPO_RescoEnv-v0_d455b_00000_0_2023-12-01_15-51-49/checkpoint_000000 
 
 Simulation:
   gui: False

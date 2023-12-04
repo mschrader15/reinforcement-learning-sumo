@@ -239,7 +239,7 @@ class TLEnv(gymnasium.Env, metaclass=ABCMeta):
 
         subscription_data = self.k.simulation_step()
         self.actor.get_current_state(self.k.sim_time, subscription_data)
-        ok_2_switch = self.actor.get_okay_2_switch(self.k.sim_time)
+        # ok_2_switch = self.actor.get_okay_2_switch(self.k.sim_time)
 
         if not subscription_data:
             self.reset()
@@ -251,7 +251,7 @@ class TLEnv(gymnasium.Env, metaclass=ABCMeta):
         # reset the reward class
         self.rewarder.re_initialize()
 
-        return self.get_state(subscription_data, ok_2_switch), {}
+        return self.get_state(subscription_data, ), {}
 
     def _subscribe_n_pass_traci(
         self,
@@ -279,6 +279,9 @@ class TLEnv(gymnasium.Env, metaclass=ABCMeta):
         traci_c = self.k.start_simulation()
         self._reset_action_obs_rewarder()
         self.k.pass_traci_kernel(traci_c)
+
+        # step again to get the observations
+        subscription_data = self.k.simulation_step()
 
         # re-pass traci to the actor and the observer
         self._subscribe_n_pass_traci()
@@ -324,23 +327,16 @@ class TLEnv(gymnasium.Env, metaclass=ABCMeta):
         crash = False
         truncate = False
 
-        # this happens before step so that we can get the okay 2 switch
-        # when the action is applied
-        # okay_2_switch = self.actor.get_okay_2_switch(self.k.sim_time,)
-        # apply the rl agent actions
-        # action_penalty = [-1]
-        # while (not sim_broke and not crash and not truncate) and (
-        #     all([p < 0 for p in action_penalty])
-        # ):
         for _ in range(self.env_params.sims_per_step):
             # increment the step counter
             self.step_counter += 1
 
-            action_penalty = self.apply_rl_actions(
+            action_reward = self.apply_rl_actions(
                 rl_actions=action,
             )
 
             # step the simulation
+            # while not (self.actor.actions_implemented()):
             subscription_data = self.k.simulation_step()
 
             # check to see if there was a failure
@@ -353,28 +349,35 @@ class TLEnv(gymnasium.Env, metaclass=ABCMeta):
 
             if crash:
                 print("There was a crash")
+                reward = -1
+                sim_broke = True
+                observation = []
                 break
 
             # get the current state of the simulation
             if not sim_broke:
+
                 raw_obs = self._get_raw_obs(subscription_data)
                 observation = self.get_state(
                     subscription_data=subscription_data,
                     raw_obs=raw_obs,
                     phase_timers=self.actor.get_phase_timers(self.k.sim_time),
                 )
-
                 # check for long queues
                 if self.check_long_queue(raw_obs):
                     truncate = True
                     reward = -1
                     break
-
-                reward = self.calculate_reward(
-                    subscription_data=subscription_data,
-                    obs_data=raw_obs,
-                    actions=action,
-                )
+                if min(action_reward) < 0:
+                    # the reward is just a straight penalty for trying to take an action when you can't
+                    reward = min(action_reward)
+                else:
+                    # get the reward
+                    reward = self.calculate_reward(
+                        subscription_data=subscription_data,
+                        obs_data=raw_obs,
+                        actions=action,
+                    )
 
             else:
                 observation = []
@@ -382,29 +385,27 @@ class TLEnv(gymnasium.Env, metaclass=ABCMeta):
                 truncate = True
                 break
 
-            # reward += sum(action_penalty) / len(action_penalty)
-            if sum(action_penalty) < 0:
-                reward = min(action_penalty)
-
             # check long delays
             if self.k.check_long_delay(subscription_data):
                 truncate = True
+                break
 
-        done = (self.step_counter * self.k.sim_step_size) >= self.horizon
+        done = (self.step_counter * self.k.sim_step_size) >= self.horizon 
 
         info = {
             "sim_time": self.k.sim_time,
             "broken": sim_broke,
             "reward": reward,
-            # "all_de"
         }
+
+        # print(truncate)
 
         return observation, reward, done, truncate or crash, info
     
     def check_long_queue(self, raw_obs):
         for tl, obs, pos_dict in zip(self.actor.tls, raw_obs, self._tl_to_pos_dict):
             for p in tl.default_state:
-                if sum(wt > 0 for wt in obs[pos_dict[p]]['waiting_time']) > 20:
+                if sum(wt > 0 for wt in obs[pos_dict[p]]['waiting_time']) > 60:
                     return True
         return False
 
@@ -488,10 +489,17 @@ class RescoEnv(TLEnv):
             dtype=np.float32,
         )
 
-    def get_state(self, subscription_data, phase_timers, *args, **kwargs) -> Dict:
-        states, colors = self.actor.get_current_state(
-            subscription_results=subscription_data, sim_time=self.k.sim_time
+    def get_state(self, subscription_data, *args, **kwargs) -> Dict:
+        
+        states, colors, phase_timers = self.actor.get_current_state(
+            subscription_results=subscription_data, 
+            sim_time=self.k.sim_time
         )
+
+
+
+        # determine if the current state is the in tthra
+
 
         empty_state = np.zeros(
             (

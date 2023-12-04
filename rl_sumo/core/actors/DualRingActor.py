@@ -289,7 +289,7 @@ class DualRingActor(_Base):
         self._take_control()
         # force the traffic light to move initially by writing
         # detector calls on the default state
-        return self.try_switch(self.default_state, sim_time)
+        return self.try_switch(self.default_state, sim_time, override=True)
 
     def _take_control(
         self,
@@ -318,7 +318,9 @@ class DualRingActor(_Base):
         for detect in self._all_detectors:
             self._traci_c.lanearea.overrideVehicleNumber(detect, -1)
 
-    def try_switch(self, requested_state: Tuple[int], sim_time: float) -> int:
+    def try_switch(
+        self, requested_state: Tuple[int], sim_time: float, override: bool = False
+    ) -> int:
         """This function is called to change the light state.
 
         Args:
@@ -335,22 +337,28 @@ class DualRingActor(_Base):
         if isinstance(requested_state, int):
             requested_state = self.action_space[requested_state]
 
-        # print(f"Sim time: {sim_time}")
-        # print(f"Requested state: {requested_state}"
-        #       f"\nCurrent state: {self.sumo_active_state}")
-        
-        penalty = 0
-        # check if the requested state is okay to switch to
-        okay_2_switch = self.okay_2_switch(sim_time)
-        if len(okay_2_switch) and not all(
-            [
-                okay_2_switch[i]
-                for i, p in enumerate(requested_state)
-                if p != self.sumo_active_state[i]
-            ]
-        ):
-            # if not, then return a penalty
-            penalty -= 1
+        # simplified okay to switch
+        # if the requested state is not the current state, and the light color is green, we can switch
+        # otherwise nopeeee
+        if not override:
+            for i, (requested_phase, current_phase, color) in enumerate(
+                zip(
+                    requested_state,
+                    *self._sumo_active_state[1:],
+                )
+            ):
+                # if the requested phase is not the current phase
+                # and the light is not green
+                # or the light has not been green for at least 5 seconds
+                # penalize the action and don't even implement it
+                if (requested_phase != current_phase) and (
+                    (color != 2)
+                    or (
+                        self.get_phase_active_time(current_phase, current_time=sim_time)
+                        < self._time_tracker[current_phase][0]
+                    )
+                ):
+                    return -1
 
         # turn off the diff detectors in the current state
         new_state = set(requested_state)
@@ -364,7 +372,7 @@ class DualRingActor(_Base):
         # pass the new state as the current state
         self.requested_state = new_state
 
-        return penalty
+        return 0
 
     def get_requested_state(
         self,
@@ -402,6 +410,11 @@ class DualRingActor(_Base):
             ),
         )
 
+        self._sumo_active_state = (
+            *self._sumo_active_state,
+            self.get_actual_color(sim_time, sub_res),
+        )
+
         if len(self._last_sumo_phase) == len(self.sumo_active_state):
             for p, p_old in zip(self.sumo_active_state, self._last_sumo_phase):
                 if p != p_old:
@@ -437,27 +450,27 @@ class DualRingActor(_Base):
         # return the active phase colors
         return self._active_phase_colors
 
-    def okay_2_switch(
-        self,
-        sim_time: float,
-    ) -> List[bool]:
-        # sourcery skip: raise-specific-error
-        if not self._sumo_active_state:
-            raise Exception(
-                "You first need to pass the simulation dict before checking"
-                + "if it is okay to try and switch the traffic lights"
-            )  # noqa
+    # def okay_2_switch(
+    #     self,
+    #     sim_time: float,
+    # ) -> List[bool]:
+    #     # sourcery skip: raise-specific-error
+    #     if not self._sumo_active_state:
+    #         raise Exception(
+    #             "You first need to pass the simulation dict before checking"
+    #             + "if it is okay to try and switch the traffic lights"
+    #         )  # noqa
 
-        # aka (current_time - start_time) > min_time
-        return [
-            (
-                self.get_phase_active_time(p, current_time=sim_time)
-                > self._time_tracker[p][0]
-            )
-            # & (p not in requested_state)
-            & (self.get_phase_color(p) > COLOR_ENUMERATE["r"])
-            for p in self.sumo_active_state
-        ]
+    #     # aka (current_time - start_time) > min_time
+    #     return [
+    #         (
+    #             self.get_phase_active_time(p, current_time=sim_time)
+    #             > self._time_tracker[p][0]
+    #         )
+    #         # & (p not in requested_state)
+    #         & (self.get_phase_color(p) > COLOR_ENUMERATE["r"])
+    #         for p in self.sumo_active_state
+    #     ]
 
     def get_phase_active_time(self, p: int, current_time: float) -> float:
         return current_time - self._time_tracker[p][1]
@@ -623,22 +636,24 @@ class GlobalDualRingActor:
         """
         states = []
         light_head_colors = []
+        phase_timeers = []
 
         for tl in self.tls:
             states.append(tl.get_sumo_state(sim_time, subscription_results))
             light_head_colors.append(
                 tl.get_actual_color(sim_time, subscription_results)
             )
-        return states, light_head_colors
+            phase_timeers.append(tl.get_active_times(sim_time))
+        return states, light_head_colors, phase_timeers
 
-    def get_okay_2_switch(
-        self,
-        sim_time: float,
-    ) -> List[bool]:
-        okay_2_switch = []
-        for tl in self.tls:
-            okay_2_switch.append(tl.okay_2_switch(sim_time))
-        return okay_2_switch
+    # def get_okay_2_switch(
+    #     self,
+    #     sim_time: float,
+    # ) -> List[bool]:
+    #     okay_2_switch = []
+    #     for tl in self.tls:
+    #         okay_2_switch.append(tl.okay_2_switch(sim_time))
+    #     return okay_2_switch
 
     def get_phase_timers(self, sim_time: float) -> List[float]:
         return [tl.get_active_times(sim_time) for tl in self.tls]

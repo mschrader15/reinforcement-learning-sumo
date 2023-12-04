@@ -147,7 +147,7 @@ class Lane(_Base):
         # a storage of the direction (either incoming or outgoing)
         self._direction: LaneType = direction
 
-        self._val_map = {"speeds": [], "distance": [], "type": [], "waiting_time": []}
+        self._val_map = {"speeds": [], "distance": [], "type": [], "waiting_time": [], "ids": []}
 
     @property
     def lanes(
@@ -223,6 +223,8 @@ class Lane(_Base):
         self._val_map["waiting_time"] = [
             vehicle_info[_id][VAR_WAITING_TIME] for _id in self._last_ids
         ]
+
+        self._val_map["ids"] = self._last_ids
 
         return self._val_map.copy()
 

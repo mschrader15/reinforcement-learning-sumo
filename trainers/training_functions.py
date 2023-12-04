@@ -2,6 +2,7 @@
 
 import os
 from copy import deepcopy
+from pathlib import Path
 from rl_sumo.helpers.register_environment import make_create_env
 
 # The frequency with which rllib checkpoints are saved
@@ -162,8 +163,8 @@ def run_rllib_ppo(sim_params, env_params):
     from ray.rllib.models import ModelCatalog
 
     ModelCatalog.register_custom_model("ippo", IPPO)
-    ray.init(local_mode=True)
-    # ray.init()
+    # ray.init(local_mode=True)
+    ray.init()
     # # force no gui, crashes computer if so many instances spawn
     # sim_params.gui = False
 
@@ -181,8 +182,9 @@ def run_rllib_ppo(sim_params, env_params):
         # "sgd_minibatch_size": 256,
         # "grad_clip": 0.5,
         "model": {
-            "fcnet_hiddens": [32, 16],
-            "use_lstm": True,
+            "fcnet_hiddens": [64, 32, 16],
+            # "use_lstm": True,
+            # "ltsm_cell_size": 256,
         },
         # "entropy_coeff": 0.001,
         "num_workers": env_params.cpu_num,
@@ -200,11 +202,10 @@ def run_rllib_ppo(sim_params, env_params):
         param_space=config,
         run_config=air.RunConfig(
             name="PPO",
-            # stop={"training_iteration": 10000},
+            # stop={"training_iteration": 1000},
             checkpoint_config=air.CheckpointConfig(
-                checkpoint_frequency=50, checkpoint_at_end=True
+                checkpoint_frequency=5, checkpoint_at_end=True
             ),
-            # callbacks=[WandbLoggerCallback(project="sumo-rl")]
         ),
     )
 
@@ -236,10 +237,48 @@ def run_pfrl(sim_params, env_params):
     env.close()
 
 
+def replay_model(sim_params, env_params):
+
+    # read in a trained model and replay it
+    from ray.tune.registry import register_env
+    from rl_sumo.helpers.register_environment import make_create_env
+    from ray.rllib.algorithms.algorithm import Algorithm
+
+    # initialize the gym
+    gym_name, create_env = make_create_env(env_params, sim_params)
+
+    # register the environment
+    register_env(gym_name, create_env)
+
+    checkpoint_path = Path(env_params.checkpoint_path)
+    
+    algo = Algorithm.from_checkpoint(checkpoint_path)
+
+    
+    env = create_env()
+    obs, info = env.reset()
+
+    episode_reward = 0
+    terminated = truncated = False
+
+    while not terminated and not truncated:
+        action = algo.compute_single_action(obs)
+        
+        obs, reward, terminated, truncated, info = env.step(action)
+        
+        episode_reward += reward
+
+
+
+
+
+
+
 # a helper dictionary to make selecting the desired algorithm easier
 TRAINING_FUNCTIONS = {
     "no-rl": run_no_rl,
     "es": run_rllib_es,
     "ppo": run_rllib_ppo,
     "pfrl": run_pfrl,
+    'replay': replay_model
 }

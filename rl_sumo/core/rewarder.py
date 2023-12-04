@@ -65,7 +65,9 @@ class DelayMin(Rewarder):
         self,
         subscription_dict,
         observation_space,
-        action,  # okay_2_switch
+        # action,  # okay_2_switch
+        *args,
+        **kwargs,
     ) -> None:
         # use the observation space to get the lanes that we are interested in
         # vehicle_list = list(subscription_dict[tc.VAR_VEHICLE].values())
@@ -79,6 +81,15 @@ class DelayMin(Rewarder):
             for tl_obs in observation_space
             for approach in tl_obs
         )
+
+        # rel_speeds = [
+        #         sc_results[_id][tc.VAR_SPEED] / sc_results[_id][tc.VAR_ALLOWED_SPEED] for tl_obs in observation_space for approach in tl_obs for _id in approach["ids"]
+        #     ]
+        #     # compute values corresponding to summary-output
+        #     running = len(rel_speeds)
+        #     # stopped = len([1 for d in sc_results.values() if d[tc.VAR_SPEED] < 0.1])
+        #     mean_speed_relative = sum(rel_speeds) / running
+        #     return (1 - mean_speed_relative) * running * self.sim_step
 
         wait_penalty = -1 * (
             total_wait / max(total_veh, 1) / 600
@@ -115,10 +126,16 @@ class SpeedMax(Rewarder):
     def __init__(self, *args, **kwargs):
         super().__init__()
 
-    def get_reward(self, subscription_dict, observation_space) -> None:
+    def get_reward(self, subscription_dict, observation_space, *args, **kwargs) -> None:
         # use the observation space to get the lanes that we are interested in
-        total_speed = sum(sum(approach["speed"]) for approach in observation_space)
-        total_veh = sum(len(approach["speed"]) for approach in observation_space)
+        total_speed = sum(
+            sum(approach["speeds"])
+            for tl_obs in observation_space
+            for approach in tl_obs
+        )
+        total_veh = sum(
+            len(approach["speeds"]) for tl_obs in observation_space for approach in tl_obs
+        )
 
         return total_speed / max(total_veh, 1) / 30
 

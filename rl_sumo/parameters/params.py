@@ -16,6 +16,7 @@ class EnvParams:
     clip_actions: bool = True
     num_rollouts: int = 50
     cpu_num: int = 1
+    checkpoint_path: Optional[str] = None
 
 
 @dataclass
