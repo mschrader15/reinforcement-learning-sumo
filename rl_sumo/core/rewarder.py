@@ -83,13 +83,16 @@ class DelayMin(Rewarder):
         )
 
         # rel_speeds = [
-        #         sc_results[_id][tc.VAR_SPEED] / sc_results[_id][tc.VAR_ALLOWED_SPEED] for tl_obs in observation_space for approach in tl_obs for _id in approach["ids"]
-        #     ]
-        #     # compute values corresponding to summary-output
-        #     running = len(rel_speeds)
-        #     # stopped = len([1 for d in sc_results.values() if d[tc.VAR_SPEED] < 0.1])
-        #     mean_speed_relative = sum(rel_speeds) / running
-        #     return (1 - mean_speed_relative) * running * self.sim_step
+        #     sc_results[_id][tc.VAR_SPEED] / sc_results[_id][tc.VAR_ALLOWED_SPEED]
+        #     for tl_obs in observation_space
+        #     for approach in tl_obs
+        #     for _id in approach["ids"]
+        # ]
+        # # compute values corresponding to summary-output
+        # running = len(rel_speeds)
+        # # stopped = len([1 for d in sc_results.values() if d[tc.VAR_SPEED] < 0.1])
+        # mean_speed_relative = sum(rel_speeds) / running
+        # return (1 - mean_speed_relative) * running * self.sim_step
 
         wait_penalty = -1 * (
             total_wait / max(total_veh, 1) / 600
@@ -134,7 +137,9 @@ class SpeedMax(Rewarder):
             for approach in tl_obs
         )
         total_veh = sum(
-            len(approach["speeds"]) for tl_obs in observation_space for approach in tl_obs
+            len(approach["speeds"])
+            for tl_obs in observation_space
+            for approach in tl_obs
         )
 
         return total_speed / max(total_veh, 1) / 30

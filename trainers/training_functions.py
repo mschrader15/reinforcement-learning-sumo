@@ -239,21 +239,14 @@ def run_pfrl(sim_params, env_params):
 
 def replay_model(sim_params, env_params):
     # read in a trained model and replay it
-    from ray.tune.registry import register_env
-    from rl_sumo.helpers.register_environment import make_create_env
-    from ray.rllib.algorithms.algorithm import Algorithm
+    import requests
 
     # initialize the gym
     gym_name, create_env = make_create_env(env_params, sim_params)
 
     # register the environment
-    register_env(gym_name, create_env)
-
-    checkpoint_path = Path(env_params.checkpoint_path)
-
-    algo = Algorithm.from_checkpoint(checkpoint_path)
-
     env = create_env()
+
     obs, info = env.reset()
 
     episode_reward = 0
@@ -263,7 +256,11 @@ def replay_model(sim_params, env_params):
         Path(env_params.video_dir).mkdir(parents=True)
 
     while not terminated and not truncated:
-        action = algo.compute_single_action(obs)
+        action = requests.get(
+            "http://localhost:8000/", json={"observation": obs.tolist()}
+        ).json()["action"]
+
+        print(action)
 
         obs, reward, terminated, truncated, info = env.step(action)
 
@@ -279,7 +276,11 @@ def replay_model(sim_params, env_params):
     # generate the video
     if env_params.video_dir:
         os.system(
-            f"ffmpeg -r {sim_params.sim_step} -i {env_params.video_dir}/frame_%06d.png -vcodec mpeg4 -y {env_params.video_dir}/video.mp4"
+            f"""
+            ffmpeg -r {sim_params.sim_step} -i \
+            {env_params.video_dir}/frame_%06d.png \
+            -vcodec mpeg4 -y {env_params.video_dir}/video.mp4
+            """
         )
 
 

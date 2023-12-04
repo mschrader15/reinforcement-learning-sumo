@@ -164,13 +164,7 @@ class Kernel(object):
             self.traci_c.vehicle.subscribe(veh_id, VEHICLE_SUBSCRIPTIONS)
 
     def _prep_signals_4_control(self, traci_c: traci.connection.Connection = None):
-        if traci_c is None:
-            traci_c = self.traci_c
-        for tl_id in self._controlled_signals:
-            traci_c.trafficlight.setProgram(
-                tl_id, self._loaded_tl_programs[tl_id][-1].programID
-            )
-            traci_c.trafficlight.setPhase(tl_id, 0)
+        pass
 
     def reset_simulation(
         self,
@@ -227,7 +221,7 @@ class Kernel(object):
     def _close_traci(
         self,
     ):
-        if self.traci_c:
+        if self.traci_c and not self.sim_params.gui:
             self.traci_c.close()
 
     def _os_pg_killer(
